@@ -6,4 +6,8 @@
 
 ## proposed architecture
 
-![alt text](docs/pipeline.png)
+Our FR-Former architecture design:
+![alt text](docs/FR-Former.png)
+
+IIP-Transformer architecture:
+![alt text](docs/IIP-Transformer.png)
