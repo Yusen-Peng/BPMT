@@ -23,7 +23,7 @@ IIP-Transformer architecture:
 
   - [x] verify the correctness of the data loading process
 
-- [ ] build the modality pool (use inheritence if we wanna do some benchmarking with modality-free approches)
+- [x] build the modality pool (use inheritence if we wanna do some benchmarking with modality-free approches)
   - [x] partition original keypoints into 5 different parts/modalities
   - [x] verify the correctness of:
     - [x] torso
