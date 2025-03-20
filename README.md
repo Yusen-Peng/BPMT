@@ -7,7 +7,6 @@
 Our FR-Former pipeline design:
 ![alt text](docs/pipeline.png)
 
-
 Our FR-Former architecture design:
 ![alt text](docs/FR-Former.png)
 
@@ -16,17 +15,17 @@ IIP-Transformer architecture:
 
 ## implementation roadmap
 
-### First phase of masked pretraining (modality level):
+### First phase of masked pretraining (modality level)
 
-- [ ] load Gait3D data
+- [x] load Gait3D data (a subset of Gait3D -- 50 subjects; original Gait3D has 4K subjects)
 
-    - [ ] load pose/keypoints data from Gait3D (may start with a subset of data)
+  - [x] load pose/keypoints data from Gait3D
 
-    - [ ] verify the correctness of the data loading process
+  - [x] verify the correctness of the data loading process
 
 - [ ] build the modality pool
-    - [ ] partition original keypoints into 5 different parts/modalities
-    - [ ] verify the correctness of:
+  - [ ] partition original keypoints into 5 different parts/modalities
+  - [ ] verify the correctness of:
         - [ ] torso
         - [ ] left leg
         - [ ] right leg
@@ -34,38 +33,36 @@ IIP-Transformer architecture:
         - [ ] right arm
 
 - [ ] implement IIP-Transformer (T1)
-    - [ ] individual transformer layer
+  - [ ] individual transformer layer
         - [ ] Intra-Inter-Part attention
         - [ ] S-IIPA
         - [ ] T-IIPA
         - [ ] complete the transformer layer
 
-    - [ ] finish up the entire transformer
+  - [ ] finish up the entire transformer
         - [ ] add class token
         - [ ] add FC layer 
 
-
 - [ ] add additional FC layers to reduce dimension
 
-
-### Second phase of masked pretraining (modality pair level):
+### Second phase of masked pretraining (modality pair level)
 
 - [ ] construct pairs of features from modality i and modality j
 
 - [ ] implement the cross attention layer
 
 - [ ] implement another IIP-Transformer (T2), should be similar to T1
-    - [ ] individual transformer layer
+  - [ ] individual transformer layer
         - [ ] Intra-Inter-Part attention
         - [ ] S-IIPA
         - [ ] T-IIPA
         - [ ] complete the transformer layer
 
-    - [ ] finish up the entire transformer
+  - [ ] finish up the entire transformer
         - [ ] add class token
         - [ ] add FC layer
 
-### Finetuning:
+### Finetuning
 
 - [ ] cross attention between transformer T2 output (the second phase of pretraining) and modality features (the first phase of pretraining)
 
