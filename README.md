@@ -26,22 +26,22 @@ IIP-Transformer architecture:
 - [ ] build the modality pool
   - [ ] partition original keypoints into 5 different parts/modalities
   - [ ] verify the correctness of:
-        - [ ] torso
-        - [ ] left leg
-        - [ ] right leg
-        - [ ] left arm
-        - [ ] right arm
+    - [ ] torso
+    - [ ] left leg
+    - [ ] right leg
+    - [ ] left arm
+    - [ ] right arm
 
 - [ ] implement IIP-Transformer (T1)
   - [ ] individual transformer layer
-        - [ ] Intra-Inter-Part attention
-        - [ ] S-IIPA
-        - [ ] T-IIPA
-        - [ ] complete the transformer layer
+    - [ ] Intra-Inter-Part attention
+    - [ ] S-IIPA
+    - [ ] T-IIPA
+    - [ ] complete the transformer layer
 
   - [ ] finish up the entire transformer
-        - [ ] add class token
-        - [ ] add FC layer 
+    - [ ] add class token
+    - [ ] add FC layer 
 
 - [ ] add additional FC layers to reduce dimension
 
@@ -53,14 +53,14 @@ IIP-Transformer architecture:
 
 - [ ] implement another IIP-Transformer (T2), should be similar to T1
   - [ ] individual transformer layer
-        - [ ] Intra-Inter-Part attention
-        - [ ] S-IIPA
-        - [ ] T-IIPA
-        - [ ] complete the transformer layer
+    - [ ] Intra-Inter-Part attention
+    - [ ] S-IIPA
+    - [ ] T-IIPA
+    - [ ] complete the transformer layer
 
   - [ ] finish up the entire transformer
-        - [ ] add class token
-        - [ ] add FC layer
+    - [ ] add class token
+    - [ ] add FC layer
 
 ### Finetuning
 
