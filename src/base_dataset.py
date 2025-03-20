@@ -3,9 +3,7 @@ import glob
 import numpy as np
 from typing import List, Tuple
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 
 class GaitRecognitionDataset(Dataset):
@@ -160,7 +158,6 @@ def load_all_data(root_dir: str) -> Tuple[List[np.ndarray], List[int]]:
             all_labels.append(new_label)
 
     return all_sequences, all_labels
-
 
 
 

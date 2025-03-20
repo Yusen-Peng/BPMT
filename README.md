@@ -23,14 +23,14 @@ IIP-Transformer architecture:
 
   - [x] verify the correctness of the data loading process
 
-- [ ] build the modality pool
-  - [ ] partition original keypoints into 5 different parts/modalities
-  - [ ] verify the correctness of:
-    - [ ] torso
-    - [ ] left leg
-    - [ ] right leg
-    - [ ] left arm
-    - [ ] right arm
+- [ ] build the modality pool (use inheritence if we wanna do some benchmarking with modality-free approches)
+  - [x] partition original keypoints into 5 different parts/modalities
+  - [x] verify the correctness of:
+    - [x] torso
+    - [x] left leg
+    - [x] right leg
+    - [x] left arm
+    - [x] right arm
 
 - [ ] implement IIP-Transformer (T1)
   - [ ] individual transformer layer
@@ -41,7 +41,7 @@ IIP-Transformer architecture:
 
   - [ ] finish up the entire transformer
     - [ ] add class token
-    - [ ] add FC layer 
+    - [ ] add FC layer
 
 - [ ] add additional FC layers to reduce dimension
 
