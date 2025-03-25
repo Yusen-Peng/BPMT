@@ -1,13 +1,10 @@
-# FR-Former: Fast, Real-time Transformer for Efficient and Accurate Gait Recognition
+# BPMT: Body Part as Modality Transformer for Efficient and Accurate Gait Recognition
 
 ## Computer Vision Undergraduate Thesis Advised Dr. Alper Yilmaz
 
 ## proposed architecture
 
-Our FR-Former pipeline design:
-![alt text](docs/pipeline.png)
-
-Our FR-Former architecture design:
+Our BPMT architecture design:
 ![alt text](docs/FR-Former.png)
 
 IIP-Transformer architecture:
