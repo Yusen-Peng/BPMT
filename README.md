@@ -1,16 +1,22 @@
 # BPMT: Body Part as Modality Transformer for Efficient and Accurate Gait Recognition
 
-## Computer Vision Undergraduate Thesis Advised Dr. Alper Yilmaz
+## research motivation
+
+Although a massive number of gait recognition models have been proposed, and multiple architectures including IIP-Transformer, STSA-Net, and IGFormer have experimented with dividing the body poses explicitly into multiple meaningful parts or segments, no existing work has attempted to integrate body-part-aware transformers into the two-phase masked pretraining framework proposed in OmniVec2, which
+was originally designed to learn multi-modal representations to perform multiple tasks. In this work, we attempt to address the following problem: can we treat different human parts as different modalities to integrate body-part-aware transformers into the two-phase masked pretraining framework proposed in OmniVec2?
 
 ## proposed architecture
 
+Our BPMT pipeline design:
+![alt text](docs/BPMT_pipeline.png)
+
 Our BPMT architecture design:
-![alt text](docs/FR-Former.png)
+![alt text](docs/BPMT.png)
 
 IIP-Transformer architecture:
 ![alt text](docs/IIP-Transformer.png)
 
-## implementation roadmap
+## implementation roadmap (implement IIP-Transformer later; use a basic transformer first)
 
 ### First phase of masked pretraining (modality level)
 
