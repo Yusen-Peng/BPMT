@@ -1,6 +1,7 @@
 import torch
 import random
 import numpy as np
+import torch.nn as nn
 
 def set_seed(seed=42):
     random.seed(seed)
@@ -11,6 +12,7 @@ def set_seed(seed=42):
     torch.backends.cudnn.benchmark = False
 
 MASK = False
+POSITIONAL_UPPER_BOUND = 500
 
 def mask_keypoints(batch_inputs: torch.Tensor, mask_ratio: float = 0.15) -> tuple[torch.Tensor, torch.Tensor]:
     """
@@ -48,6 +50,49 @@ def mask_keypoints(batch_inputs: torch.Tensor, mask_ratio: float = 0.15) -> tupl
 
     return masked_inputs, mask
 
+
+
+class T1BaseTransformer(nn.Module):
+    """
+        A simple baseline transformer model for reconstructing masked keypoints.
+        The model consists of:
+        - Keypoint embedding layer
+        - Positional embedding layer
+        - Transformer encoder
+        - Reconstruction head
+        The model is designed to take in sequences of 2D keypoints and reconstruct the masked frames.
+    """
+    
+    def __init__(self, num_joints: int, d_model: int = 128, nhead: int = 4, num_layers: int = 2):
+        super(T1BaseTransformer, self).__init__()
+        self.num_joints = num_joints
+        self.d_model = d_model
+
+        # keypoint embedding
+        self.embedding = nn.Linear(num_joints * 2, d_model)
+
+        # positional embedding
+        self.pos_embedding = nn.Parameter(torch.zeros(1, POSITIONAL_UPPER_BOUND, d_model))
+
+        # transformer encoder
+        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+
+        # reconstruction head
+        self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        B, T, _ = x.shape
+        keypoint_embedding = self.embedding(x)
+        keypoint_embedding_with_pos = keypoint_embedding + self.pos_embedding[:, :T, :]
+
+        # NOTE: PyTorch Transformer wants shape (T, B, d_model) instead of (B, T, d_model)
+        keypoint_embedding_with_pos = keypoint_embedding_with_pos.transpose(0,1)
+        encoded = self.transformer_encoder(keypoint_embedding_with_pos)
+        encoded = encoded.transpose(0,1)
+
+        recons = self.reconstruction_head(encoded)
+        return recons
 
 
 
