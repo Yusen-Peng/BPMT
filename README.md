@@ -36,13 +36,19 @@ IIP-Transformer architecture:
     - [x] right arm
 
 - [ ] modality-level masked training baseline (we need to have quick prototype/baseline first to later compare with IIP-Transformer)
-  - [x] we need a function to do masking for training
+  - [x] we need a helper function to do masking for training
   - [x] then we can build a base transformer with PyTorch
     - [x] keypoint embeddings
     - [x] positional embeddings
     - [x] PyTorch built-in transformer encoder (this is our base transformer)
     - [x] reconstruction head
-  - [ ] training loop for masked pretraining
+  - [x] implement the training loop for masked pretraining
+  - [ ] verify and train the following 5 modalities:
+    - [ ] torso
+    - [ ] left arm
+    - [ ] right arm
+    - [ ] left leg
+    - [ ] right leg
 
 - [ ] implement IIP-Transformer (T1)
   - [ ] individual transformer layer
