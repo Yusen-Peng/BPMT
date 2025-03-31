@@ -4,9 +4,7 @@ import numpy as np
 from typing import List, Tuple
 import torch
 from base_dataset import GaitRecognitionDataset
-from base_dataset import load_all_data
-
-
+from utils import load_all_data
 
 class GaitRecognitionModalityAwareDataset(GaitRecognitionDataset):
     """
@@ -60,67 +58,19 @@ class GaitRecognitionModalityAwareDataset(GaitRecognitionDataset):
 # DEBUGGING
 if __name__ == "__main__":
     root_dir = "2D_Poses_50/"
-    batch_size = 4
-    num_epochs = 100
-    hidden_size = 64
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    print("=" * 50)
-    print(f"[INFO] Starting Gait3D dataset processing on {device}...")
-    print("=" * 50)
-
-
-
-    # Step 1: Load sequences and labels
-    print(f"\n[INFO] Loading data from root directory: {root_dir}")
     sequences, labels = load_all_data(root_dir)
-    print("\n[DEBUG] Data Statistics:")
-    print(f"  - Total sequences loaded: {len(sequences)}")
-    print(f"  - Total labels loaded: {len(labels)}")
-    print(f"  - Unique label count: {len(set(labels))}")
-
-    # step 2: verify sequence shapes
-    print("\n[INFO] Verifying sequence shapes...")
-    for i, seq in enumerate(sequences[:5]):  # Check first 5 sequences
-        print(f"  - Sequence {i}: Shape {seq.shape}")
-
-    # step 3: check label distribution
-    unique_labels, label_counts = np.unique(labels, return_counts=True)
-    print("\n[INFO] Label distribution:")
-    for lbl, count in zip(unique_labels, label_counts):
-        print(f"  - Label {lbl}: {count} sequences")
-
-    # step 4: create dataset
-    print("\n[INFO] Creating modality-aware datasets...")
+    
     torso_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "torso")
     left_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_arm")
     right_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_arm")
     left_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_leg")
     right_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_leg")
 
-    # Step 5: confirm modality datasets
-    print("\n[DEBUG] Modality Dataset Sizes:")
-    print(f"  - Torso modality: {len(torso_modality)} samples")
-    print(f"  - Left Arm modality: {len(left_arm_modality)} samples")
-    print(f"  - Right Arm modality: {len(right_arm_modality)} samples")
-    print(f"  - Left Leg modality: {len(left_leg_modality)} samples")
-    print(f"  - Right Leg modality: {len(right_leg_modality)} samples")
+    # CHECK if each dataset has a variable length of dimension
+    for i in range(len(torso_modality)):
+        # destructure into sequence input tensor and label tensor
+        seq, label = torso_modality[i]
+        print(f"Sequence {i}: Shape {seq.shape}")
 
-    print("\n[INFO] Data partitioning complete! Each body region is now treated as a separate modality.")
-    print("=" * 60)
-
-
-    # Step 6: debug first 3 samples per modality
-    print("\n[INFO] Checking first few samples from each modality...")
-    for modality_name, modality_dataset in [
-        ("Torso", torso_modality),
-        ("Left Arm", left_arm_modality),
-        ("Right Arm", right_arm_modality),
-        ("Left Leg", left_leg_modality),
-        ("Right Leg", right_leg_modality),
-    ]:
-        print(f"\n[DEBUG] Modality: {modality_name}")
-        for i in range(min(3, len(modality_dataset))):
-            seq_tensor, label_tensor = modality_dataset[i]
-            print(f"  - Sample {i}:")
-            print(f"    - Sequence tensor shape: {seq_tensor.shape} | Data type: {seq_tensor.dtype}")
-            print(f"    - Label tensor: {label_tensor.item()}")
+        #print(f"Torso Modality {i}: {torso_modality[i]}")
+    

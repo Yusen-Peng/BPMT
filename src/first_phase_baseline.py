@@ -4,8 +4,8 @@ import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from utils import set_seed
 from modality_aware_dataset import GaitRecognitionModalityAwareDataset
+from utils import collate_fn_batch_padding
 
 MASK = False
 POSITIONAL_UPPER_BOUND = 500
@@ -105,7 +105,12 @@ def train_T1(dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0
             device: Device to run the training on ('cuda' or 'cpu').
     """
 
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataloader = DataLoader(
+                        dataset,
+                        batch_size=batch_size, 
+                        shuffle=True,
+                        collate_fn=collate_fn_batch_padding
+                    )
     
     # we use MSE loss to measure the reconstruction error
     criterion = nn.MSELoss(reduction='none')
@@ -151,21 +156,3 @@ def train_T1(dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0
         print(f"Epoch {epoch+1}/{num_epochs} - Loss: {epoch_loss:.4f}")
 
     return model
-
-
-if __name__ == "__main__":
-    set_seed(42)
-
-
-    # # CODE TO TEST MASK_KEYPOINTS FUNCTION
-    # B = 2
-    # T = 5
-    # D = 4
-    # batch_inputs = torch.rand((B, T, D))
-    # mask_ratio = 0.6
-
-    # masked_inputs, mask = mask_keypoints(batch_inputs, mask_ratio)
-
-    # print(f"Original Inputs:\n{batch_inputs}")
-    # print(f"Masked Inputs:\n{masked_inputs}")
-    # print(f"Mask:\n{mask}")
