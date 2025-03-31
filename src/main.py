@@ -25,7 +25,6 @@ def main():
     print(f"[INFO] Starting Gait3D dataset processing on {device}...")
     print("=" * 50)
     sequences, labels = load_all_data(root_dir)
-    unique_labels, label_counts = np.unique(labels, return_counts=True)
     torso_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "torso")
     left_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_arm")
     right_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_arm")

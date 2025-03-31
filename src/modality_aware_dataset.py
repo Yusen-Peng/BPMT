@@ -53,24 +53,3 @@ class GaitRecognitionModalityAwareDataset(GaitRecognitionDataset):
             selected_keypoints[:, i * 2: (i + 1) * 2] = seq[:, joint_idx * 2: (joint_idx * 2) + 2]
         
         return selected_keypoints
-
-
-# DEBUGGING
-if __name__ == "__main__":
-    root_dir = "2D_Poses_50/"
-    sequences, labels = load_all_data(root_dir)
-    
-    torso_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "torso")
-    left_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_arm")
-    right_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_arm")
-    left_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_leg")
-    right_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_leg")
-
-    # CHECK if each dataset has a variable length of dimension
-    for i in range(len(torso_modality)):
-        # destructure into sequence input tensor and label tensor
-        seq, label = torso_modality[i]
-        print(f"Sequence {i}: Shape {seq.shape}")
-
-        #print(f"Torso Modality {i}: {torso_modality[i]}")
-    

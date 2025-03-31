@@ -1,10 +1,7 @@
 import torch
-import random
-import numpy as np
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from modality_aware_dataset import GaitRecognitionModalityAwareDataset
 from utils import collate_fn_batch_padding
 
 MASK = False

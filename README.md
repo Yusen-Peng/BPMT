@@ -35,20 +35,20 @@ IIP-Transformer architecture:
     - [x] left arm
     - [x] right arm
 
-- [ ] modality-level masked training baseline (we need to have quick prototype/baseline first to later compare with IIP-Transformer)
+- [x] modality-level masked training baseline (we need to have quick prototype/baseline first to later compare with IIP-Transformer)
   - [x] we need a helper function to do masking for training
   - [x] then we can build a base transformer with PyTorch
     - [x] keypoint embeddings
     - [x] positional embeddings
     - [x] PyTorch built-in transformer encoder (this is our base transformer)
     - [x] reconstruction head
-  - [x] implement the training loop for masked pretraining
-  - [ ] verify and train the following 5 modalities:
-    - [ ] torso
-    - [ ] left arm
-    - [ ] right arm
-    - [ ] left leg
-    - [ ] right leg
+  - [x] implement the training loop for first-stage masked pretraining
+  - [x] train the following 5 modalities:
+    - [x] torso
+    - [x] left arm
+    - [x] right arm
+    - [x] left leg
+    - [x] right leg
 
 - [ ] implement IIP-Transformer (T1)
   - [ ] individual transformer layer
@@ -61,15 +61,17 @@ IIP-Transformer architecture:
     - [ ] add class token
     - [ ] add FC layer
 
-- [ ] add additional FC layers to reduce dimension
+- [ ] add additional FC layers for dimension reduction (hold it for now - add this simple component when it comes to IIP-Transformer)
 
 ### Second phase of masked pretraining (modality pair level)
 
-- [ ] construct pairs of features from modality i and modality j
+- [ ] construct pairs of features from modality i and modality j (we will have 5 choose 2 = 10 combinations/pairs in total)
+  - [ ] first of all, load single-modality checkpoints from the first training stage
+  - [ ] we can also freeze certain layers in T1 durinh second stage training (tricky - a balance is needed)
 
 - [ ] implement the cross attention layer
 
-- [ ] implement another IIP-Transformer (T2), should be similar to T1
+- [ ] implement another IIP-Transformer (T2), should be similar to T1 [hold this for now]
   - [ ] individual transformer layer
     - [ ] Intra-Inter-Part attention
     - [ ] S-IIPA

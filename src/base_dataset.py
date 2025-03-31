@@ -1,10 +1,7 @@
-import os
-import glob
 import numpy as np
-from typing import List, Tuple
+from typing import List
 import torch
 from torch.utils.data import Dataset
-from utils import load_all_data
 
 class GaitRecognitionDataset(Dataset):
     """
