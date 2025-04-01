@@ -18,6 +18,16 @@ IIP-Transformer architecture:
 
 ## implementation roadmap (implement IIP-Transformer later; use a basic transformer first)
 
+week April 1 ~ April 8: 
+
+1) finish the second stage of masked pretraining
+
+2) scale up experiments - 50 too small!
+
+3) implement validation during training
+
+4) report plots/results of training + validation
+
 ### First phase of masked pretraining (modality level)
 
 - [x] load Gait3D data (a subset of Gait3D -- 50 subjects; original Gait3D has 4K subjects)
