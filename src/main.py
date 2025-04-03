@@ -16,7 +16,10 @@ from utils import load_all_data, set_seed, get_num_joints_for_modality
 
 def main():
     set_seed(42)
-    root_dir = "2D_Poses_50/"
+    #root_dir = "2D_Poses_50/"
+    # scale up to 300 now
+    root_dir = "2D_Poses_300/"
+
     batch_size = 4
     num_epochs = 100
     hidden_size = 64
@@ -72,7 +75,7 @@ def main():
         )
 
         # save each model
-        torch.save(model.state_dict(), f"{modality_name.lower().replace(' ','_')}_masked_pretrained.pt")
+        torch.save(model.state_dict(), f"checkpoints/{modality_name.lower().replace(' ','_')}_masked_pretrained.pt")
 
     print("Aha! All modalities trained successfully!")
 
