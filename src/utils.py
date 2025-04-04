@@ -148,7 +148,7 @@ def get_num_joints_for_modality(modality_name):
     """
     if modality_name == "Torso":
         return 9
-    elif modality_name in ["Left Arm", "Right Arm", "Left Leg", "Right Leg"]:
+    elif modality_name in ["Left_Arm", "Right_Arm", "Left_Leg", "Right_Leg"]:
         return 2
     else:
         raise ValueError("Unknown modality")
