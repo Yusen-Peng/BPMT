@@ -48,6 +48,7 @@ def load_sequence(seq_folder: str, num_joints: int = 17) -> np.ndarray:
             np.ndarray: A 2D array of shape (num_frames, num_joints * 2) containing the 2D keypoints.
     """
     txt_files = glob.glob(os.path.join(seq_folder, '*.txt'))
+    print(f"...Loading {len(txt_files)} files from {seq_folder}")
     if not txt_files:
         return None
     
@@ -166,3 +167,23 @@ def collate_fn_batch_padding(batch):
     padded_seq = pad_sequence(sequences, batch_first=True, padding_value=0.0)
     labels = torch.stack(labels, dim=0)
     return padded_seq, labels
+
+def collate_fn_pairs(batch):
+    """
+    A collate function for second-stage pretraining.
+    Pads two sets of variable-length sequences (modality A and modality B) separately.
+
+    Args:
+        batch: list of tuples [(xA1, xB1), (xA2, xB2), ...]
+    
+    Returns:
+        xA_padded: (B, T_A_max, D_A)
+        xB_padded: (B, T_B_max, D_B)
+    """
+    xA_list = [xA for xA, _ in batch]
+    xB_list = [xB for _, xB in batch]
+
+    xA_padded = pad_sequence(xA_list, batch_first=True, padding_value=0.0)
+    xB_padded = pad_sequence(xB_list, batch_first=True, padding_value=0.0)
+
+    return xA_padded, xB_padded

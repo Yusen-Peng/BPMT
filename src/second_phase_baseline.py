@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from utils import collate_fn_batch_padding
+from utils import collate_fn_pairs
 from first_phase_baseline import BaseT1, mask_keypoints
 
 def load_T1(model_path: str, num_joints: int = 14, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
@@ -72,11 +72,24 @@ class BaseT2(nn.Module):
         reconsB = self.headB(encoded[:, T_A:, :])
 
         return reconsA, reconsB
+    
+    def encode(self, x, T_A):
+        """
+            Encodes the input sequence using the transformer encoder.
+            Returns the encoded features.
+        """
+        encoded = self.encoder(x)
+        
+        encoded_A = encoded[:, :T_A, :]
+        encoded_B = encoded[:, T_A:, :]
+        return encoded_A, encoded_B        
+
 
 def train_T2(pairwise_dataset, 
             model_pathA: str, 
             model_pathB: str, 
-            num_joints: int,
+            num_joints_A: int,
+            num_joints_B: int,
             d_model: int = 128,
             nhead: int = 4,
             num_layers: int = 2,
@@ -93,12 +106,18 @@ def train_T2(pairwise_dataset,
     """
 
     # load pretrained T1 encoders
-    modality_A = load_T1(model_pathA, num_joints, d_model, nhead, num_layers, freeze_T1, device)
-    modality_B = load_T1(model_pathB, num_joints, d_model, nhead, num_layers, freeze_T1, device)
+    modality_A = load_T1(model_pathA, num_joints_A, d_model, nhead, num_layers, freeze_T1, device)
+    modality_B = load_T1(model_pathB, num_joints_B, d_model, nhead, num_layers, freeze_T1, device)
 
     # intialize the cross-attention and transformer encoder
     cross_attn = CrossAttention(d_model=d_model, nhead=nhead)
-    model_T2 = BaseT2(num_joints=num_joints, d_model=d_model, nhead=nhead, num_layers=num_layers)
+    model_T2 = BaseT2(
+        out_dim_A=num_joints_A * 2,
+        out_dim_B=num_joints_B * 2,
+        d_model=d_model,
+        nhead=nhead,
+        num_layers=num_layers
+    )
     cross_attn.to(device)
     model_T2.to(device)
 
@@ -107,7 +126,7 @@ def train_T2(pairwise_dataset,
         pairwise_dataset,
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=collate_fn_batch_padding
+        collate_fn=collate_fn_pairs
     )
 
     # optimize both the cross-attention and the transformer encoder

@@ -18,9 +18,13 @@ from utils import load_all_data, set_seed, get_num_joints_for_modality
 
 def main():
     set_seed(42)
-    #root_dir = "2D_Poses_50/"
-    # scale up to 300 now
-    root_dir = "2D_Poses_300/"
+    # base experiment
+    root_dir = "2D_Poses_50/"
+    # tiny experiment
+    #root_dir = "2D_Poses_300/"
+
+    # full experiment
+    #root_dir = "2D_Poses_1000/"
 
     batch_size = 4
     num_epochs = 100
@@ -81,6 +85,9 @@ def main():
 
     print("Aha! All single modalities trained successfully!")
     print("=" * 100)
+    print("=" * 100)
+    print("=" * 100)
+    print("=" * 100)
 
     """
         Second phase masked pretraining: one pair of modalities at a time
@@ -105,7 +112,8 @@ def main():
             pairwise_dataset=pairwise_dataset,
             model_pathA=f"checkpoints/{modA_name.lower().replace(' ','_')}_masked_pretrained.pt",
             model_pathB=f"checkpoints/{modB_name.lower().replace(' ','_')}_masked_pretrained.pt",
-            num_joints=(num_joints_A, num_joints_B),
+            num_joints_A=num_joints_A,
+            num_joints_B=num_joints_B,
             d_model=hidden_size,
             nhead=4,
             num_layers=2,
