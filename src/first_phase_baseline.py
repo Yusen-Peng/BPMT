@@ -85,7 +85,22 @@ class BaseT1(nn.Module):
 
         recons = self.reconstruction_head(encoded)
         return recons
+    
+    def encode(self, x: torch.Tensor) -> torch.Tensor:
+        """
+            Encode the input sequence without reconstruction.
+            This is used for extracting features from the model.
+        """
+        B, T, _ = x.shape
+        keypoint_embedding = self.embedding(x)
+        keypoint_embedding_with_pos = keypoint_embedding + self.pos_embedding[:, :T, :]
 
+        # NOTE: PyTorch Transformer wants shape (T, B, d_model) instead of (B, T, d_model)
+        keypoint_embedding_with_pos = keypoint_embedding_with_pos.transpose(0,1)
+        encoded = self.transformer_encoder(keypoint_embedding_with_pos)
+        encoded = encoded.transpose(0,1)
+
+        return encoded
 
 
 def train_T1(dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
