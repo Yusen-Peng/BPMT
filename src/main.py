@@ -3,13 +3,15 @@ import glob
 import numpy as np
 import torch
 from typing import List, Tuple
-from base_dataset import GaitRecognitionDataset
-from modality_aware_dataset import GaitRecognitionModalityAwareDataset
+from itertools import combinations
+from modality_aware_dataset import GaitRecognitionModalityAwareDataset, PairwiseModalityDataset
 from torch import nn
 from torch import optim
 from torch import Tensor
 from torch.nn import functional as F
 from first_phase_baseline import BaseT1, train_T1
+from second_phase_baseline import BaseT2, train_T2
+
 
 from utils import load_all_data, set_seed, get_num_joints_for_modality
 
@@ -77,7 +79,50 @@ def main():
         # save each model
         torch.save(model.state_dict(), f"checkpoints/{modality_name.lower().replace(' ','_')}_masked_pretrained.pt")
 
-    print("Aha! All modalities trained successfully!")
+    print("Aha! All single modalities trained successfully!")
+    print("=" * 100)
+
+    """
+        Second phase masked pretraining: one pair of modalities at a time
+    """
+
+    modality_map = dict(modalities)
+    modality_names = list(modality_map.keys())
+
+    for modA_name, modB_name in combinations(modality_names, 2):
+        print(f"\n==========================")
+        print(f"Second-Stage Pretraining on {modA_name} + {modB_name}")
+        print(f"==========================")
+
+        datasetA = modality_map[modA_name]
+        datasetB = modality_map[modB_name]
+        pairwise_dataset = PairwiseModalityDataset(datasetA, datasetB)
+
+        num_joints_A = get_num_joints_for_modality(modA_name)
+        num_joints_B = get_num_joints_for_modality(modB_name)
+
+        model_T2 = train_T2(
+            pairwise_dataset=pairwise_dataset,
+            model_pathA=f"checkpoints/{modA_name.lower().replace(' ','_')}_masked_pretrained.pt",
+            model_pathB=f"checkpoints/{modB_name.lower().replace(' ','_')}_masked_pretrained.pt",
+            num_joints=(num_joints_A, num_joints_B),
+            d_model=hidden_size,
+            nhead=4,
+            num_layers=2,
+            num_epochs=num_epochs,
+            batch_size=batch_size,
+            lr=1e-4,
+            mask_ratio=0.15,
+            freeze_T1=True,
+            device=device
+        )
+
+        save_path = f"checkpoints/{modA_name}_{modB_name}_T2.pt"
+        torch.save(model_T2.state_dict(), save_path)
+
+        print("Aha! All modality pairs trained successfully!")
+        print("=" * 100)
+
 
 if __name__ == "__main__":
     main()

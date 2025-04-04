@@ -3,49 +3,24 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from utils import collate_fn_batch_padding
-from first_phase_baseline import BaseT1
+from first_phase_baseline import BaseT1, mask_keypoints
 
-def load_and_encode(model_pathA: str,
-                    model_pathB: str, 
-                    xA: torch.Tensor, 
-                    xB: torch.Tensor,
-                    num_joints=14,
-                    d_model=128,
-                    nhead=4,
-                    num_layers=2,
-                    freeze_T1: bool = True,
-                    device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
-                ) -> torch.Tensor:
-
+def load_T1(model_path: str, num_joints: int = 14, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
+                device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT1:
     """
-        Loads two pretrained BaseT1 models (for two modalities) and extracts their encoded features.
-
+        loads a BaseT1 model from a checkpoint
     """
-    # load the baseT1 checkpoints for two modalities
-    # load onto CPU first, then move to GPU if available
-    modA = BaseT1(num_joints=num_joints, d_model=d_model, nhead=nhead, num_layers=num_layers)
-    modB = BaseT1(num_joints=num_joints, d_model=d_model, nhead=nhead, num_layers=num_layers)
-    modA.load_state_dict(torch.load(model_pathA, map_location='cpu'))
-    modB.load_state_dict(torch.load(model_pathB, map_location='cpu'))
 
-    # we can optionally freeze parameters for the T1 models
-    if freeze_T1:
-        for param in modA.parameters():
-            param.requires_grad = False
-        for param in modB.parameters():
+    model = BaseT1(num_joints=num_joints, d_model=d_model, nhead=nhead, num_layers=num_layers)
+    model.load_state_dict(torch.load(model_path, map_location='cpu'))
+
+    # optionally freeze the model parameters
+    if freeze:
+        for param in model.parameters():
             param.requires_grad = False
 
-    # move models and data to the appropriate device
-    modA.to(device)
-    modB.to(device)
-    xA = xA.to(device)
-    xB = xB.to(device)
-    
-    # feature extraction
-    feature_A = modA.encode(xA)
-    feature_B = modB.encode(xB)
-    return feature_A, feature_B
-
+    # move model to device and return the model
+    return model.to(device)
 
 class CrossAttention(nn.Module):
     """
@@ -74,23 +49,122 @@ class CrossAttention(nn.Module):
 
 class BaseT2(nn.Module):
     """
-        A second-stage transformer that processes cross-attended features.
+        A simple baseline transformer model for reconstructing masked keypoints (second stage).
+
     """
-    def __init__(self, num_joints: int, d_model: int = 128, nhead: int = 4, num_layers: int = 2):
+    def __init__(self, out_dim_A: int, out_dim_B: int, d_model=128, nhead=4, num_layers=2):
         super(BaseT2, self).__init__()
+        self.encoder = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, batch_first=True),
+            num_layers=num_layers
+        )
+
+        # separate heads for each modality
+        self.headA = nn.Linear(d_model, out_dim_A)
+        self.headB = nn.Linear(d_model, out_dim_B)
+
+    def forward(self, x, T_A):
+        encoded = self.encoder(x)
+
+        # shape (B, T_A, out_dim_A)
+        reconsA = self.headA(encoded[:, :T_A, :])
+        # shape (B, T_B, out_dim_B)
+        reconsB = self.headB(encoded[:, T_A:, :])
+
+        return reconsA, reconsB
+
+def train_T2(pairwise_dataset, 
+            model_pathA: str, 
+            model_pathB: str, 
+            num_joints: int,
+            d_model: int = 128,
+            nhead: int = 4,
+            num_layers: int = 2,
+            num_epochs: int = 50,
+            batch_size: int = 16,
+            lr: float = 1e-4,
+            mask_ratio: float = 0.15,
+            freeze_T1: bool = True,
+            device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
+        ):
+    """
+        second-stage masked pretraining using pretrained T1 models for two modalities.
+
+    """
+
+    # load pretrained T1 encoders
+    modality_A = load_T1(model_pathA, num_joints, d_model, nhead, num_layers, freeze_T1, device)
+    modality_B = load_T1(model_pathB, num_joints, d_model, nhead, num_layers, freeze_T1, device)
+
+    # intialize the cross-attention and transformer encoder
+    cross_attn = CrossAttention(d_model=d_model, nhead=nhead)
+    model_T2 = BaseT2(num_joints=num_joints, d_model=d_model, nhead=nhead, num_layers=num_layers)
+    cross_attn.to(device)
+    model_T2.to(device)
+
+    # Dataloader
+    dataloader = DataLoader(
+        pairwise_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=collate_fn_batch_padding
+    )
+
+    # optimize both the cross-attention and the transformer encoder
+    optimizer = optim.Adam(list(cross_attn.parameters()) + list(model_T2.parameters()), lr=lr)
+    criterion = nn.MSELoss(reduction='none')
+
+    for epoch in range(num_epochs):
+        modality_A.eval()
+        modality_B.eval()
+        cross_attn.train()
+        model_T2.train()
+
+        epoch_loss = 0.0
+
+        for sequences_A, sequences_B in dataloader:
+
+            sequences_A = sequences_A.float().to(device)
+            sequences_B = sequences_B.float().to(device)
         
-        # a standard Transformer Encoder stack
-        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, batch_first=True)
-        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+            # masking
+            maskedA, maskA = mask_keypoints(sequences_A, mask_ratio)
+            maskedB, maskB = mask_keypoints(sequences_B, mask_ratio)
 
-        # reconstruction head
-        self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
+            # encoding
+            featsA = modality_A.encode(maskedA)
+            featsB = modality_B.encode(maskedB)
 
+            # cross-attention
+            A_attends_B = cross_attn(featsA, featsB, featsB)
+            B_attends_A = cross_attn(featsB, featsA, featsA)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        encoded = self.transformer_encoder(x)
-        recons = self.reconstruction_head(encoded)
-        return recons
-    
+            # concatenate + T2 forward pass
+            concatenated = torch.cat([A_attends_B, B_attends_A], dim=1)
+            reconsA, reconsB = model_T2(concatenated, sequences_A.size(1))        
 
+            # compute the reconstruction loss
+            lossA = criterion(reconsA, sequences_A)
+            lossB = criterion(reconsB, sequences_B)
 
+            # again, we only do MSE on masked positions
+            # we also need to broadcast mask to match the shape 
+            maskA = maskA.unsqueeze(-1).expand_as(lossA)
+            maskB = maskB.unsqueeze(-1).expand_as(lossB)
+            lossA = (lossA * maskA).sum() / (maskA.sum() + 1e-8)
+            lossB = (lossB * maskB).sum() / (maskB.sum() + 1e-8)
+
+            # average loss
+            loss = (lossA + lossB) * 0.5
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            epoch_loss += loss.item() * sequences_A.size(0)
+        
+        # average epoch loss
+        epoch_loss /= len(pairwise_dataset)
+        print(f"[Epoch {epoch+1}/{num_epochs}] Loss: {epoch_loss:.4f}")
+
+    return model_T2

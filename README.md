@@ -96,6 +96,8 @@ week April 1 ~ April 8:
   - [x] transformer encoder
   - [x] reconstruction head
 
+  - [x] implement the training loop for first-stage masked pretraining
+
 ### Finetuning
 
 - [ ] cross attention between transformer T2 output (the second phase of pretraining) and modality features (the first phase of pretraining)

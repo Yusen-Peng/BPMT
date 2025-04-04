@@ -53,3 +53,23 @@ class GaitRecognitionModalityAwareDataset(GaitRecognitionDataset):
             selected_keypoints[:, i * 2: (i + 1) * 2] = seq[:, joint_idx * 2: (joint_idx * 2) + 2]
         
         return selected_keypoints
+
+
+
+class PairwiseModalityDataset(torch.utils.data.Dataset):
+    """
+    Combines two aligned single-modality datasets into a dataset that returns (xA, xB) pairs.
+    Assumes that both datasets are the same length and order.
+    """
+    def __init__(self, datasetA, datasetB):
+        assert len(datasetA) == len(datasetB), "Datasets must be the same length"
+        self.datasetA = datasetA
+        self.datasetB = datasetB
+
+    def __len__(self):
+        return len(self.datasetA)
+
+    def __getitem__(self, idx):
+        xA, _ = self.datasetA[idx]
+        xB, _ = self.datasetB[idx]
+        return xA, xB
