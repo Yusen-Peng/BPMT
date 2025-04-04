@@ -45,7 +45,7 @@ week April 1 ~ April 8:
     - [x] left arm
     - [x] right arm
 
-- [x] modality-level masked training baseline (we need to have quick prototype/baseline first to later compare with IIP-Transformer)
+- [x] modality-level masked training baseline T1 (we need to have quick prototype/baseline first to later compare with IIP-Transformer)
   - [x] we need a helper function to do masking for training
   - [x] then we can build a base transformer with PyTorch
     - [x] keypoint embeddings
@@ -76,10 +76,10 @@ week April 1 ~ April 8:
 ### Second phase of masked pretraining (modality pair level)
 
 - [ ] construct pairs of features from modality i and modality j (we will have 5 choose 2 = 10 combinations/pairs in total)
-  - [ ] first of all, load single-modality checkpoints from the first training stage
-  - [ ] we can also freeze certain layers in T1 durinh second stage training (tricky - a balance is needed)
+  - [x] first of all, load single-modality checkpoints from the first training stage
+  - [x] we can also freeze T1 (totally or partially) during second stage training
 
-- [ ] implement the cross attention layer
+- [x] implement the cross attention layer
 
 - [ ] implement another IIP-Transformer (T2), should be similar to T1 [hold this for now]
   - [ ] individual transformer layer
@@ -91,6 +91,10 @@ week April 1 ~ April 8:
   - [ ] finish up the entire transformer
     - [ ] add class token
     - [ ] add FC layer
+  
+- [x] baseline T2
+  - [x] transformer encoder
+  - [x] reconstruction head
 
 ### Finetuning
 

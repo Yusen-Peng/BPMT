@@ -5,29 +5,21 @@ from torch.utils.data import DataLoader
 from utils import collate_fn_batch_padding
 from first_phase_baseline import BaseT1
 
-
-
-def load_and_fuse(model_pathA: str, model_pathB: str, xA: torch.Tensor, xB: torch.Tensor,
-    num_joints=14,
-    d_model=128,
-    nhead=4,
-    num_layers=2,
-    freeze_baseT1: bool = False
-) -> torch.Tensor:
+def load_and_encode(model_pathA: str,
+                    model_pathB: str, 
+                    xA: torch.Tensor, 
+                    xB: torch.Tensor,
+                    num_joints=14,
+                    d_model=128,
+                    nhead=4,
+                    num_layers=2,
+                    freeze_T1: bool = True,
+                    device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
+                ) -> torch.Tensor:
 
     """
-    Loads two pretrained BaseT1 models (for two modalities), extracts their encoded features,
-    and returns a fused representation.
+        Loads two pretrained BaseT1 models (for two modalities) and extracts their encoded features.
 
-    Args:
-        model_pathA: path to the checkpoint for modality A's BaseT1.
-        model_pathB: path to the checkpoint for modality B's BaseT1.
-        xA, xB: input tensors for each modality, of shape (B, T, 2*num_joints).
-        num_joints, d_model, nhead, num_layers: parameters for BaseT1 model creation.
-        freeze_baseT1: if True, sets requires_grad=False on BaseT1 parameters.
-
-    Returns:
-        fused: a torch.Tensor containing the fused representation from both modalities.
     """
     # load the baseT1 checkpoints for two modalities
     # load onto CPU first, then move to GPU if available
@@ -36,26 +28,23 @@ def load_and_fuse(model_pathA: str, model_pathB: str, xA: torch.Tensor, xB: torc
     modA.load_state_dict(torch.load(model_pathA, map_location='cpu'))
     modB.load_state_dict(torch.load(model_pathB, map_location='cpu'))
 
-    # we can optionally freeze parameters for the baseT1 models
-    if freeze_baseT1:
+    # we can optionally freeze parameters for the T1 models
+    if freeze_T1:
         for param in modA.parameters():
             param.requires_grad = False
         for param in modB.parameters():
             param.requires_grad = False
 
-
-
-    # 4) Extract encoded features
-    featsA = modA.get_encoded_features(xA)  # shape (B, T, d_model)
-    featsB = modB.get_encoded_features(xB)  # shape (B, T, d_model)
-
-    # 5) Simple Fusion by concatenation along the feature dimension
-    # If you'd rather combine along the time dimension, or do some other approach, adjust here.
-    # (B, T, d_model) => (B, T, 2*d_model)
-    fused = torch.cat([featsA, featsB], dim=2)
-
-    return fused
-
+    # move models and data to the appropriate device
+    modA.to(device)
+    modB.to(device)
+    xA = xA.to(device)
+    xB = xB.to(device)
+    
+    # feature extraction
+    feature_A = modA.encode(xA)
+    feature_B = modB.encode(xB)
+    return feature_A, feature_B
 
 
 class CrossAttention(nn.Module):
@@ -81,5 +70,27 @@ class CrossAttention(nn.Module):
         out = self.norm(Q + self.dropout(attn_out))
         
         return out
+
+
+class BaseT2(nn.Module):
+    """
+        A second-stage transformer that processes cross-attended features.
+    """
+    def __init__(self, num_joints: int, d_model: int = 128, nhead: int = 4, num_layers: int = 2):
+        super(BaseT2, self).__init__()
+        
+        # a standard Transformer Encoder stack
+        encoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, batch_first=True)
+        self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+
+        # reconstruction head
+        self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
+
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        encoded = self.transformer_encoder(x)
+        recons = self.reconstruction_head(encoded)
+        return recons
+    
 
 
