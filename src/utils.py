@@ -187,3 +187,30 @@ def collate_fn_pairs(batch):
     xB_padded = pad_sequence(xB_list, batch_first=True, padding_value=0.0)
 
     return xA_padded, xB_padded
+
+
+def collate_fn_finetuning(batch):
+    """
+    Collate function for finetuningDataset.
+    Pads each modality across time dimension to the max length in the batch.
+    Returns:
+        - torso_batch:      [B, T_max_torso, D]
+        - left_arm_batch:   [B, T_max_left_arm, D]
+        - right_arm_batch:  [B, T_max_right_arm, D]
+        - left_leg_batch:   [B, T_max_left_leg, D]
+        - right_leg_batch:  [B, T_max_right_leg, D]
+        - labels:           [B]
+    """
+    torso_batch, left_arm_batch, right_arm_batch, left_leg_batch, right_leg_batch, labels = zip(*batch)
+
+    torso_batch = pad_sequence(torso_batch, batch_first=True, padding_value=0.0)
+    left_arm_batch = pad_sequence(left_arm_batch, batch_first=True, padding_value=0.0)
+    right_arm_batch = pad_sequence(right_arm_batch, batch_first=True, padding_value=0.0)
+    left_leg_batch = pad_sequence(left_leg_batch, batch_first=True, padding_value=0.0)
+    right_leg_batch = pad_sequence(right_leg_batch, batch_first=True, padding_value=0.0)
+
+    labels = torch.stack(labels, dim=0)
+
+    return torso_batch, left_arm_batch, right_arm_batch, left_leg_batch, right_leg_batch, labels
+
+

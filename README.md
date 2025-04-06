@@ -5,13 +5,27 @@
 Although a massive number of gait recognition models have been proposed, and multiple architectures including IIP-Transformer, STSA-Net, and IGFormer have experimented with dividing the body poses explicitly into multiple meaningful parts or segments, no existing work has attempted to integrate body-part-aware transformers into the two-phase masked pretraining framework proposed in OmniVec2, which
 was originally designed to learn multi-modal representations to perform multiple tasks. In this work, we attempt to address the following problem: can we treat different human parts as different modalities to integrate body-part-aware transformers into the two-phase masked pretraining framework proposed in OmniVec2?
 
-## proposed architecture
+## BPMT pipeline
 
-Our BPMT pipeline design:
 ![alt text](docs/BPMT_pipeline.png)
+
+
+## BPMT architecture
 
 Our BPMT architecture design:
 ![alt text](docs/BPMT.png)
+
+First-stage pretraining:
+![alt text](docs/first_stage.png)
+
+Second-stage pretraining:
+![alt text](docs/second_stage.png)
+
+Finetuning:
+![alt text](docs/finetuning.png)
+
+
+## IIP-Transformer (Q. Wang et. al, CVPR 2022)
 
 IIP-Transformer architecture:
 ![alt text](docs/IIP-Transformer.png)
@@ -75,7 +89,7 @@ week April 1 ~ April 8:
 
 ### Second phase of masked pretraining (modality pair level)
 
-- [ ] construct pairs of features from modality i and modality j (we will have 5 choose 2 = 10 combinations/pairs in total)
+- [x] construct pairs of features from modality i and modality j (we will have 5 choose 2 = 10 combinations/pairs in total)
   - [x] first of all, load single-modality checkpoints from the first training stage
   - [x] we can also freeze T1 (totally or partially) during second stage training
 
@@ -100,6 +114,6 @@ week April 1 ~ April 8:
 
 ### Finetuning
 
-- [ ] cross attention between transformer T2 output (the second phase of pretraining) and modality features (the first phase of pretraining)
+- [x] cross attention between transformer T2 output (the second phase of pretraining) and modality features (the first phase of pretraining)
 
-- [ ] gait recognition head
+- [x] gait recognition head

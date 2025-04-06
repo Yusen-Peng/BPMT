@@ -15,7 +15,7 @@ from second_phase_baseline import BaseT2, train_T2, load_T1
 from finetuning import GaitRecognitionHead, finetuning, load_T2
 
 
-from utils import load_all_data, set_seed, get_num_joints_for_modality
+from utils import load_all_data, set_seed, get_num_joints_for_modality, collate_fn_finetuning
 
 
 def parse_args():
@@ -45,7 +45,6 @@ def main():
     print(f"first_stage: {first_stage}")
     print(f"second_stage: {second_stage}")
 
-    return
     # Set the device
 
     hidden_size = 64
@@ -55,6 +54,11 @@ def main():
     print(f"[INFO] Starting Gait3D dataset processing on {device}...")
     print("=" * 50)
     sequences, labels = load_all_data(root_dir)
+
+    # get the number of classes/subjects
+    num_classes = len(set(labels))
+    print(f"[INFO] Number of classes: {num_classes}")
+
     torso_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "torso")
     left_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_arm")
     right_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_arm")
@@ -218,9 +222,6 @@ def main():
         device=device
     )
 
-    # load T2 models
-    #load_T2(model_path: str, out_dim_A: int, out_dim_B: int, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
-            #device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT2:
     t2_torso_left_arm = load_T2(
         model_path="checkpoints/Torso_Left_Arm_T2.pt",
         out_dim_A=num_joints_dict["Torso"] * 2,
@@ -323,11 +324,11 @@ def main():
     )
 
     t1_map = {
-        'torso': t1_torso,
-        'left_arm': t1_left_arm,
-        'right_arm': t1_right_arm,
-        'left_leg': t1_left_leg,
-        'right_leg': t1_right_leg
+        'Torso': t1_torso,
+        'Left_Arm': t1_left_arm,
+        'Right_Arm': t1_right_arm,
+        'Left_Leg': t1_left_leg,
+        'Right_Leg': t1_right_leg
     }
 
     t2_map = {
@@ -349,8 +350,37 @@ def main():
     print("=" * 100)
 
 
+    finetuning_dataset = finetuningDataset(
+        torso_dataset=torso_modality,
+        left_arm_dataset=left_arm_modality,
+        right_arm_dataset=right_arm_modality,
+        left_leg_dataset=left_leg_modality,
+        right_leg_dataset=right_leg_modality,
+    )
+
+    finetuning_dataloader = torch.utils.data.DataLoader(
+        finetuning_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        collate_fn=collate_fn_finetuning
+    )
 
 
+    gait_head = GaitRecognitionHead(input_dim=hidden_size * 5, num_classes=num_classes).to(device)
+
+    finetuning(
+        dataloader=finetuning_dataloader,
+        t1_map=t1_map,
+        t2_map=t2_map,
+        gait_head=gait_head,
+        d_model=hidden_size,
+        
+        num_epochs=num_epochs,
+        freeze=True,
+        device=device
+    )
+
+    print("Aha! Finetuning completed successfully!")
 
 
 
