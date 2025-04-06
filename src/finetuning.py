@@ -41,8 +41,8 @@ class GaitRecognitionHead(nn.Module):
 
 def finetuning(
     dataloader,
-    t1_map,         # dict: {'torso': t1_torso, ...}
-    t2_map,         # dict: {('torso','left_arm'): t2_torso_left_arm, ...}
+    t1_map,
+    t2_map,
     cross_attn,
     gait_head,
     optimizer,
