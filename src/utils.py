@@ -2,6 +2,7 @@ import random
 import numpy as np
 import torch
 from torch.nn.utils.rnn import pad_sequence
+from torch.utils.data import random_split
 import os
 import glob
 from typing import List, Tuple
@@ -214,3 +215,18 @@ def collate_fn_finetuning(batch):
     return torso_batch, left_arm_batch, right_arm_batch, left_leg_batch, right_leg_batch, labels
 
 
+def split_train_val(dataset, train_ratio=0.8, seed=42):
+    """
+    Splits a dataset into train and validation subsets.
+    """
+    # fix the seed to make it deterministic
+    generator = torch.Generator().manual_seed(seed)
+
+    train_size = int(train_ratio * len(dataset))
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = random_split(
+        dataset, 
+        [train_size, val_size],
+        generator=generator
+    )
+    return train_dataset, val_dataset

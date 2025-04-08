@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
 from utils import collate_fn_batch_padding
 from first_phase_baseline import BaseT1, mask_keypoints
 from second_phase_baseline import BaseT2, CrossAttention, load_T1
@@ -147,7 +148,8 @@ def T2_encoding(t2_map: dict[str, BaseT2], encoded_t1_torso: torch.Tensor, encod
 
 
 def finetuning(
-    dataloader: DataLoader,
+    train_loader: DataLoader,
+    val_loader: DataLoader,
     t1_map: dict[str, BaseT1],
     t2_map: dict[str, BaseT2],
     gait_head: GaitRecognitionHead,
@@ -211,15 +213,19 @@ def finetuning(
             params += list(m.parameters())
         for m in t2_map.values():
             params += list(m.parameters())
+    
+    # save both train and val loss
+    train_losses = []
+    val_losses = []
 
 
     optimizer = optim.Adam(params, lr=1e-4)
     
     for epoch in range(num_epochs):
-        total_loss = 0.0
+        train_loss = 0.0
         total_samples = 0
 
-        for batch in dataloader:
+        for batch in train_loader:
             # unpack the batch
             (torso_seq, la_seq, ra_seq, ll_seq, rl_seq, labels) = batch
             torso_seq = torso_seq.to(device)
@@ -316,22 +322,146 @@ def finetuning(
             ], dim=-1)
 
             # classification (gait recognition)
-
             logits = gait_head(final_reprs)
 
             # compute loss
             loss = criterion(logits, labels)  
-
-
             # optimizer step
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            total_loss += loss.item() * labels.size(0)
+            train_loss += loss.item() * labels.size(0)
             total_samples += labels.size(0)
         
-        # average epoch loss
-        avg_loss = total_loss / (total_samples + 1e-9)
-        print(f"[Epoch {epoch+1}/{num_epochs}] Loss: {avg_loss:.4f}")
+        # average training epoch loss
+        train_loss = train_loss / (total_samples + 1e-9)
+        train_losses.append(train_loss)
+
+        # validation step
+        val_loss = 0.0
+        val_samples = 0
+
+        # freeze the gait head and cross-attention modules
+        gait_head.eval()
+
+        # freeze cross-attention modules as well
+        for m in cross_attn_modules_before_T2.values():
+            m.eval()
+        for m in cross_attn_modules_after_T2.values():
+            m.eval()
+
+        with torch.no_grad():
+            for batch in val_loader:
+                (torso_seq, la_seq, ra_seq, ll_seq, rl_seq, labels) = batch
+                torso_seq = torso_seq.to(device)
+                la_seq = la_seq.to(device)
+                ra_seq = ra_seq.to(device)
+                ll_seq = ll_seq.to(device)
+                rl_seq = rl_seq.to(device)
+                labels = labels.to(device)
+
+                # get T1 encoding for each modality
+                encoded_t1 = T1_encoding(t1_map, torso_seq, la_seq, ra_seq, ll_seq, rl_seq)
+                encoded_t1_torso = encoded_t1['torso']
+                encoded_t1_left_arm = encoded_t1['left_arm']
+                encoded_t1_right_arm = encoded_t1['right_arm']
+                encoded_t1_left_leg = encoded_t1['left_leg']
+                encoded_t1_right_leg = encoded_t1['right_leg']
+        
+                # get T2 encoding with each other modality O for each modality M
+                encoded_T2 = T2_encoding(t2_map, encoded_t1_torso, encoded_t1_left_arm, encoded_t1_right_arm, encoded_t1_left_leg, encoded_t1_right_leg, cross_attn_modules_before_T2)
+                encoded_t2_torso = encoded_T2['torso']
+                encoded_t2_left_arm = encoded_T2['left_arm']
+                encoded_t2_right_arm = encoded_T2['right_arm']
+                encoded_t2_left_leg = encoded_T2['left_leg']
+                encoded_t2_right_leg = encoded_T2['right_leg']
+
+                # for each modality, do cross-atttention between individual T1 encoding and T2 encoding list
+                # here, we do joint cross-attention over the aggregation of 4 other encodings
+                # torso
+                Q = encoded_t1_torso
+                K = V = torch.cat([
+                    encoded_t2_torso[0],
+                    encoded_t2_torso[1],
+                    encoded_t2_torso[2],
+                    encoded_t2_torso[3]
+                ], dim=1)
+                cross_out_torso = cross_attn_modules_after_T2['torso'](Q, K, V)
+
+                # left arm
+                Q = encoded_t1_left_arm
+                K = V = torch.cat([
+                    encoded_t2_left_arm[0],
+                    encoded_t2_left_arm[1],
+                    encoded_t2_left_arm[2],
+                    encoded_t2_left_arm[3]
+                ], dim=1)
+                cross_out_left_arm = cross_attn_modules_after_T2['left_arm'](Q, K, V)
+                # right arm
+                Q = encoded_t1_right_arm
+                K = V = torch.cat([
+                    encoded_t2_right_arm[0],
+                    encoded_t2_right_arm[1],
+                    encoded_t2_right_arm[2],
+                    encoded_t2_right_arm[3]
+                ], dim=1)
+                cross_out_right_arm = cross_attn_modules_after_T2['right_arm'](Q, K, V)
+                # left leg
+                Q = encoded_t1_left_leg
+                K = V = torch.cat([
+                    encoded_t2_left_leg[0],
+                    encoded_t2_left_leg[1],
+                    encoded_t2_left_leg[2],
+                    encoded_t2_left_leg[3]
+                ], dim=1)
+                cross_out_left_leg = cross_attn_modules_after_T2['left_leg'](Q, K, V)
+                # right leg
+                Q = encoded_t1_right_leg
+                K = V = torch.cat([
+                    encoded_t2_right_leg[0],
+                    encoded_t2_right_leg[1],
+                    encoded_t2_right_leg[2],
+                    encoded_t2_right_leg[3]
+                ], dim=1)
+                cross_out_right_leg = cross_attn_modules_after_T2['right_leg'](Q, K, V)
+                # average pooling over time
+                pooled_torso = cross_out_torso.mean(dim=1)
+                pooled_left_arm = cross_out_left_arm.mean(dim=1)
+                pooled_right_arm = cross_out_right_arm.mean(dim=1)
+                pooled_left_leg = cross_out_left_leg.mean(dim=1)
+                pooled_right_leg = cross_out_right_leg.mean(dim=1)
+                # final fused representation
+                final_reprs = torch.cat([
+                    pooled_torso,
+                    pooled_left_arm,
+                    pooled_right_arm,
+                    pooled_left_leg,
+                    pooled_right_leg
+                ], dim=-1)
+                # classification (gait recognition)
+                logits = gait_head(final_reprs)
+                # compute loss
+                loss = criterion(logits, labels)
+                val_loss += loss.item() * labels.size(0)
+                val_samples += labels.size(0)
+        # average validation epoch loss
+        val_loss = val_loss / (val_samples + 1e-9)
+        val_losses.append(val_loss)
+
+
+        print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+    
+
+
+    # plotting
+    plt.figure()
+    plt.plot(range(1, num_epochs + 1), train_losses, label='Train Loss')
+    plt.plot(range(1, num_epochs + 1), val_losses, label='Val Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.title(f'Finetuning - Train and Val Loss')
+    plt.savefig('figures/finetuning_train_val_loss.png')
+
 
     print("Finetuning complete!")

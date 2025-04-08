@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from utils import collate_fn_batch_padding
@@ -103,24 +104,18 @@ class BaseT1(nn.Module):
         return encoded
 
 
-def train_T1(dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
-    """
-        Train the transformer model on the dataset.
-        
-        Args:
-            dataset: The dataset containing sequences and labels.
-            model: The transformer model.
-            num_epochs: Number of training epochs.
-            batch_size: Batch size for training.
-            lr: Learning rate for the optimizer.
-            mask_ratio: Fraction of frames to mask during training.
-            device: Device to run the training on ('cuda' or 'cpu').
-    """
-
-    dataloader = DataLoader(
-                        dataset,
+def train_T1(modality_name, train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
+    
+    train_loader = DataLoader(
+                        train_dataset,
                         batch_size=batch_size, 
                         shuffle=True,
+                        collate_fn=collate_fn_batch_padding
+                    )
+    val_loader = DataLoader(
+                        val_dataset,
+                        batch_size=batch_size, 
+                        shuffle=False,
                         collate_fn=collate_fn_batch_padding
                     )
     
@@ -128,12 +123,17 @@ def train_T1(dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0
     criterion = nn.MSELoss(reduction='none')
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
+
+    # we also need to visualize both the train and val loss
+    train_losses = []
+    val_losses = []
+
     model.to(device)
 
     for epoch in range(num_epochs):
         model.train()
-        epoch_loss = 0.0
-        for sequences, _ in dataloader:
+        train_loss = 0.0
+        for sequences, _ in train_loader:
             # input sequences: (B, T, 2*num_joints)
             sequences = sequences.float().to(device)
 
@@ -161,10 +161,41 @@ def train_T1(dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0
             optimizer.step()
 
             # accumulate loss
-            epoch_loss += loss.item() * sequences.size(0)
+            train_loss += loss.item() * sequences.size(0)
 
-        # average epoch loss
-        epoch_loss /= len(dataset)
-        print(f"Epoch {epoch+1}/{num_epochs} - Loss: {epoch_loss:.4f}")
+        # compute the average training loss
+        train_loss /= len(train_dataset) 
 
+        # validation step
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for sequences, _ in val_loader:
+                sequences = sequences.float().to(device)
+                masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
+                recons = model(masked_inputs)
+                loss_matrix = criterion(recons, sequences)
+                mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
+                masked_loss = loss_matrix * mask_broadcasted
+                num_masked = mask_broadcasted.sum()
+                loss = masked_loss.sum() / (num_masked + 1e-8)
+                val_loss += loss.item() * sequences.size(0)
+
+        val_loss /= len(val_dataset)
+
+        # store the losses
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+
+        print(f"[Epoch {epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+
+    plt.figure()
+    plt.plot(range(1, num_epochs + 1), train_losses, label='Train Loss')
+    plt.plot(range(1, num_epochs + 1), val_losses, label='Val Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.title(f'{modality_name} - Train and Val Loss')
+    plt.savefig(f'figures/{modality_name}_train_val_loss.png')
+    
     return model

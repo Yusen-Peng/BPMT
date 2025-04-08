@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from utils import collate_fn_pairs
 from first_phase_baseline import BaseT1, mask_keypoints
@@ -85,7 +86,11 @@ class BaseT2(nn.Module):
         return encoded_A, encoded_B        
 
 
-def train_T2(pairwise_dataset, 
+def train_T2(
+            modality_name_A,
+            modality_name_B,
+            train_pairwise_dataset,
+            val_pairwise_dataset, 
             model_pathA: str, 
             model_pathB: str, 
             num_joints_A: int,
@@ -122,10 +127,17 @@ def train_T2(pairwise_dataset,
     model_T2.to(device)
 
     # Dataloader
-    dataloader = DataLoader(
-        pairwise_dataset,
+    train_loader = DataLoader(
+        train_pairwise_dataset,
         batch_size=batch_size,
         shuffle=True,
+        collate_fn=collate_fn_pairs
+    )
+
+    val_loader = DataLoader(
+        val_pairwise_dataset,
+        batch_size=batch_size,
+        shuffle=False,
         collate_fn=collate_fn_pairs
     )
 
@@ -133,15 +145,19 @@ def train_T2(pairwise_dataset,
     optimizer = optim.Adam(list(cross_attn.parameters()) + list(model_T2.parameters()), lr=lr)
     criterion = nn.MSELoss(reduction='none')
 
+    # we also need to visualize both the train and val loss
+    train_losses = []
+    val_losses = []
+
     for epoch in range(num_epochs):
         modality_A.eval()
         modality_B.eval()
         cross_attn.train()
         model_T2.train()
 
-        epoch_loss = 0.0
+        train_loss = 0.0
 
-        for sequences_A, sequences_B in dataloader:
+        for sequences_A, sequences_B in train_loader:
 
             sequences_A = sequences_A.float().to(device)
             sequences_B = sequences_B.float().to(device)
@@ -180,10 +196,66 @@ def train_T2(pairwise_dataset,
             loss.backward()
             optimizer.step()
 
-            epoch_loss += loss.item() * sequences_A.size(0)
+            train_loss += loss.item() * sequences_A.size(0)
         
         # average epoch loss
-        epoch_loss /= len(pairwise_dataset)
-        print(f"[Epoch {epoch+1}/{num_epochs}] Loss: {epoch_loss:.4f}")
+        train_loss /= len(train_pairwise_dataset)
+
+        # validation step
+        cross_attn.eval()
+        model_T2.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for sequences_A, sequences_B in val_loader:
+                sequences_A = sequences_A.float().to(device)
+                sequences_B = sequences_B.float().to(device)
+
+                # masking
+                maskedA, maskA = mask_keypoints(sequences_A, mask_ratio)
+                maskedB, maskB = mask_keypoints(sequences_B, mask_ratio)
+
+                # encoding
+                featsA = modality_A.encode(maskedA)
+                featsB = modality_B.encode(maskedB)
+
+                # cross-attention
+                A_attends_B = cross_attn(featsA, featsB, featsB)
+                B_attends_A = cross_attn(featsB, featsA, featsA)
+
+                # concatenate + T2 forward pass
+                concatenated = torch.cat([A_attends_B, B_attends_A], dim=1)
+                reconsA, reconsB = model_T2(concatenated, sequences_A.size(1))
+
+                # compute the reconstruction loss
+                lossA = criterion(reconsA, sequences_A)
+                lossB = criterion(reconsB, sequences_B)
+
+                # again, we only do MSE on masked positions
+                # we also need to broadcast mask to match the shape 
+                maskA = maskA.unsqueeze(-1).expand_as(lossA)
+                maskB = maskB.unsqueeze(-1).expand_as(lossB)
+                lossA = (lossA * maskA).sum() / (maskA.sum() + 1e-8)
+                lossB = (lossB * maskB).sum() / (maskB.sum() + 1e-8)
+
+                # average loss
+                loss = (lossA + lossB) * 0.5
+
+                val_loss += loss.item() * sequences_A.size(0)
+        
+        # average epoch loss
+        val_loss /= len(val_pairwise_dataset)
+
+        print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+    
+    plt.figure()
+    plt.plot(range(1, num_epochs + 1), train_losses, label='Train Loss')
+    plt.plot(range(1, num_epochs + 1), val_losses, label='Val Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.title(f'{modality_name_A} ~ {modality_name_B} - Train and Val Loss')
+    plt.savefig(f'figures/{modality_name_A}_{modality_name_B}_train_val_loss.png')
 
     return model_T2

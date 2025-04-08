@@ -117,3 +117,51 @@ week April 1 ~ April 8:
 - [x] cross attention between transformer T2 output (the second phase of pretraining) and modality features (the first phase of pretraining)
 
 - [x] gait recognition head
+
+### Training Loss & Validation Loss - 50 subjects
+
+#### first stage pretraining
+
+![alt text](figures/Torso_train_val_loss.png)
+
+![alt text](figures/Left_Arm_train_val_loss.png)
+
+![alt text](figures/Right_Arm_train_val_loss.png)
+
+![alt text](figures/Left_Leg_train_val_loss.png)
+
+![alt text](figures/Right_Arm_train_val_loss.png)
+
+#### second stage pretraining
+
+![alt text](figures/Torso_Left_Arm_train_val_loss.png)
+
+![alt text](figures/Torso_Right_Arm_train_val_loss.png)
+
+![alt text](figures/Torso_Left_Leg_train_val_loss.png)
+
+![alt text](figures/Torso_Right_Leg_train_val_loss.png)
+
+![alt text](figures/Left_Arm_Right_Arm_train_val_loss.png)
+
+![alt text](figures/Left_Arm_Left_Leg_train_val_loss.png)
+
+![alt text](figures/Left_Arm_Right_Leg_train_val_loss.png)
+
+![alt text](figures/Right_Arm_Left_Leg_train_val_loss.png)
+
+![alt text](figures/Right_Arm_Right_Leg_train_val_loss.png)
+
+![alt text](figures/Left_Leg_Right_Leg_train_val_loss.png)
+
+
+#### finetuning
+
+Right now I am facing over overfitting issues:
+
+![alt text](figures/finetuning_train_val_loss.png)
+
+
+## Conda environment setup
+
+BPMT_env - stay tuned!

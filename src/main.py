@@ -15,7 +15,7 @@ from second_phase_baseline import BaseT2, train_T2, load_T1
 from finetuning import GaitRecognitionHead, finetuning, load_T2
 
 
-from utils import load_all_data, set_seed, get_num_joints_for_modality, collate_fn_finetuning
+from utils import load_all_data, set_seed, get_num_joints_for_modality, collate_fn_finetuning, split_train_val
 
 
 def parse_args():
@@ -65,21 +65,28 @@ def main():
     left_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_leg")
     right_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_leg")
 
-    modalities = [
-            ("Torso", torso_modality),
-            ("Left_Arm", left_arm_modality),
-            ("Right_Arm", right_arm_modality),
-            ("Left_Leg", left_leg_modality),
-            ("Right_Leg", right_leg_modality),
-        ]
+    # split training and validation sets
+    torso_train, torso_val = split_train_val(torso_modality)
+    left_arm_train, left_arm_val = split_train_val(left_arm_modality)
+    right_arm_train, right_arm_val = split_train_val(right_arm_modality)
+    left_leg_train, left_leg_val = split_train_val(left_leg_modality)
+    right_leg_train, right_leg_val = split_train_val(right_leg_modality)
 
+    # define modalities
+    modalities = [
+        ("Torso", torso_train, torso_val),
+        ("Left_Arm", left_arm_train, left_arm_val),
+        ("Right_Arm", right_arm_train, right_arm_val),
+        ("Left_Leg", left_leg_train, left_leg_val),
+        ("Right_Leg", right_leg_train, right_leg_val)
+    ]
 
     if first_stage == True: 
         """"
             First phase masked pretraining: one modality at a time
         """
 
-        for modality_name, modality_dataset in modalities:
+        for modality_name, train_dataset, val_dataset in modalities: 
             print(f"\n==========================")
             print(f"Starting Masked Pretraining for {modality_name}")
             print(f"==========================")
@@ -98,7 +105,9 @@ def main():
             # training
             # dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
             train_T1(
-                dataset=modality_dataset,
+                modality_name=modality_name,
+                train_dataset=train_dataset,
+                val_dataset=val_dataset,
                 model=model,
                 num_epochs=num_epochs,
                 batch_size=batch_size,
@@ -119,12 +128,21 @@ def main():
     print("=" * 100)
 
 
+    modality_map = {
+        "Torso": (torso_train, torso_val),
+        "Left_Arm": (left_arm_train, left_arm_val),
+        "Right_Arm": (right_arm_train, right_arm_val),
+        "Left_Leg": (left_leg_train, left_leg_val),
+        "Right_Leg": (right_leg_train, right_leg_val)
+    }
+
+
     if second_stage == True:
         """
             Second phase masked pretraining: one pair of modalities at a time
         """
 
-        modality_map = dict(modalities)
+        # define the modality names from the dictionary
         modality_names = list(modality_map.keys())
 
         for modA_name, modB_name in combinations(modality_names, 2):
@@ -132,15 +150,21 @@ def main():
             print(f"Second-Stage Pretraining on {modA_name} + {modB_name}")
             print(f"==========================")
 
-            datasetA = modality_map[modA_name]
-            datasetB = modality_map[modB_name]
-            pairwise_dataset = PairwiseModalityDataset(datasetA, datasetB)
+
+            datasetA_train, datasetA_val = modality_map[modA_name]
+            datasetB_train, datasetB_val = modality_map[modB_name]
+
+            train_pairwise_dataset = PairwiseModalityDataset(datasetA_train, datasetB_train)
+            val_pairwise_dataset = PairwiseModalityDataset(datasetA_val, datasetB_val)
 
             num_joints_A = get_num_joints_for_modality(modA_name)
             num_joints_B = get_num_joints_for_modality(modB_name)
 
             model_T2 = train_T2(
-                pairwise_dataset=pairwise_dataset,
+                modality_name_A=modA_name,
+                modality_name_B=modB_name,
+                train_pairwise_dataset=train_pairwise_dataset,
+                val_pairwise_dataset=val_pairwise_dataset,
                 model_pathA=f"checkpoints/{modA_name.lower().replace(' ','_')}_masked_pretrained.pt",
                 model_pathB=f"checkpoints/{modB_name.lower().replace(' ','_')}_masked_pretrained.pt",
                 num_joints_A=num_joints_A,
@@ -161,7 +185,6 @@ def main():
 
         print("Aha! All modality pairs trained successfully!")
         print("=" * 100)
-        
 
     """
         finetuning on gait recognition.
@@ -350,18 +373,33 @@ def main():
     print("=" * 100)
 
 
-    finetuning_dataset = finetuningDataset(
-        torso_dataset=torso_modality,
-        left_arm_dataset=left_arm_modality,
-        right_arm_dataset=right_arm_modality,
-        left_leg_dataset=left_leg_modality,
-        right_leg_dataset=right_leg_modality,
+    train_finetuning_dataset = finetuningDataset(
+        torso_dataset=torso_train,
+        left_arm_dataset=left_arm_train,
+        right_arm_dataset=right_arm_train,
+        left_leg_dataset=left_leg_train,
+        right_leg_dataset=right_leg_train,
     )
 
-    finetuning_dataloader = torch.utils.data.DataLoader(
-        finetuning_dataset,
+    train_finetuning_dataloader = torch.utils.data.DataLoader(
+        train_finetuning_dataset,
         batch_size=batch_size,
         shuffle=True,
+        collate_fn=collate_fn_finetuning
+    )
+
+    val_finetuning_dataset = finetuningDataset(
+        torso_dataset=torso_val,
+        left_arm_dataset=left_arm_val,
+        right_arm_dataset=right_arm_val,
+        left_leg_dataset=left_leg_val,
+        right_leg_dataset=right_leg_val,
+    )
+
+    val_finetuning_dataloader = torch.utils.data.DataLoader(
+        val_finetuning_dataset,
+        batch_size=batch_size,
+        shuffle=False,
         collate_fn=collate_fn_finetuning
     )
 
@@ -369,12 +407,12 @@ def main():
     gait_head = GaitRecognitionHead(input_dim=hidden_size * 5, num_classes=num_classes).to(device)
 
     finetuning(
-        dataloader=finetuning_dataloader,
+        train_loader=train_finetuning_dataloader,
+        val_loader=val_finetuning_dataloader,
         t1_map=t1_map,
         t2_map=t2_map,
         gait_head=gait_head,
         d_model=hidden_size,
-        
         num_epochs=num_epochs,
         freeze=True,
         device=device
