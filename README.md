@@ -30,6 +30,12 @@ Finetuning:
 IIP-Transformer architecture:
 ![alt text](docs/IIP-Transformer.png)
 
+## Baseline Transformer
+
+Baseline Transformer architecture:
+![alt text](docs/baseline_transformer.png)
+
+
 ## implementation pending tasks
 
 - [ ] implement IIP-Transformer (T1)
