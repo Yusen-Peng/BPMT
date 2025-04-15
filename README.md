@@ -31,7 +31,14 @@ Finetuning:
 Baseline Transformer architecture:
 ![alt text](docs/baseline_transformer.png)
 
-### Training Loss & Validation Loss - 50 subjects
+
+
+## Camera-View-Aware Data Preprocessing
+
+Camera-View-Aware Data Preprocessing:
+![alt text](docs/camera-view-aware.png)
+
+<!-- ### Training Loss & Validation Loss - 50 subjects
 
 #### first stage pretraining
 
@@ -72,10 +79,10 @@ Baseline Transformer architecture:
 
 Right now I am facing overfitting issues:
 
-![alt text](figures_50/finetuning_train_val_loss.png)
+![alt text](figures_50/finetuning_train_val_loss.png) -->
 
 
-### Training Loss & Validation Loss - 300 subjects
+<!-- ### Training Loss & Validation Loss - 300 subjects
 
 #### first stage pretraining
 
@@ -160,7 +167,7 @@ Right now I am facing the same overfitting issues:
 
 Right now I am facing the same overfitting issues:
 
-![alt text](figures_50_class_specific/finetuning_train_val_loss.png)
+![alt text](figures_50_class_specific/finetuning_train_val_loss.png) -->
 
 
 ## Current issue: overfitting
