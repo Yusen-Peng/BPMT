@@ -188,3 +188,13 @@ My Other ideas (from my past time series experience + NLP class):
 ## Conda environment setup
 
 BPMT_env - stay tuned!
+
+
+## Meeting notes 04/15
+
+1. don't do masked pretraining - just do regular encoding
+2. do "view-based" validation instead of random or class-specific validation
+    1. only select people with enough number of views/cameras (1000 in total)
+    2. from these people, split train/val based on views/cameras (like 6 cameras for training, 2 cameras for validation)
+
+3. alternative project: wifi-signal-based human tracking
