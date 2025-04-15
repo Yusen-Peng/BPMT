@@ -165,24 +165,25 @@ Right now I am facing the same overfitting issues:
 
 ## Current issue: overfitting
 
-❌ no early stopping
+❌ not seeing enough data (300 subjects still small)?
 
-❌ no regularization (dropout, weight decay)
+❌ no early stopping?
 
-❌ improper learning rate (and scheduler)
+❌ no regularization (dropout, weight decay)?
+
+❌ improper learning rate (and scheduler)?
 
 
 ## What can be the next step?
 
 integrate IIP-Transformer and compare with the baseline!
 
-Other ideas: (most of the ideas below are from my past time-series-analysis research experience) 
+My Other ideas (from my past time series experience + NLP class):
 
-1. alterntaive transformer/encoder: try different attention mechanisms like FlowAttention
-2. 
-3. 
-4. data augmentation:
-
+1. try efficient attention mechanisms like FlowAttention, FlashAttention
+2. dual encoder (noisy encoder + clean encoder) like DEPICT
+3. add contrastive learning objective on top of cross attention like CLIP
+4. add auxiliary classification objective (mix in fake samples) like DTCR
 
 ## Conda environment setup
 
