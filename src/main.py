@@ -15,7 +15,7 @@ from second_phase_baseline import BaseT2, train_T2, load_T1
 from finetuning import GaitRecognitionHead, finetuning, load_T2
 
 
-from utils import load_all_data, set_seed, get_num_joints_for_modality, collate_fn_finetuning, split_train_val
+from utils import load_all_data, set_seed, get_num_joints_for_modality, collate_fn_finetuning, split_train_val, split_train_val_within_each_class
 
 
 def parse_args():
@@ -26,6 +26,7 @@ def parse_args():
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for training")
     parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
     parser.add_argument("--hidden_size", type=int, default=64, help="Hidden size for the model")
+    parser.add_argument("--class_specific_split", action='store_true', help="Use class-specific split for training and validation")
     parser.add_argument("--device", type=str, default='cuda', help="Device to use for training (cuda or cpu)")
     return parser.parse_args()
 
@@ -41,9 +42,11 @@ def main():
     device = args.device
     first_stage = args.first_stage
     second_stage = args.second_stage
+    class_specific_split = args.class_specific_split
 
     print(f"first_stage: {first_stage}")
     print(f"second_stage: {second_stage}")
+    print(f"using class-specific split: {class_specific_split}")
 
     # Set the device
 
@@ -65,12 +68,19 @@ def main():
     left_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_leg")
     right_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_leg")
 
-    # split training and validation sets
-    torso_train, torso_val = split_train_val(torso_modality)
-    left_arm_train, left_arm_val = split_train_val(left_arm_modality)
-    right_arm_train, right_arm_val = split_train_val(right_arm_modality)
-    left_leg_train, left_leg_val = split_train_val(left_leg_modality)
-    right_leg_train, right_leg_val = split_train_val(right_leg_modality)
+    # split training and validation sets (class-unaware)
+    if class_specific_split:
+        torso_train, torso_val = split_train_val_within_each_class(torso_modality)
+        left_arm_train, left_arm_val = split_train_val_within_each_class(left_arm_modality)
+        right_arm_train, right_arm_val = split_train_val_within_each_class(right_arm_modality)
+        left_leg_train, left_leg_val = split_train_val_within_each_class(left_leg_modality)
+        right_leg_train, right_leg_val = split_train_val_within_each_class(right_leg_modality)
+    else:
+        torso_train, torso_val = split_train_val(torso_modality)
+        left_arm_train, left_arm_val = split_train_val(left_arm_modality)
+        right_arm_train, right_arm_val = split_train_val(right_arm_modality)
+        left_leg_train, left_leg_val = split_train_val(left_leg_modality)
+        right_leg_train, right_leg_val = split_train_val(right_leg_modality)
 
     # define modalities
     modalities = [

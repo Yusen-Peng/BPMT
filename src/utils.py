@@ -3,8 +3,12 @@ import numpy as np
 import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import random_split
+from torch.utils.data import Subset
+from sklearn.model_selection import train_test_split
+from collections import defaultdict
 import os
 import glob
+from tqdm import tqdm
 from typing import List, Tuple
 
 
@@ -230,3 +234,38 @@ def split_train_val(dataset, train_ratio=0.8, seed=42):
         generator=generator
     )
     return train_dataset, val_dataset
+
+
+def split_train_val_within_each_class(dataset, train_ratio=0.8, seed=42):
+    """
+        Splits a dataset into train and validation subsets ensuring that each class is represented in both subsets.
+    """
+    label_to_indices = defaultdict(list)
+    # group dataset indices by label
+    for i, (seq, label) in enumerate(dataset):
+        # NOTE: convert label from tensor to int
+        label = int(label)
+        label_to_indices[label].append(i)
+
+    total_train_indices = []
+    total_val_indices = []
+
+    # for each label/class, split the indices
+    for label, indices in label_to_indices.items():
+        # split the indices into train and val
+        train_indices, val_indices = train_test_split(
+            indices, 
+            train_size=train_ratio, 
+            random_state=seed,
+            shuffle=True
+        )
+        total_train_indices.extend(train_indices)
+        total_val_indices.extend(val_indices)
+    
+
+
+    # after splitting, create the datasets
+    train_dataset = Subset(dataset, total_train_indices)
+    val_dataset = Subset(dataset, total_val_indices)
+    return train_dataset, val_dataset
+    

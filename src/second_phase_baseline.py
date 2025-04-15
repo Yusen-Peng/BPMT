@@ -4,6 +4,7 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from utils import collate_fn_pairs
+from tqdm import tqdm
 from first_phase_baseline import BaseT1, mask_keypoints
 
 def load_T1(model_path: str, num_joints: int = 14, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
@@ -149,7 +150,7 @@ def train_T2(
     train_losses = []
     val_losses = []
 
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs)):
         modality_A.eval()
         modality_B.eval()
         cross_attn.train()

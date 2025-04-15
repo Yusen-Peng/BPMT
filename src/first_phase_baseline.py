@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from utils import collate_fn_batch_padding
+from tqdm import tqdm
 
 MASK = False
 POSITIONAL_UPPER_BOUND = 500
@@ -130,7 +131,7 @@ def train_T1(modality_name, train_dataset, val_dataset, model, num_epochs=50, ba
 
     model.to(device)
 
-    for epoch in range(num_epochs):
+    for epoch in tqdm(range(num_epochs)):
         model.train()
         train_loss = 0.0
         for sequences, _ in train_loader:
@@ -187,7 +188,7 @@ def train_T1(modality_name, train_dataset, val_dataset, model, num_epochs=50, ba
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
-        print(f"[Epoch {epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+        tqdm.write(f"[Epoch {epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
 
     plt.figure()
     plt.plot(range(1, num_epochs + 1), train_losses, label='Train Loss')

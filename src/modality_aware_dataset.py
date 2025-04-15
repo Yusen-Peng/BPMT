@@ -55,7 +55,6 @@ class GaitRecognitionModalityAwareDataset(GaitRecognitionDataset):
         return selected_keypoints
 
 
-
 class PairwiseModalityDataset(torch.utils.data.Dataset):
     """
     Combines two aligned single-modality datasets into a dataset that returns (xA, xB) pairs.
