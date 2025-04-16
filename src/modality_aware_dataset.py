@@ -4,7 +4,6 @@ import numpy as np
 from typing import List, Tuple
 import torch
 from base_dataset import GaitRecognitionDataset
-from utils import load_all_data
 
 class GaitRecognitionModalityAwareDataset(GaitRecognitionDataset):
     """

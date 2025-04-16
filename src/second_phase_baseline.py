@@ -163,13 +163,15 @@ def train_T2(
             sequences_A = sequences_A.float().to(device)
             sequences_B = sequences_B.float().to(device)
         
-            # masking
-            maskedA, maskA = mask_keypoints(sequences_A, mask_ratio)
-            maskedB, maskB = mask_keypoints(sequences_B, mask_ratio)
+            # # masking
+            # maskedA, maskA = mask_keypoints(sequences_A, mask_ratio)
+            # maskedB, maskB = mask_keypoints(sequences_B, mask_ratio)
 
             # encoding
-            featsA = modality_A.encode(maskedA)
-            featsB = modality_B.encode(maskedB)
+            # featsA = modality_A.encode(maskedA)
+            # featsB = modality_B.encode(maskedB)
+            featsA = modality_A.encode(sequences_A)
+            featsB = modality_B.encode(sequences_B)
 
             # cross-attention
             A_attends_B = cross_attn(featsA, featsB, featsB)
@@ -183,12 +185,15 @@ def train_T2(
             lossA = criterion(reconsA, sequences_A)
             lossB = criterion(reconsB, sequences_B)
 
-            # again, we only do MSE on masked positions
-            # we also need to broadcast mask to match the shape 
-            maskA = maskA.unsqueeze(-1).expand_as(lossA)
-            maskB = maskB.unsqueeze(-1).expand_as(lossB)
-            lossA = (lossA * maskA).sum() / (maskA.sum() + 1e-8)
-            lossB = (lossB * maskB).sum() / (maskB.sum() + 1e-8)
+            # # again, we only do MSE on masked positions
+            # # we also need to broadcast mask to match the shape 
+            # maskA = maskA.unsqueeze(-1).expand_as(lossA)
+            # maskB = maskB.unsqueeze(-1).expand_as(lossB)
+            # lossA = (lossA * maskA).sum() / (maskA.sum() + 1e-8)
+            # lossB = (lossB * maskB).sum() / (maskB.sum() + 1e-8)
+
+            lossA = lossA.mean()
+            lossB = lossB.mean()
 
             # average loss
             loss = (lossA + lossB) * 0.5
@@ -212,13 +217,15 @@ def train_T2(
                 sequences_B = sequences_B.float().to(device)
 
                 # masking
-                maskedA, maskA = mask_keypoints(sequences_A, mask_ratio)
-                maskedB, maskB = mask_keypoints(sequences_B, mask_ratio)
+                # maskedA, maskA = mask_keypoints(sequences_A, mask_ratio)
+                # maskedB, maskB = mask_keypoints(sequences_B, mask_ratio)
 
                 # encoding
-                featsA = modality_A.encode(maskedA)
-                featsB = modality_B.encode(maskedB)
-
+                # featsA = modality_A.encode(maskedA)
+                # featsB = modality_B.encode(maskedB)
+                featsA = modality_A.encode(sequences_A)
+                featsB = modality_B.encode(sequences_B)
+                
                 # cross-attention
                 A_attends_B = cross_attn(featsA, featsB, featsB)
                 B_attends_A = cross_attn(featsB, featsA, featsA)
@@ -233,10 +240,14 @@ def train_T2(
 
                 # again, we only do MSE on masked positions
                 # we also need to broadcast mask to match the shape 
-                maskA = maskA.unsqueeze(-1).expand_as(lossA)
-                maskB = maskB.unsqueeze(-1).expand_as(lossB)
-                lossA = (lossA * maskA).sum() / (maskA.sum() + 1e-8)
-                lossB = (lossB * maskB).sum() / (maskB.sum() + 1e-8)
+                # maskA = maskA.unsqueeze(-1).expand_as(lossA)
+                # maskB = maskB.unsqueeze(-1).expand_as(lossB)
+                # lossA = (lossA * maskA).sum() / (maskA.sum() + 1e-8)
+                # lossB = (lossB * maskB).sum() / (maskB.sum() + 1e-8)
+
+
+                lossA = lossA.mean()
+                lossB = lossB.mean()
 
                 # average loss
                 loss = (lossA + lossB) * 0.5

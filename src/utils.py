@@ -9,8 +9,7 @@ from collections import defaultdict
 import os
 import glob
 from tqdm import tqdm
-from typing import List, Tuple
-
+from typing import List, Tuple, Dict
 
 def set_seed(seed=42):
     random.seed(seed)
@@ -19,7 +18,6 @@ def set_seed(seed=42):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-
 
 def parse_pose_file(file_path: str, num_joints: int = 17) -> np.ndarray:
     """
@@ -53,7 +51,6 @@ def load_sequence(seq_folder: str, num_joints: int = 17) -> np.ndarray:
             np.ndarray: A 2D array of shape (num_frames, num_joints * 2) containing the 2D keypoints.
     """
     txt_files = glob.glob(os.path.join(seq_folder, '*.txt'))
-    print(f"...Loading {len(txt_files)} files from {seq_folder}")
     if not txt_files:
         return None
     
@@ -83,64 +80,102 @@ def load_sequence(seq_folder: str, num_joints: int = 17) -> np.ndarray:
         frames_2d.append(keypoints_2d.flatten())
     return np.vstack(frames_2d)
 
-
-def collect_subject_sequences(subject_folder: str) -> List[np.ndarray]:
-    """
-        Collects all sequences of 2D keypoints from a given subject folder.
-        Args:
-            subject_folder (str): Path to the subject folder containing sequence files.
-        Returns:
-            List[np.ndarray]: A list of 2D keypoint sequences.
-    """
-    sequences = []
-    for root, _, files in os.walk(subject_folder):
-        if any(f.endswith('.txt') for f in files):
-            seq_data = load_sequence(root)
-            if seq_data is not None and seq_data.shape[0] > 0:
-                sequences.append(seq_data)
-    return sequences
+def collect_all_valid_subjects(parent_folder: str, min_cameras: int = 5) -> Dict[str, Dict[str, List[Tuple[np.ndarray, int]]]]:
 
 
+    # subject ID to label mapping
+    subject_ids = sorted([
+    d for d in os.listdir(parent_folder)
+    if os.path.isdir(os.path.join(parent_folder, d)) and not d.startswith(".")
+    ])
+    subject_id_to_label = {sid: idx for idx, sid in enumerate(subject_ids)}
 
-def load_all_data(root_dir: str) -> Tuple[List[np.ndarray], List[int]]:
-    """
-        Loads all sequences of 2D keypoints and their corresponding labels from the given root directory.
-        Args:
-            root_dir (str): Path to the root directory containing subject folders.
-        Returns:
-            Tuple[List[np.ndarray], List[int]]: A tuple containing a list of 2D keypoint sequences and their corresponding labels.
-    """    
+    # subject id: data
+    valid_subjects = {}
 
-    subject_folders = [f for f in os.listdir(root_dir) if os.path.isdir(os.path.join(root_dir, f))]
-    subject_folders.sort()
+    # iterate over each subject
+    for subject_id in sorted(os.listdir(parent_folder)):        
+        subject_path = os.path.join(parent_folder, subject_id)
+        if not os.path.isdir(subject_path):
+            continue
+        
+        # map subject_id like 0013 to a number
+        label = subject_id_to_label[subject_id]
+
+        # collect sequences + labels for each camera
+        cam_seqs_labels = collect_sequences_by_camera(subject_path, label=label)
+
+        if len(cam_seqs_labels) >= min_cameras:
+            valid_subjects[subject_id] = cam_seqs_labels
+
+    # print the number of valid subjects
+    print(f"Number of valid subjects with at least {min_cameras} cameras: {len(valid_subjects)}")
     
-    all_sequences = []
-    all_labels = []
+    return valid_subjects
 
-    # create a mapping from original subject ID -> new contiguous label
-    unique_subject_ids = sorted(set(subject_folders))
-    subject_id_map = {int(subj): idx for idx, subj in enumerate(unique_subject_ids)}
 
-    for subject_folder in subject_folders:
-        full_path = os.path.join(root_dir, subject_folder)
-        seqs = collect_subject_sequences(full_path)
+def collect_sequences_by_camera(subject_folder: str, label: int) -> Dict[str, List[Tuple[np.ndarray, int]]]:
+    sequences_with_labels_by_cam: Dict[str, List[Tuple[np.ndarray, int]]] = {}
 
-        try:
-            # convert '0003' -> 3
-            subject_id = int(subject_folder)  
-        except ValueError:
-            subject_id = subject_folders.index(subject_folder)
+    for cam_folder in os.listdir(subject_folder):
+        cam_path = os.path.join(subject_folder, cam_folder)
 
-        # remap the subject ID to a contiguous label
-        new_label = subject_id_map[subject_id]  
+        if not os.path.isdir(cam_path):
+            continue
 
-        for s in seqs:
-            all_sequences.append(s)
+        if "_" in cam_folder and cam_folder.startswith("camid"):
+            cam_id = cam_folder.split("_")[0]
 
-            # use the new contiguous label
-            all_labels.append(new_label)
+            for seq_folder in os.listdir(cam_path):
+                seq_path = os.path.join(cam_path, seq_folder)
+                if not os.path.isdir(seq_path):
+                    continue
 
-    return all_sequences, all_labels
+                if any(f.endswith('.txt') for f in os.listdir(seq_path)):
+                    seq_data = load_sequence(seq_path)
+                    if seq_data is not None and seq_data.shape[0] > 0:
+                        if cam_id not in sequences_with_labels_by_cam:
+                            sequences_with_labels_by_cam[cam_id] = []
+                        sequences_with_labels_by_cam[cam_id].append((seq_data, label))
+
+    return sequences_with_labels_by_cam
+
+def aggregate_train_val_data_by_camera_split(
+    valid_subjects: Dict[str, Dict[str, List[Tuple[np.ndarray, int]]]],
+    train_ratio: float = 0.75,
+    seed: int = 42
+) -> Tuple[List[np.ndarray], List[int], List[np.ndarray], List[int]]:
+
+    random.seed(seed)
+    train_sequences = []
+    train_labels = []
+    val_sequences = []
+    val_labels = []
+
+    for subject_id, cam_seqs_with_labels in valid_subjects.items():
+        cam_ids = sorted(cam_seqs_with_labels.keys())
+        num_total = len(cam_ids)
+
+        # determine number of cameras for training
+        num_train = max(1, int(num_total * train_ratio))
+        # also ensure that we have at least one camera for validation
+        num_train = min(num_train, num_total - 1)
+
+        random.shuffle(cam_ids)
+        train_cams = cam_ids[:num_train]
+        val_cams = cam_ids[num_train:]
+
+        # Aggregate sequences
+        for cam in train_cams:
+            for seq_data, label in cam_seqs_with_labels[cam]:
+                train_sequences.append(seq_data)
+                train_labels.append(label)
+        for cam in val_cams:
+            for seq_data, label in cam_seqs_with_labels[cam]:
+                val_sequences.append(seq_data)
+                val_labels.append(label)
+    
+    return train_sequences, train_labels, val_sequences, val_labels
 
 
 def get_num_joints_for_modality(modality_name):
@@ -219,53 +254,16 @@ def collate_fn_finetuning(batch):
     return torso_batch, left_arm_batch, right_arm_batch, left_leg_batch, right_leg_batch, labels
 
 
-def split_train_val(dataset, train_ratio=0.8, seed=42):
-    """
-    Splits a dataset into train and validation subsets.
-    """
-    # fix the seed to make it deterministic
-    generator = torch.Generator().manual_seed(seed)
+if __name__ == "__main__":
+    # Example usage
+    root_dir = "2D_Poses_50/"
+    MIN_CAMERAS = 3
+    valid_subjects = collect_all_valid_subjects(root_dir, min_cameras=3)
 
-    train_size = int(train_ratio * len(dataset))
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = random_split(
-        dataset, 
-        [train_size, val_size],
-        generator=generator
+    print(f"the number of valid subjects: {len(valid_subjects)}")
+
+    train_sequences, train_labels, val_sequences, val_labels = aggregate_train_val_data_by_camera_split(
+        valid_subjects,
+        train_ratio=0.75,
+        seed=42
     )
-    return train_dataset, val_dataset
-
-
-def split_train_val_within_each_class(dataset, train_ratio=0.8, seed=42):
-    """
-        Splits a dataset into train and validation subsets ensuring that each class is represented in both subsets.
-    """
-    label_to_indices = defaultdict(list)
-    # group dataset indices by label
-    for i, (seq, label) in enumerate(dataset):
-        # NOTE: convert label from tensor to int
-        label = int(label)
-        label_to_indices[label].append(i)
-
-    total_train_indices = []
-    total_val_indices = []
-
-    # for each label/class, split the indices
-    for label, indices in label_to_indices.items():
-        # split the indices into train and val
-        train_indices, val_indices = train_test_split(
-            indices, 
-            train_size=train_ratio, 
-            random_state=seed,
-            shuffle=True
-        )
-        total_train_indices.extend(train_indices)
-        total_val_indices.extend(val_indices)
-    
-
-
-    # after splitting, create the datasets
-    train_dataset = Subset(dataset, total_train_indices)
-    val_dataset = Subset(dataset, total_val_indices)
-    return train_dataset, val_dataset
-    

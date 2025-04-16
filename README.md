@@ -38,147 +38,8 @@ Baseline Transformer architecture:
 Camera-View-Aware Data Preprocessing:
 ![alt text](docs/camera-view-aware.png)
 
-<!-- ### Training Loss & Validation Loss - 50 subjects
 
-#### first stage pretraining
 
-![alt text](figures_50/Torso_train_val_loss.png)
-
-![alt text](figures_50/Left_Arm_train_val_loss.png)
-
-![alt text](figures_50/Right_Arm_train_val_loss.png)
-
-![alt text](figures_50/Left_Leg_train_val_loss.png)
-
-![alt text](figures_50/Right_Arm_train_val_loss.png)
-
-#### second stage pretraining
-
-![alt text](figures_50/Torso_Left_Arm_train_val_loss.png)
-
-![alt text](figures_50/Torso_Right_Arm_train_val_loss.png)
-
-![alt text](figures_50/Torso_Left_Leg_train_val_loss.png)
-
-![alt text](figures_50/Torso_Right_Leg_train_val_loss.png)
-
-![alt text](figures_50/Left_Arm_Right_Arm_train_val_loss.png)
-
-![alt text](figures_50/Left_Arm_Left_Leg_train_val_loss.png)
-
-![alt text](figures_50/Left_Arm_Right_Leg_train_val_loss.png)
-
-![alt text](figures_50/Right_Arm_Left_Leg_train_val_loss.png)
-
-![alt text](figures_50/Right_Arm_Right_Leg_train_val_loss.png)
-
-![alt text](figures_50/Left_Leg_Right_Leg_train_val_loss.png)
-
-
-#### finetuning
-
-Right now I am facing overfitting issues:
-
-![alt text](figures_50/finetuning_train_val_loss.png) -->
-
-
-<!-- ### Training Loss & Validation Loss - 300 subjects
-
-#### first stage pretraining
-
-![alt text](figures_300/Torso_train_val_loss.png)
-
-![alt text](figures_300/Left_Arm_train_val_loss.png)
-
-![alt text](figures_300/Right_Arm_train_val_loss.png)
-
-![alt text](figures_300/Left_Leg_train_val_loss.png)
-
-![alt text](figures_300/Right_Arm_train_val_loss.png)
-
-#### second stage pretraining
-
-![alt text](figures_300/Torso_Left_Arm_train_val_loss.png)
-
-![alt text](figures_300/Torso_Right_Arm_train_val_loss.png)
-
-![alt text](figures_300/Torso_Left_Leg_train_val_loss.png)
-
-![alt text](figures_300/Torso_Right_Leg_train_val_loss.png)
-
-![alt text](figures_300/Left_Arm_Right_Arm_train_val_loss.png)
-
-![alt text](figures_300/Left_Arm_Left_Leg_train_val_loss.png)
-
-![alt text](figures_300/Left_Arm_Right_Leg_train_val_loss.png)
-
-![alt text](figures_300/Right_Arm_Left_Leg_train_val_loss.png)
-
-![alt text](figures_300/Right_Arm_Right_Leg_train_val_loss.png)
-
-![alt text](figures_300/Left_Leg_Right_Leg_train_val_loss.png)
-
-
-#### finetuning
-
-Right now I am facing the same overfitting issues:
-
-![alt text](figures_300/finetuning_train_val_loss.png)
-
-
-### Training Loss & Validation Loss - 50 subjects with class-specific split
-
-#### first stage pretraining
-
-![alt text](figures_50_class_specific/Torso_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Left_Arm_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Right_Arm_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Left_Leg_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Right_Arm_train_val_loss.png)
-
-#### second stage pretraining
-
-![alt text](figures_50_class_specific/Torso_Left_Arm_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Torso_Right_Arm_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Torso_Left_Leg_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Torso_Right_Leg_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Left_Arm_Right_Arm_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Left_Arm_Left_Leg_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Left_Arm_Right_Leg_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Right_Arm_Left_Leg_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Right_Arm_Right_Leg_train_val_loss.png)
-
-![alt text](figures_50_class_specific/Left_Leg_Right_Leg_train_val_loss.png)
-
-
-#### finetuning
-
-Right now I am facing the same overfitting issues:
-
-![alt text](figures_50_class_specific/finetuning_train_val_loss.png) -->
-
-
-## Current issue: overfitting
-
-❌ not seeing enough data (300 subjects still small)?
-
-❌ no early stopping?
-
-❌ no regularization (dropout, weight decay)?
-
-❌ improper learning rate (and scheduler)?
 
 
 ## What can be the next step?
@@ -205,3 +66,15 @@ BPMT_env - stay tuned!
     2. from these people, split train/val based on views/cameras (like 6 cameras for training, 2 cameras for validation)
 
 3. alternative project: wifi-signal-based human tracking
+
+
+
+## Current issue: overfitting
+
+❌ not seeing enough data (300 subjects still small)?
+
+❌ no early stopping?
+
+❌ no regularization (dropout, weight decay)?
+
+❌ improper learning rate (and scheduler)?

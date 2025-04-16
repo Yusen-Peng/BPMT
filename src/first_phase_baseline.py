@@ -139,30 +139,32 @@ def train_T1(modality_name, train_dataset, val_dataset, model, num_epochs=50, ba
             sequences = sequences.float().to(device)
 
             # perform masking
-            masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
+            #masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
 
             # forward pass
-            recons = model(masked_inputs)
+            #recons = model(masked_inputs)
+            recons = model(sequences)
 
             # compute the reconstruction loss
-            loss_matrix = criterion(recons, sequences)
+            loss = criterion(recons, sequences)
+            loss_mean = loss.mean()
 
             # we only do MSE on masked positions
             # we also need to broadcast mask to match the shape 
-            mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
-            masked_loss = loss_matrix * mask_broadcasted
+            # mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
+            # masked_loss = loss_matrix * mask_broadcasted
 
             # compute the average loss per masked position
-            num_masked = mask_broadcasted.sum()
-            loss = masked_loss.sum() / (num_masked + 1e-8)
+            #num_masked = mask_broadcasted.sum()
+            #loss = masked_loss.sum() / (num_masked + 1e-8)
 
             # backpropagation
             optimizer.zero_grad()
-            loss.backward()
+            loss_mean.backward()
             optimizer.step()
 
             # accumulate loss
-            train_loss += loss.item() * sequences.size(0)
+            train_loss += loss_mean.item() * sequences.size(0)
 
         # compute the average training loss
         train_loss /= len(train_dataset) 
@@ -173,14 +175,17 @@ def train_T1(modality_name, train_dataset, val_dataset, model, num_epochs=50, ba
         with torch.no_grad():
             for sequences, _ in val_loader:
                 sequences = sequences.float().to(device)
-                masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
-                recons = model(masked_inputs)
-                loss_matrix = criterion(recons, sequences)
-                mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
-                masked_loss = loss_matrix * mask_broadcasted
-                num_masked = mask_broadcasted.sum()
-                loss = masked_loss.sum() / (num_masked + 1e-8)
-                val_loss += loss.item() * sequences.size(0)
+                #masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
+                #recons = model(masked_inputs)
+                recons = model(sequences)
+
+                loss = criterion(recons, sequences)
+                loss_mean = loss.mean()
+                #mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
+                #masked_loss = loss_matrix * mask_broadcasted
+                #num_masked = mask_broadcasted.sum()
+                #loss = masked_loss.sum() / (num_masked + 1e-8)
+                val_loss += loss_mean.item() * sequences.size(0)
 
         val_loss /= len(val_dataset)
 

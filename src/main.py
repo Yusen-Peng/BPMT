@@ -15,7 +15,7 @@ from second_phase_baseline import BaseT2, train_T2, load_T1
 from finetuning import GaitRecognitionHead, finetuning, load_T2
 
 
-from utils import load_all_data, set_seed, get_num_joints_for_modality, collate_fn_finetuning, split_train_val, split_train_val_within_each_class
+from utils import set_seed, get_num_joints_for_modality, collate_fn_finetuning, aggregate_train_val_data_by_camera_split, collect_all_valid_subjects
 
 
 def parse_args():
@@ -36,6 +36,7 @@ def main():
 
     args = parse_args()
     root_dir = args.root_dir
+    # get the number of classes from the root_dir by taking the trailing number
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     hidden_size = args.hidden_size
@@ -56,31 +57,47 @@ def main():
     print("=" * 50)
     print(f"[INFO] Starting Gait3D dataset processing on {device}...")
     print("=" * 50)
-    sequences, labels = load_all_data(root_dir)
 
-    # get the number of classes/subjects
-    num_classes = len(set(labels))
+    MIN_CAMERAS = 3
+
+    # load the dataset
+    valid_subjects = collect_all_valid_subjects(root_dir, min_cameras=MIN_CAMERAS)
+
+    # get the number of classes
+    num_classes = len(valid_subjects)
     print(f"[INFO] Number of classes: {num_classes}")
+    print("=" * 100)
 
-    torso_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "torso")
-    left_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_arm")
-    right_arm_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_arm")
-    left_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "left_leg")
-    right_leg_modality = GaitRecognitionModalityAwareDataset(sequences, labels, "right_leg")
 
-    # split training and validation sets (class-unaware)
-    if class_specific_split:
-        torso_train, torso_val = split_train_val_within_each_class(torso_modality)
-        left_arm_train, left_arm_val = split_train_val_within_each_class(left_arm_modality)
-        right_arm_train, right_arm_val = split_train_val_within_each_class(right_arm_modality)
-        left_leg_train, left_leg_val = split_train_val_within_each_class(left_leg_modality)
-        right_leg_train, right_leg_val = split_train_val_within_each_class(right_leg_modality)
-    else:
-        torso_train, torso_val = split_train_val(torso_modality)
-        left_arm_train, left_arm_val = split_train_val(left_arm_modality)
-        right_arm_train, right_arm_val = split_train_val(right_arm_modality)
-        left_leg_train, left_leg_val = split_train_val(left_leg_modality)
-        right_leg_train, right_leg_val = split_train_val(right_leg_modality)
+    # split the dataset into training and validation sets
+    train_sequences, train_labels, val_sequences, val_labels = aggregate_train_val_data_by_camera_split(
+        valid_subjects,
+        train_ratio=0.75,
+        seed=42
+    )
+
+
+    # label remapping
+    unique_train_labels = sorted(set(train_labels))
+    label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(unique_train_labels)}
+    train_labels = [label2new[old_lbl] for old_lbl in train_labels]
+    
+    uniqueu_val_labels = sorted(set(val_labels))
+    label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(uniqueu_val_labels)}
+    val_labels = [label2new[old_lbl] for old_lbl in val_labels]
+
+
+    # dataset creation
+    torso_train = GaitRecognitionModalityAwareDataset(train_sequences, train_labels, "torso")
+    torso_val = GaitRecognitionModalityAwareDataset(val_sequences, val_labels, "torso")
+    left_arm_train = GaitRecognitionModalityAwareDataset(train_sequences, train_labels, "left_arm")
+    left_arm_val = GaitRecognitionModalityAwareDataset(val_sequences, val_labels, "left_arm")
+    right_arm_train = GaitRecognitionModalityAwareDataset(train_sequences, train_labels, "right_arm")
+    right_arm_val = GaitRecognitionModalityAwareDataset(val_sequences, val_labels, "right_arm")
+    left_leg_train = GaitRecognitionModalityAwareDataset(train_sequences, train_labels, "left_leg")
+    left_leg_val = GaitRecognitionModalityAwareDataset(val_sequences, val_labels, "left_leg")
+    right_leg_train = GaitRecognitionModalityAwareDataset(train_sequences, train_labels, "right_leg")
+    right_leg_val = GaitRecognitionModalityAwareDataset(val_sequences, val_labels, "right_leg")
 
     # define modalities
     modalities = [
