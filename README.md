@@ -39,9 +39,6 @@ Camera-View-Aware Data Preprocessing:
 ![alt text](docs/camera-view-aware.png)
 
 
-
-
-
 ## What can be the next step?
 
 integrate IIP-Transformer and compare with the baseline!
@@ -69,4 +66,19 @@ BPMT_env - stay tuned!
 
 ❌ hyperparameter tuning - cosine scheduler?
 
-❌ no early stopping
+❌ no early stopping (save the best checkpoint needed)
+
+
+## Existing Gait recognition evaluation results 
+
+The following papers give a nice overview of POSE-ONLY gait recognition
+"GaitPT: Skeletons Are All You Need For Gait Recognition"
+"SkeletonGait: Gait Recognition Using Skeleton Maps"
+"GaitRef: Gait Recognition with Refined Sequential Skeletons"
+
+
+
+TODO: gather some comprehensive benchmark results on Gait3D
+
+For example, in GaitPT, multiple evaluation metrics are used: rank-1 accuracy, rank-5 accuracy. it shows the following results:
+![alt text](docs/existing_results.png)
