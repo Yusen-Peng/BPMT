@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from utils import collate_fn_pairs
 from tqdm import tqdm
+from typing import Tuple
 from first_phase_baseline import BaseT1, mask_keypoints
 
 def load_T1(model_path: str, num_joints: int = 14, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
@@ -105,9 +106,9 @@ def train_T2(
             mask_ratio: float = 0.15,
             freeze_T1: bool = True,
             device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
-        ):
+        ) -> Tuple[BaseT2, CrossAttention]:
     """
-        second-stage masked pretraining using pretrained T1 models for two modalities.
+        second-stage pretraining using pretrained T1 models for two modalities.
 
     """
 
@@ -270,4 +271,4 @@ def train_T2(
     plt.title(f'{modality_name_A} ~ {modality_name_B} - Train and Val Loss')
     plt.savefig(f'figures/{modality_name_A}_{modality_name_B}_train_val_loss.png')
 
-    return model_T2
+    return model_T2, cross_attn

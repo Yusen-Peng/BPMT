@@ -108,3 +108,40 @@ class finetuningDataset(torch.utils.data.Dataset):
         assert label1 == label2 == label3 == label4 == label5, "Mismatched labels across modalities"
 
         return torso_seq, la_seq, ra_seq, ll_seq, rl_seq, label1
+
+class InferenceDataset(torch.utils.data.Dataset):
+    """
+        Dataset for Inference that returns all five modalities in parallel,
+        aligned with their shared gait ID label.
+    """
+
+    def __init__(
+        self,
+        torso_dataset,
+        left_arm_dataset,
+        right_arm_dataset,
+        left_leg_dataset,
+        right_leg_dataset
+    ):
+        # sanity check
+        assert len(torso_dataset) == len(left_arm_dataset) == len(right_arm_dataset) == len(left_leg_dataset) == len(right_leg_dataset), "All modality datasets must be the same length"
+        self.torso_dataset = torso_dataset
+        self.left_arm_dataset = left_arm_dataset
+        self.right_arm_dataset = right_arm_dataset
+        self.left_leg_dataset = left_leg_dataset
+        self.right_leg_dataset = right_leg_dataset
+
+    def __len__(self):
+        return len(self.torso_dataset)  # they’re all the same length
+
+    def __getitem__(self, idx):
+        torso_seq, label1 = self.torso_dataset[idx]
+        la_seq, label2 = self.left_arm_dataset[idx]
+        ra_seq, label3 = self.right_arm_dataset[idx]
+        ll_seq, label4 = self.left_leg_dataset[idx]
+        rl_seq, label5 = self.right_leg_dataset[idx]
+
+        # sanity check
+        assert label1 == label2 == label3 == label4 == label5, "Mismatched labels across modalities"
+
+        return torso_seq, la_seq, ra_seq, ll_seq, rl_seq, label1

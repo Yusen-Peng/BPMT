@@ -12,7 +12,7 @@ from torch import Tensor
 from torch.nn import functional as F
 from first_phase_baseline import BaseT1, train_T1
 from second_phase_baseline import BaseT2, train_T2, load_T1
-from finetuning import GaitRecognitionHead, finetuning, load_T2
+from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
 
 from utils import set_seed, get_num_joints_for_modality, collate_fn_finetuning, aggregate_train_val_data_by_camera_split, collect_all_valid_subjects
@@ -77,7 +77,7 @@ def main():
     )
 
 
-    # label remapping
+    # label remapping (IMPORTANT ALL THE TIME!)
     unique_train_labels = sorted(set(train_labels))
     label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(unique_train_labels)}
     train_labels = [label2new[old_lbl] for old_lbl in train_labels]
@@ -187,7 +187,7 @@ def main():
             num_joints_A = get_num_joints_for_modality(modA_name)
             num_joints_B = get_num_joints_for_modality(modB_name)
 
-            model_T2 = train_T2(
+            model_T2, cross_attn = train_T2(
                 modality_name_A=modA_name,
                 modality_name_B=modB_name,
                 train_pairwise_dataset=train_pairwise_dataset,
@@ -210,9 +210,14 @@ def main():
             save_path = f"checkpoints/{modA_name}_{modB_name}_T2.pt"
             torch.save(model_T2.state_dict(), save_path)
 
+            # also save each cross-attentions
+            cross_attn_save_path = f"checkpoints/{modA_name}_{modB_name}_cross_attn.pt"
+            torch.save(cross_attn.state_dict(), cross_attn_save_path)
+
         print("Aha! All modality pairs trained successfully!")
         print("=" * 100)
 
+    
     """
         finetuning on gait recognition.
     """
@@ -373,6 +378,32 @@ def main():
         device=device
     )
 
+    # also load the cross-attention models before T2 and construct the map
+    cross_attn_t_la = load_cross_attn(path="checkpoints/Torso_Left_Arm_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_t_ra = load_cross_attn(path="checkpoints/Torso_Right_Arm_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_t_ll = load_cross_attn(path="checkpoints/Torso_Left_Leg_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_t_rl = load_cross_attn(path="checkpoints/Torso_Right_Leg_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_la_ra = load_cross_attn(path="checkpoints/Left_Arm_Right_Arm_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_la_ll = load_cross_attn(path="checkpoints/Left_Arm_Left_Leg_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_la_rl = load_cross_attn(path="checkpoints/Left_Arm_Right_Leg_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_ra_ll = load_cross_attn(path="checkpoints/Right_Arm_Left_Leg_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_ra_rl = load_cross_attn(path="checkpoints/Right_Arm_Right_Leg_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+    cross_attn_ll_rl = load_cross_attn(path="checkpoints/Left_Leg_Right_Leg_cross_attn.pt", d_model=hidden_size, nhead=4, device=device)
+
+    # cross-attention modules before T2
+    cross_attn_modules_before_T2 = {
+        'torso_left_arm': cross_attn_t_la,
+        'torso_right_arm': cross_attn_t_ra,
+        'torso_left_leg': cross_attn_t_ll,
+        'torso_right_leg': cross_attn_t_rl,
+        'left_arm_right_arm': cross_attn_la_ra,
+        'left_arm_left_leg': cross_attn_la_ll,
+        'left_arm_right_leg': cross_attn_la_rl,
+        'right_arm_left_leg': cross_attn_ra_ll,
+        'right_arm_right_leg': cross_attn_ra_rl,
+        'left_leg_right_leg': cross_attn_ll_rl
+    }
+
     t1_map = {
         'Torso': t1_torso,
         'Left_Arm': t1_left_arm,
@@ -430,15 +461,15 @@ def main():
         collate_fn=collate_fn_finetuning
     )
 
+    gait_head_template = GaitRecognitionHead(input_dim=hidden_size * 5, num_classes=num_classes).to(device)
 
-    gait_head = GaitRecognitionHead(input_dim=hidden_size * 5, num_classes=num_classes).to(device)
-
-    finetuning(
+    gait_head, cross_attn_modules_after_T2 = finetuning(
         train_loader=train_finetuning_dataloader,
         val_loader=val_finetuning_dataloader,
         t1_map=t1_map,
         t2_map=t2_map,
-        gait_head=gait_head,
+        cross_attn_modules_before_T2=cross_attn_modules_before_T2,
+        gait_head=gait_head_template,
         d_model=hidden_size,
         num_epochs=num_epochs,
         freeze=True,
@@ -448,7 +479,11 @@ def main():
     print("Aha! Finetuning completed successfully!")
 
 
-
+    # save the finetuned model
+    torch.save(gait_head.state_dict(), "checkpoints/gait_recognition_finetuned.pt")
+    # save the cross-attention modules after T2
+    for key, value in cross_attn_modules_after_T2.items():
+        torch.save(value.state_dict(), f"checkpoints/{key}_cross_attn_finetuned.pt")
 
 if __name__ == "__main__":
     main()

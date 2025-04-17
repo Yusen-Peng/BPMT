@@ -8,6 +8,17 @@ from first_phase_baseline import BaseT1, mask_keypoints
 from second_phase_baseline import BaseT2, CrossAttention, load_T1
 
 
+def load_cross_attn(path: str,
+                    d_model: int = 128,
+                    nhead: int = 4,
+                    device: str = "cuda") -> CrossAttention:
+    """
+        loads a CrossAttention model from a checkpoint
+    """
+    layer = CrossAttention(d_model=d_model, nhead=nhead)
+    layer.load_state_dict(torch.load(path, map_location="cpu"))
+    return layer.to(device)
+
 def load_T2(model_path: str, out_dim_A: int, out_dim_B: int, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
                 device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT2:
     """
@@ -152,6 +163,7 @@ def finetuning(
     val_loader: DataLoader,
     t1_map: dict[str, BaseT1],
     t2_map: dict[str, BaseT2],
+    cross_attn_modules_before_T2: dict[str, CrossAttention],
     gait_head: GaitRecognitionHead,
     d_model=128,
     nhead=4,
@@ -160,21 +172,6 @@ def finetuning(
     device='cuda'
 ):
     
-    # cross-attention modules before T2
-    cross_attn_modules_before_T2 = {
-        'torso_left_arm': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'torso_right_arm': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'torso_left_leg': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'torso_right_leg': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'left_arm_right_arm': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'left_arm_left_leg': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'left_arm_right_leg': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'right_arm_left_leg': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'right_arm_right_leg': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-        'left_leg_right_leg': CrossAttention(d_model=d_model, nhead=nhead).to(device),
-    }
-
-
     # cross-attention modeles after T2
     cross_attn_modules_after_T2 = {
         'torso': CrossAttention(d_model=d_model, nhead=nhead).to(device),
@@ -218,8 +215,10 @@ def finetuning(
     train_losses = []
     val_losses = []
 
-
-    optimizer = optim.Adam(params, lr=1e-4)
+    # IMPORTANT: use a small learning rate for finetuning
+    # this is because the model is already trained and we want to finetune it
+    # use weight decay for regularization
+    optimizer = optim.Adam(params, lr=1e-5, weight_decay=1e-4)
     
     for epoch in range(num_epochs):
         train_loss = 0.0
@@ -465,3 +464,6 @@ def finetuning(
 
 
     print("Finetuning complete!")
+
+    # return all necessary model components
+    return gait_head, cross_attn_modules_after_T2

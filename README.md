@@ -57,24 +57,16 @@ My Other ideas (from my past time series experience + NLP class):
 
 BPMT_env - stay tuned!
 
-
-## Meeting notes 04/15
-
-1. don't do masked pretraining - just do regular encoding
-2. do "view-based" validation instead of random or class-specific validation
-    1. only select people with enough number of views/cameras (1000 in total)
-    2. from these people, split train/val based on views/cameras (like 6 cameras for training, 2 cameras for validation)
-
-3. alternative project: wifi-signal-based human tracking
-
-
-
 ## Current issue: overfitting
 
-❌ not seeing enough data (300 subjects still small)?
+✅ fixing the bug of not saving pretrained cross-attention module properly
 
-❌ no early stopping?
+✅ severe underfitting during pretraining & finetuning
 
-❌ no regularization (dropout, weight decay)?
+✅ hyperparameter tuning - smaller learning rate
 
-❌ improper learning rate (and scheduler)?
+✅ hyperparameter tuning - weight decay
+
+❌ hyperparameter tuning - cosine scheduler?
+
+❌ no early stopping
