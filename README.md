@@ -82,3 +82,16 @@ TODO: gather some comprehensive benchmark results on Gait3D
 
 For example, in GaitPT, multiple evaluation metrics are used: rank-1 accuracy, rank-5 accuracy. it shows the following results:
 ![alt text](docs/existing_results.png)
+
+
+
+
+
+
+
+## Our experiment tracker
+
+| #subject scanned | #subject actual | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | R1-acc | R5-acc |
+|------------------|------------------|------------|--------|-------------|-------------|--------|-------------|----------------|--------------------|--------------|--------------|
+| 50 | 27 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 26% | TBD |             
+| 300 | 109 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | TBD | TBD |
