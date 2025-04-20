@@ -91,7 +91,10 @@ For example, in GaitPT, multiple evaluation metrics are used: rank-1 accuracy, r
 
 ## Our experiment tracker
 
+Note that now the R1-acc and R5-acc are both based on the validation set we pick on our own.
+
 | #subject scanned | #subject actual | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | R1-acc | R5-acc |
 |------------------|------------------|------------|--------|-------------|-------------|--------|-------------|----------------|--------------------|--------------|--------------|
 | 50 | 27 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 26% | TBD |             
-| 300 | 109 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | TBD | TBD |
+| 300 | 109 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 400 | 6% | TBD |
+| 300 | 109 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 1000 | 7.35% | TBD |

@@ -218,7 +218,8 @@ def finetuning(
     # IMPORTANT: use a small learning rate for finetuning
     # this is because the model is already trained and we want to finetune it
     # use weight decay for regularization
-    optimizer = optim.Adam(params, lr=1e-5, weight_decay=1e-4)
+    # FIXME: tune the learning rate here ALWAYS
+    optimizer = optim.Adam(params, lr=1e-6, weight_decay=1e-4)
     
     for epoch in range(num_epochs):
         train_loss = 0.0
