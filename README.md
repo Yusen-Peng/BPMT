@@ -97,3 +97,8 @@ IMPORTANT NOTE: now the R1-acc and R5-acc are both based on the validation set w
 | 50 | 27 | no | 1e-4 | 1000 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 25.9% | TBD |             
 | 300 | 109 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 400 | 6% | TBD |
 | 300 | 109 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 1000 | 7.35% | TBD |
+
+
+## Q&A section
+
+1. I think I need to change the downstream training objective: classification cross entropy loss -> metric learning triplet loss (two-stage pretraining is supposed to be fine since it's basically doing reconstruction and learning body encodings); I also have to **manually** construct the triplet dataset, which is also a non-trivial task.
