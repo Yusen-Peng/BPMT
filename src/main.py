@@ -472,7 +472,7 @@ def main():
         gait_head=gait_head_template,
         d_model=hidden_size,
         num_epochs=num_epochs,
-        freeze=True,
+        freeze=False,   # change this to False if we want to finetune the T1 and T2 models
         device=device
     )
 

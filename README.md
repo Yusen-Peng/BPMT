@@ -6,15 +6,15 @@ Although a massive number of gait recognition models have been proposed, and mul
 was originally designed to learn multi-modal representations to perform multiple tasks. In this work, we attempt to address the following problem: can we treat different human parts as different modalities to integrate body-part-aware transformers into the two-phase masked pretraining framework proposed in OmniVec2?
 
 
-## BPMT pipeline
+<!-- ## BPMT pipeline
 
-![alt text](docs/BPMT_pipeline.png)
+![alt text](docs/BPMT_pipeline.png) -->
 
 
 ## BPMT architecture
 
-Our BPMT architecture design:
-![alt text](docs/BPMT.png)
+<!-- Our BPMT architecture design:
+![alt text](docs/BPMT.png) -->
 
 First-stage pretraining:
 ![alt text](docs/first_stage.png)
@@ -24,7 +24,6 @@ Second-stage pretraining:
 
 Finetuning:
 ![alt text](docs/finetuning.png)
-
 
 ## Baseline Transformer
 
@@ -69,32 +68,32 @@ BPMT_env - stay tuned!
 ❌ no early stopping (save the best checkpoint needed)
 
 
+## Gait3D dataset
+
+they have 3000/1000 train/test split, where 1000 people in the test set are **brand new people**. I think I might have misunderstood the nature of gait recognition and used the wrong training **objective** - it's supposed to be "open-set instance retrieval setting" from Gait3D paper:
+
+*"To facilitate the research, we split the 4,000 IDs of the Gait3D dataset into the train/test subsets with 3,000/1,000 IDs, respectively. For the test set, we further randomly select one sequence from each ID to build the query set with 1,000 sequences, while the rest of the sequences become the gallery set with 5,369 sequences. Our evaluation protocol is based on the open-set instance retrieval setting like existing gait recognition datasets [17] and the person ReID task [60]. Given a query sequence, we measure its similarity between all sequences in the gallery set. Then a ranking list of the gallery set is returned by the descending order of the similarities. We report the average Rank-1 and Rank-5 identification rates over all query sequences. We also adopt the mean Average Precision (mAP) and mean Inverse Negative Penalty (mINP) [55] which consider the recall of multiple instances and hard samples."*
+
+
 ## Existing Gait recognition evaluation results 
 
 The following papers give a nice overview of POSE-ONLY gait recognition
-"GaitPT: Skeletons Are All You Need For Gait Recognition"
-"SkeletonGait: Gait Recognition Using Skeleton Maps"
-"GaitRef: Gait Recognition with Refined Sequential Skeletons"
 
+"GaitPT: Skeletons Are All You Need For Gait Recognition" (CVPR'23): they use a very complicated four-stage training (joint, limb, limb group, body), which is (unfortuately) very similar to our design. GaitPT uses three datasets: CASIA-B, GREW, Gait3D for evaluation. In GaitPT, multiple evaluation metrics are used: rank-1 accuracy, rank-5 accuracy. it shows the following results for Gait 3D specifically:
 
+![alt text](docs/results_gaitPT.png)
 
-TODO: gather some comprehensive benchmark results on Gait3D
+similar results in "SkeletonGait: Gait Recognition Using Skeleton Maps" (CVPR'23):
 
-For example, in GaitPT, multiple evaluation metrics are used: rank-1 accuracy, rank-5 accuracy. it shows the following results:
-![alt text](docs/existing_results.png)
-
-
-
-
-
-
+![alt text](docs/results_skeletonmap.png)
 
 ## Our experiment tracker
 
-Note that now the R1-acc and R5-acc are both based on the validation set we pick on our own.
+IMPORTANT NOTE: now the R1-acc and R5-acc are both based on the validation set we pick on our own.
 
 | #subject scanned | #subject actual | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | R1-acc | R5-acc |
 |------------------|------------------|------------|--------|-------------|-------------|--------|-------------|----------------|--------------------|--------------|--------------|
-| 50 | 27 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 26% | TBD |             
+| 50 | 27 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 26.6% | TBD |
+| 50 | 27 | no | 1e-4 | 1000 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 25.9% | TBD |             
 | 300 | 109 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 400 | 6% | TBD |
 | 300 | 109 | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 1000 | 7.35% | TBD |
