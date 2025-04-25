@@ -183,7 +183,7 @@ def main():
         nhead=4,
         num_layers=2,
         num_epochs=num_epochs,
-        lr=1e-4,
+        lr=1e-5,
         freezeT1=freezeT1,
         device=device
     )

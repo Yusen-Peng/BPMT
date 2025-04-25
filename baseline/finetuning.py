@@ -91,7 +91,7 @@ def finetuning(
     nhead: int = 4,
     num_layers: int = 2,
     num_epochs: int = 200,
-    lr: float = 1e-6,
+    lr: float = 1e-5,
     freezeT1: bool = True,
     device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
 ) -> Tuple[BaseT1, nn.Module, nn.Module]:
