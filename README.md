@@ -20,8 +20,8 @@ Cascading Finetuning:
 
 | #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------------|------------|------------|--------|-------------|-------------|--------|------------|
-| 50 | 27 | linear | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | TBD |
-
+| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-6, wd=1e-4 | 20 | 22.30% | 
+| 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-5 | 20 | 20.86% |
 
 
 ## BPMT 1.0 - Design
