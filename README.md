@@ -5,18 +5,18 @@
 Camera-View-Aware Data Preprocessing:
 ![alt text](docs/camera-view-aware.png)
 
-## Baseline Design
+## Baseline Design (close-set classification)
 
 Baseline Transformer (T1 and T2):
 ![alt text](docs/baseline_transformer.png)
 
 Pretraining:
-![alt text](docs/baseline_pretraining.png)
+![alt text](docs/baseline_pretraining_%20classification.png)
 
 Cascading Finetuning:
-![alt text](docs/baseline_finetuning.png)
+![alt text](docs/baseline_finetuning_classification.png)
 
-## Baseline - Experiment
+## Baseline - Experiment (close-set classification)
 
 | #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------------|------------|------------|--------|-------------|-------------|--------|------------|
@@ -24,7 +24,26 @@ Cascading Finetuning:
 | 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 15.83% |
 
 
-## BPMT 1.0 - Design
+## Baseline - Design (open-set retrieval)
+
+Baseline Transformer (T1 and T2):
+![alt text](docs/baseline_transformer.png)
+
+Pretraining:
+![alt text](docs/baseline_pretraining_retrieval.png)
+
+Finetuning:
+![alt text](docs/baseline_finetuning_retrieval.png)
+
+
+## Baseline - Experiment (open-set retrieval)
+| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | R1-acc | 
+|------------------|------------------|------------|------------|--------|-------------|-------------|--------|------------|
+| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | TBD | 
+
+
+
+## BPMT 1.0 - Design (close-set classification)
 
 BPMT 1.0 Transformer and Baseline Transformer are the same.
 
@@ -35,10 +54,10 @@ Second-stage pretraining:
 ![alt text](docs/second_stage.png)
 
 Finetuning:
-![alt text](docs/finetuning.png)
+![alt text](docs/finetuning_classification.png)
 
 
-## BPMT 1.0 - Experiment
+## BPMT 1.0 - Experiment (close-set classification)
 
 | #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | clf-acc | 
 |------------------|------------------|------------|------------|--------|-------------|-------------|--------|-------------|----------------|--------------------|--------------|
@@ -46,6 +65,13 @@ Finetuning:
 | 50 | 27 | linear | yes | 1e-4 | 1000 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 25.9% |           
 | 300 | 109 | linear | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 400 | 6% |
 | 300 | 109 | linear | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 1000 | 7.35% | 
+
+
+## BPMT 1.0 Design (open-set retrieval)
+
+## BPMT 1.0 Experiment (open-set retrieval)
+| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | R1-acc | 
+|------------------|------------------|------------|------------|--------|-------------|-------------|--------|-------------|----------------|--------------------|--------------|
 
 
 ## Conda environment setup
