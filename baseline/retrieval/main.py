@@ -13,7 +13,6 @@ from torch.nn import functional as F
 from pretraining import train_T1, BaseT1
 from finetuning import load_T1, finetuning
 
-
 from utils import set_seed, get_num_joints_for_modality, collate_fn_finetuning, aggregate_train_val_data_by_camera_split, collect_all_valid_subjects
 
 def parse_args():
@@ -206,7 +205,7 @@ def main():
         collate_fn=collate_fn_finetuning
     )
 
-    freezeT1 = True
+    freezeT1 = False
 
     trained_T2, train_cross_attn = finetuning(
         train_loader=train_finetuning_dataloader,

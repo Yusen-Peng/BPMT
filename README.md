@@ -16,15 +16,11 @@ Pretraining:
 Cascading Finetuning:
 ![alt text](docs/baseline_finetuning_classification.png)
 
-## Baseline - Experiment (close-set classification)
-
-| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
-|------------------|------------------|------------|------------|--------|-------------|-------------|--------|------------|
-| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 21.58% | 
-| 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 15.83% |
-
-
 ## Baseline - Design (open-set retrieval)
+
+The definition of "open-set retrieval" from Gait3D paper:
+
+*"Given a query sequence, we measure its similarity between all sequences in the gallery set. Then a ranking list of the gallery set is returned by the descending order of the similarities. We report the average Rank-1 and Rank-5 identification rates over all query sequences. We also adopt the mean Average Precision (mAP) and mean Inverse Negative Penalty (mINP) [55] which consider the recall of multiple instances and hard samples."*
 
 Baseline Transformer (T1 and T2):
 ![alt text](docs/baseline_transformer.png)
@@ -34,14 +30,6 @@ Pretraining:
 
 Finetuning:
 ![alt text](docs/baseline_finetuning_retrieval.png)
-
-
-## Baseline - Experiment (open-set retrieval)
-| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | R1-acc | 
-|------------------|------------------|------------|------------|--------|-------------|-------------|--------|------------|
-| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | TBD | 
-
-
 
 ## BPMT 1.0 - Design (close-set classification)
 
@@ -56,6 +44,22 @@ Second-stage pretraining:
 Finetuning:
 ![alt text](docs/finetuning_classification.png)
 
+## BPMT 1.0 Design (open-set retrieval)
+
+TBD
+
+## Baseline - Experiment (close-set classification)
+
+| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
+|------------------|------------------|------------|------------|--------|-------------|-------------|--------|------------|
+| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 21.58% | 
+| 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 15.83% |
+
+## Baseline - Experiment (open-set retrieval)
+| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | R1-acc (seen people) | 
+|------------------|------------------|------------|------------|--------|-------------|-------------|--------|------------|
+| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 30.94% |
+| 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 28.06% | 
 
 ## BPMT 1.0 - Experiment (close-set classification)
 
@@ -66,39 +70,14 @@ Finetuning:
 | 300 | 109 | linear | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 400 | 6% |
 | 300 | 109 | linear | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 1000 | 7.35% | 
 
-
-## BPMT 1.0 Design (open-set retrieval)
-
 ## BPMT 1.0 Experiment (open-set retrieval)
-| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | R1-acc | 
+| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | R1-acc (seen people) | 
 |------------------|------------------|------------|------------|--------|-------------|-------------|--------|-------------|----------------|--------------------|--------------|
 
 
 ## Conda environment setup
 
 BPMT_env - stay tuned!
-
-## Current issue: overfitting
-
-✅ fixing the bug of not saving pretrained cross-attention module properly
-
-✅ severe underfitting during pretraining & finetuning
-
-✅ hyperparameter tuning - smaller learning rate
-
-✅ hyperparameter tuning - weight decay
-
-❌ hyperparameter tuning - cosine scheduler?
-
-❌ no early stopping (save the best checkpoint needed)
-
-
-## Gait3D dataset
-
-they have 3000/1000 train/test split, where 1000 people in the test set are **brand new people**. I think I might have misunderstood the nature of gait recognition and used the wrong training **objective** - it's supposed to be "open-set instance retrieval setting" from Gait3D paper:
-
-*"To facilitate the research, we split the 4,000 IDs of the Gait3D dataset into the train/test subsets with 3,000/1,000 IDs, respectively. For the test set, we further randomly select one sequence from each ID to build the query set with 1,000 sequences, while the rest of the sequences become the gallery set with 5,369 sequences. Our evaluation protocol is based on the open-set instance retrieval setting like existing gait recognition datasets [17] and the person ReID task [60]. Given a query sequence, we measure its similarity between all sequences in the gallery set. Then a ranking list of the gallery set is returned by the descending order of the similarities. We report the average Rank-1 and Rank-5 identification rates over all query sequences. We also adopt the mean Average Precision (mAP) and mean Inverse Negative Penalty (mINP) [55] which consider the recall of multiple instances and hard samples."*
-
 
 ## Existing Gait recognition evaluation results 
 
@@ -113,12 +92,7 @@ similar results in "SkeletonGait: Gait Recognition Using Skeleton Maps" (CVPR'23
 ![alt text](docs/results_skeletonmap.png)
 
 
-## Q&A section
-
-1. I think I need to change the downstream training objective: classification cross entropy loss -> metric learning triplet loss (two-stage pretraining is supposed to be fine since it's basically doing reconstruction and learning body encodings); I also have to **manually** construct the triplet dataset, which is also a non-trivial task.
-
-
-## What "can" be the next step?
+## What "could" be the next step?
 
 integrate IIP-Transformer and compare with the baseline (BPMT 2.0)
 

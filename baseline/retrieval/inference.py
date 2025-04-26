@@ -15,14 +15,13 @@ from torch.utils.data import DataLoader
 from torch.nn import functional as F
 from base_dataset import GaitRecognitionDataset
 from utils import set_seed, aggregate_train_val_data_by_camera_split, collect_all_valid_subjects, collate_fn_inference
-from finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
+from finetuning import load_T1, load_T2, load_cross_attn, batch_hard_triplet_loss
 
 def evaluate(
     data_loader: DataLoader,
     t1: nn.Module,
     t2: nn.Module,
     cross_attn: nn.Module,
-    gait_head: nn.Module,
     device: str = 'cuda' if torch.cuda.is_available() else 'cpu',
 ) -> Tuple[float, torch.Tensor, torch.Tensor]:
     """
@@ -46,34 +45,53 @@ def evaluate(
     t1.eval()
     t2.eval()
     cross_attn.eval()
-    gait_head.eval()
-   
 
-    all_preds, all_labels = [], []
+    all_embeddings = []
+    all_labels = []
 
     with torch.no_grad():
         for skeletons, labels in data_loader:
             skeletons, labels = skeletons.to(device), labels.to(device)
-
             x1 = t1.encode(skeletons)
             x2 = t2.encode(x1)
             fused = cross_attn(x1, x2, x2)
+
+            # pooling
             pooled = fused.mean(dim=1)
 
-            logits = gait_head(pooled)
-            preds = logits.argmax(dim=1)
+            all_embeddings.append(pooled)
+            all_labels.append(labels)
 
-            all_preds.append(preds.cpu())
-            all_labels.append(labels.cpu())
+    all_embeddings = torch.cat(all_embeddings, dim=0)
+    all_labels = torch.cat(all_labels, dim=0)
 
-    all_preds = torch.cat(all_preds)
-    all_labels = torch.cat(all_labels)
+    # Compute pairwise distances
+    distance_matrix = torch.cdist(all_embeddings, all_embeddings, p=2) 
 
-    accuracy = accuracy_score(all_labels, all_preds)
+    # for each sample, rank others by distance
+    ranks = distance_matrix.argsort(dim=1)
 
-    print(f"Evaluation Accuracy: {accuracy:.4f}")
-    return accuracy, all_preds, all_labels
+    correct = 0
+    total = all_labels.size(0)
 
+    for i in range(total):
+        # we need to skip the scenario where the sample is the same as itself
+        for j in ranks[i]:
+            if j == i:
+                continue
+            
+            if all_labels[j] == all_labels[i]:
+                # top-1 is correct
+                correct += 1
+                break 
+            else:
+                # top-1 is not correct
+                correct += 0
+                break
+
+    rank1_accuracy = correct / total
+
+    return rank1_accuracy, all_embeddings, all_labels
 
 
 def parse_args():
@@ -152,29 +170,22 @@ def main():
     # load the cross attention module
     cross_attn = load_cross_attn("baseline_checkpoints/finetuned_cross_attn.pt", d_model=hidden_size, device=device)
 
-    # load the gait recognition head
-    gait_head = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes)
-    gait_head.load_state_dict(torch.load("baseline_checkpoints/finetuned_head.pt", map_location="cpu"))
-    gait_head = gait_head.to(device)
-
     print("Aha! All models loaded successfully!")
     print("=" * 100)
 
     # evaluate the model
     print("=" * 50)
     print("[INFO] Starting evaluation...")
-    print("=" * 50)
-    accuracy, all_preds, all_labels = evaluate(
+    rank1_accuracy, all_preds, all_labels = evaluate(
         test_loader,
         t1,
         t2,
         cross_attn,
-        gait_head,
         device=device
     )
 
-    print("=" * 50)
     print("[INFO] Evaluation completed!")
+    print(f"[INFO] Rank-1 accuracy: {rank1_accuracy:.4f}")
     print("=" * 50)
 
 
