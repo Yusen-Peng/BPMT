@@ -168,7 +168,7 @@ def finetuning(
             # we need to do pooling
             pooled = fused.mean(dim=1)
 
-            print(f"[INFO] running batch hard triplet loss.. for batch {i+1}")
+            #print(f"[INFO] running batch hard triplet loss.. for batch {i+1}")
             loss = batch_hard_triplet_loss(pooled, labels, margin=0.3)
 
             optimizer.zero_grad()
