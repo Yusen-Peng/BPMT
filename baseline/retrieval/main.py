@@ -205,7 +205,7 @@ def main():
         collate_fn=collate_fn_finetuning
     )
 
-    freezeT1 = False
+    freezeT1 = True
 
     trained_T2, train_cross_attn = finetuning(
         train_loader=train_finetuning_dataloader,
