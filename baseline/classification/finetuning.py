@@ -82,6 +82,7 @@ class GaitRecognitionHead(nn.Module):
     def forward(self, x):
         return self.fc(x)
 
+from typing import List
 def finetuning(
     train_loader: DataLoader,
     val_loader: DataLoader,
@@ -93,6 +94,7 @@ def finetuning(
     num_epochs: int = 200,
     lr: float = 1e-5,
     freezeT1: bool = True,
+    unfreeze_layers: List[int] = None,
     device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
 ) -> Tuple[BaseT1, nn.Module, nn.Module]:
     
@@ -100,7 +102,13 @@ def finetuning(
     if freezeT1:
         for param in t1.parameters():
             param.requires_grad = False
-    else: 
+
+        # unfreeze specific layers if specified
+        if unfreeze_layers is not None:
+            for layer in unfreeze_layers:
+                for param in t1.transformer_encoder.layers[layer].parameters():
+                    param.requires_grad = True
+    else:
         for param in t1.parameters():
             param.requires_grad = True
     t1.to(device)
@@ -111,10 +119,10 @@ def finetuning(
     cross_attn = CrossAttention(d_model, nhead).to(device)
 
     # optimizer and loss
-    if freezeT1:
-        params = list(t2.parameters()) + list(cross_attn.parameters()) + list(gait_head.parameters())
-    else:
-        params = list(t1.parameters()) + list(t2.parameters()) + list(cross_attn.parameters()) + list(gait_head.parameters())
+    params = list(filter(lambda p: p.requires_grad, t1.parameters())) + \
+         list(t2.parameters()) + \
+         list(cross_attn.parameters()) + \
+         list(gait_head.parameters())
     
     optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
     criterion = nn.CrossEntropyLoss()
@@ -128,20 +136,20 @@ def finetuning(
         t2.train()
         cross_attn.train()
 
-        if not freezeT1:
-            t1.train()
+        t1_trainable = any(p.requires_grad for p in t1.parameters())
+        t1.train(mode=t1_trainable)
 
 
         total_loss, correct, total = 0.0, 0, 0
         for skeletons, labels in train_loader:
             skeletons, labels = skeletons.to(device), labels.to(device)
             
-            if freezeT1:
-                with torch.no_grad():
-                    x1 = t1.encode(skeletons)
+            if t1_trainable:
+                x1 = t1.encode(skeletons)        # grads will flow
             else:
-                x1 = t1.encode(skeletons)
-
+                with torch.no_grad():
+                    x1 = t1.encode(skeletons)    # frozen model, no grads
+        
             x2 = t2.encode(x1)
             fused = cross_attn(x1, x2, x2)
 

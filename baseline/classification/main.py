@@ -172,7 +172,8 @@ def main():
 
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)
 
-    freezeT1 = False
+    freezeT1 = True
+    unfreeze_layers = [1]
 
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
@@ -185,17 +186,20 @@ def main():
         num_epochs=num_epochs,
         lr=1e-5,
         freezeT1=freezeT1,
+        unfreeze_layers=unfreeze_layers,
         device=device
     )
 
     print("Aha! Finetuning completed successfully!")
+    if unfreeze_layers is not None:
+        print(f"[INFO] Unfreezing layers: {unfreeze_layers}...")
 
     # save the finetuned models
     torch.save(trained_T2.state_dict(), f"baseline_checkpoints/finetuned_T2.pt")
     torch.save(train_cross_attn.state_dict(), f"baseline_checkpoints/finetuned_cross_attn.pt")
     torch.save(train_head.state_dict(), f"baseline_checkpoints/finetuned_head.pt")
 
-    if not freezeT1:
+    if any(param.requires_grad for param in t1.parameters()):
         torch.save(t1.state_dict(), f"baseline_checkpoints/finetuned_T1.pt")
 
     print("Aha! finetuned models saved successfully!")

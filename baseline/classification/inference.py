@@ -2,7 +2,7 @@ import os
 import glob
 import numpy as np
 import torch
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score
 import seaborn as sns
 import matplotlib.pyplot as plt
 import argparse
@@ -141,11 +141,13 @@ def main():
     )
 
     # load T1 model
-    freezeT1 = False
-    if freezeT1:
+    freezeT1 = True
+    unfreeze_layers = [1]
+    if unfreeze_layers is None:
         t1 = load_T1("baseline_checkpoints/pretrained.pt", d_model=hidden_size, device=device)
     else:
         t1 = load_T1("baseline_checkpoints/finetuned_T1.pt", d_model=hidden_size, device=device)
+        print(f"************Unfreezing layers: {unfreeze_layers}")
     
     t2 = load_T2("baseline_checkpoints/finetuned_T2.pt", d_model=hidden_size, device=device)
 

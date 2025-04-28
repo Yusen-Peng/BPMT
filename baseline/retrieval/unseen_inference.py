@@ -169,11 +169,13 @@ def main():
     )
 
     # load T1 model
-    freezeT1 = False
-    if freezeT1:
+    unfreeze_layers = [1]
+    if unfreeze_layers is None:
         t1 = load_T1("baseline_checkpoints/pretrained.pt", d_model=hidden_size, device=device)
     else:
         t1 = load_T1("baseline_checkpoints/finetuned_T1.pt", d_model=hidden_size, device=device)
+        print(f"************Unfreezing layers: {unfreeze_layers}")
+
     
     t2 = load_T2("baseline_checkpoints/finetuned_T2.pt", d_model=hidden_size, device=device)
 
