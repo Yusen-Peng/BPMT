@@ -97,6 +97,11 @@ GaitDIF:
 ![alt text](docs/GaitDIF.png)
 
 
+## meeting note: April 29th
+
+1. run the ultimate experiment with baseline for gait recognition (open-set retrieval)
+2. do action recogntion experiment + literature review too
+
 ## What "could" be the next step?
 
 integrate IIP-Transformer and compare with the baseline (BPMT 2.0)
