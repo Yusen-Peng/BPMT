@@ -141,8 +141,8 @@ def main():
     )
 
     # load T1 model
-    freezeT1 = True
-    unfreeze_layers = [1]
+    freezeT1 = False
+    unfreeze_layers = ["entire"]
     if unfreeze_layers is None:
         t1 = load_T1("baseline_checkpoints/pretrained.pt", d_model=hidden_size, device=device)
     else:

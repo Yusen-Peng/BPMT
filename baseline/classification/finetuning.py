@@ -98,6 +98,10 @@ def finetuning(
     device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
 ) -> Tuple[BaseT1, nn.Module, nn.Module]:
     
+    print(f"is T1 freezed? {freezeT1}")
+    print(f"unfreezing layers: {unfreeze_layers}")
+
+    
     # freeze T1 parameters
     if freezeT1:
         for param in t1.parameters():

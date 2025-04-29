@@ -205,8 +205,10 @@ def main():
         collate_fn=collate_fn_finetuning
     )
 
-    freezeT1 = True
-    unfreeze_layers = [1]
+    freezeT1 = False
+    unfreeze_layers = None
+    if unfreeze_layers is not None:
+        print(f"[INFO] Unfreezing layers: {unfreeze_layers}...")
 
 
     trained_T2, train_cross_attn = finetuning(
@@ -224,9 +226,7 @@ def main():
     )
 
     print("Aha! Finetuning completed successfully!")
-
-    if unfreeze_layers is not None:
-        print(f"[INFO] Unfreezing layers: {unfreeze_layers}...")
+    
 
     # save the finetuned models
     torch.save(trained_T2.state_dict(), f"baseline_checkpoints/finetuned_T2.pt")

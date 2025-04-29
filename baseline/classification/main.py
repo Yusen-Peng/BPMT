@@ -172,8 +172,8 @@ def main():
 
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)
 
-    freezeT1 = True
-    unfreeze_layers = [1]
+    freezeT1 = False
+    unfreeze_layers = None
 
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,

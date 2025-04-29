@@ -55,6 +55,9 @@ TBD
 | 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 21.58% | 
 | 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 15.83% |
 | 50 | 27 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 12.95% |
+| 300 | 109 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 9.67% |
+| 300 | 109 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 10.64% |
+| 300 | 109 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 10.64% |
 
 ## Baseline - Experiment (open-set retrieval)
 | #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | R1-acc (seen people from training, but different cameras) | R1-acc (completely unseen people)
@@ -62,6 +65,9 @@ TBD
 | 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 30.94% | 15.75% |
 | 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 28.06% | 17.53% |
 | 50 | 27 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 30.22% | 14.71% |
+| 300 | 109 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 500 | 13.54% | 12.54% |
+| 300 | 109 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 10.06% | 6.24% |
+| 300 | 109 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 12.57% | 7.02% |
 
 ## BPMT 1.0 - Experiment (close-set classification)
 
@@ -76,22 +82,19 @@ TBD
 | #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | R1-acc (seen people from training) | 
 |------------------|------------------|------------|------------|--------|-------------|-------------|--------|-------------|----------------|--------------------|--------------|
 
+## Existing State-of-the-art
 
-## Conda environment setup
-
-BPMT_env - stay tuned!
-
-## Existing Gait recognition evaluation results 
-
-The following papers give a nice overview of POSE-ONLY gait recognition
-
-"GaitPT: Skeletons Are All You Need For Gait Recognition" (CVPR'23): they use a very complicated four-stage training (joint, limb, limb group, body), which is (unfortuately) very similar to our design. GaitPT uses three datasets: CASIA-B, GREW, Gait3D for evaluation. In GaitPT, multiple evaluation metrics are used: rank-1 accuracy, rank-5 accuracy. it shows the following results for Gait 3D specifically:
+PoseGait, GaitGraph, GaitFormer, GaitPT:
 
 ![alt text](docs/results_gaitPT.png)
 
-similar results in "SkeletonGait: Gait Recognition Using Skeleton Maps" (CVPR'23):
+GaitGraph2, GaitTR, GPGait:
 
 ![alt text](docs/results_skeletonmap.png)
+
+GaitDIF:
+
+![alt text](docs/GaitDIF.png)
 
 
 ## What "could" be the next step?
