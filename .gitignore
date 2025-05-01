@@ -5,6 +5,7 @@ src/__pycache__/
 2D_Poses_50_unseen/
 2D_Poses_300/
 2D_Poses_300_unseen/
+Penn_Action/
 Gait3D-Benchmark/
 Gait3D-Benchmark/datasets/
 Gait3D-Benchmark/datasets/pretreatment.log

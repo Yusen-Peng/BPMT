@@ -4,22 +4,23 @@ In this thesis project, I aim to design BPMT, Body Part as Modality Transformer,
 
 # Human Action Recognition: a close-set classification problem
 
-For Human Action Recognition, 
+Dataset zoo: (I am currently using Penn Action)
 
-Dataset zoo:
+| dataset | #videos | #actions | dimension | available? |
+| ------- | ------- | -------- | --------- | ---------- |
+| **Penn Action** | 2,325 | 15 | **2D** | downloaded (3GB) |
+| NTU RGB+D  | 56,880 | 60 | 3D | under request |
+| Skeletics-152 | 122,621 | 152 | 3D | downloadable (over 50GB!) |
 
-1. NTU RGB+D: 3D skeleton data of 25 body joints are available (requested)
-2. 
-3. 
 
+## Existing State-of-the-art
+
+TBD
 
 ## Baseline Design (Action Recognition)
 
-Baseline Transformer (T1 and T2):
-![alt text](docs/baseline_transformer.png)
-
 Pretraining:
-![alt text](docs/baseline_pretraining_%20classification.png)
+![alt text](docs/baseline_pretraining_classification.png)
 
 Cascading Finetuning:
 ![alt text](docs/baseline_finetuning_classification.png)
@@ -40,16 +41,27 @@ Finetuning:
 
 ## Baseline - Experiment (Action Recognition)
 
+| #subject | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
+|------------------|------------|------------|--------|-------------|-------------|--------|------------|
+| <tr><td colspan="10" align="center">Mini Experiments (n = 50/300)</td></tr> |
+| 50 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | TBD | 
+| 50 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | TBD |
+| 50 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | TBD |
+| 300 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | TBD |
+| 300 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | TBD |
+| 300 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | TBD |
+| <tr><td colspan="10" align="center">Complete Experiments (n = 2325)</td></tr> |
+| 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
 
 ## BPMT 1.0 - Experiment (Action Recognition)
 
+TBD
 
 # Human Gait Recognition: a open-set retrieval problem
 
 The definition of "open-set retrieval" from Gait3D paper for gait recognition:
 
 *"Given a **query** sequence, we measure its similarity between all sequences in the **gallery** set. Then a ranking list of the gallery set is returned by the descending order of the similarities. We report the average Rank-1 and Rank-5 identification rates over all query sequences. We also adopt the mean Average Precision (mAP) and mean Inverse Negative Penalty (mINP) [55] which consider the recall of multiple instances and hard samples."*
-
 
 ## Existing State-of-the-art
 
@@ -87,27 +99,19 @@ TBD
 
 <!-- ## Baseline - Experiment (close-set classification) -->
 
-<!-- | #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
-|------------------|------------------|------------|------------|--------|-------------|-------------|--------|------------|
-| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 21.58% | 
-| 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 15.83% |
-| 50 | 27 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 12.95% |
-| 300 | 109 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 9.67% |
-| 300 | 109 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 10.64% |
-| 300 | 109 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 10.64% | -->
 
 ## Baseline - Experiment (Gait Recognition)
-| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | R1-acc (seen people from training, but different cameras) | R1-acc (completely unseen people)
-|------------------|------------------|------------|------------|--------|-------------|-------------|--------|--------------------------|--------------|
+| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | R1-acc (completely unseen people)|
+|------------------|------------------|------------|------------|--------|-------------|-------------|--------|--------------------------|
 | <tr><td colspan="10" align="center">Mini Experiments (n = 50/300)</td></tr> |
-| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 30.94% | 15.75% |
-| 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 28.06% | 17.53% |
-| 50 | 27 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 30.22% | 14.71% |
-| 300 | 109 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 500 | 13.54% | 12.54% |
-| 300 | 109 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 10.06% | 6.24% |
-| 300 | 109 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 12.57% | 7.02% |
+| 50 | 27 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 15.75% |
+| 50 | 27 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 17.53% |
+| 50 | 27 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | 14.71% |
+| 300 | 109 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 500 | 12.54% |
+| 300 | 109 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 6.24% |
+| 300 | 109 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 7.02% |
 | <tr><td colspan="10" align="center">Complete Experiments (n = 3000)</td></tr> |
-| 3000 | 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 100 | TBD | TBD |
+| 3000 | 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
 
 <!-- ## BPMT 1.0 - Experiment (close-set classification)
 
