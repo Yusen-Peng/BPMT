@@ -117,6 +117,11 @@ def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr
             loss = criterion(recons, sequences)
             loss_mean = loss.mean()
 
+            # Check for NaN in loss
+            if torch.isnan(loss_mean):
+                print("NaN detected in loss, skipping batch")
+                continue  # skip this batch instead of crashing
+
             # we only do MSE on masked positions
             # we also need to broadcast mask to match the shape 
             # mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
@@ -129,6 +134,7 @@ def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr
             # backpropagation
             optimizer.zero_grad()
             loss_mean.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
 
             # accumulate loss

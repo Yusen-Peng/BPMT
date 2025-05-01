@@ -85,7 +85,7 @@ def main():
     print(f"[INFO] Starting Gait3D dataset processing on {device}...")
     print("=" * 50)
 
-    MIN_CAMERAS = 3
+    MIN_CAMERAS = 1 # by setting this to 1, we are using the entire dataset here
 
     # load the dataset
     valid_subjects = collect_all_valid_subjects(root_dir, min_cameras=MIN_CAMERAS)
@@ -151,7 +151,7 @@ def main():
             model=model,
             num_epochs=num_epochs,
             batch_size=batch_size,
-            lr=1e-4,
+            lr=1e-5,
             mask_ratio=0.15,
             device=device
         )
@@ -180,8 +180,6 @@ def main():
     )
 
     print("pretrained model loaded successfully!")
-
-
    
     train_finetuning_dataset = GaitRecognitionDataset(train_sequences, train_labels)
     val_finetuning_dataset = GaitRecognitionDataset(val_sequences, val_labels)
