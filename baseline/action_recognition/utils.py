@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import torch
+from scipy.io import loadmat
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import random_split
 from torch.utils.data import Subset
@@ -10,6 +11,9 @@ import os
 import glob
 from tqdm import tqdm
 from typing import List, Tuple, Dict
+from base_dataset import ActionRecognitionDataset
+
+NUM_JOINTS_PENN = 13
 
 def set_seed(seed=42):
     random.seed(seed)
@@ -19,179 +23,65 @@ def set_seed(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def parse_pose_file(file_path: str, num_joints: int = 17) -> np.ndarray:
+
+def load_mat_pose(mat_path: str, drop_occluded: bool = True):
     """
-        Parses a single pose file to extract 2D keypoints.
-        Args:
-            file_path (str): Path to the pose file.
-            num_joint (int): Number of joints/keypoints per frame.
-        Returns:
-            np.ndarray: A 2D array of shape (num_joints, 2) containing the x and y coordinates of the keypoints.
+    Returns a (T, 13*2) array of [x,y] per frame.
+    Missing joints -> 0 (or NaN if drop_occluded=False).
     """
-    if not os.path.exists(file_path):
-        return None
-    with open(file_path, 'r') as f:
-        line = f.readline().strip()
-    data = list(map(float, line.split(',')))
+    mat = loadmat(mat_path, squeeze_me=True, struct_as_record=False)
 
-    keypoints_2d_with_confidence = np.array(data[2 : 2 + (num_joints * 3)]).reshape(num_joints, 3)
-    
-    # extract only the x and y coordinates without the confidence score
-    keypoints_2d = keypoints_2d_with_confidence[:, :2]
-    return keypoints_2d
+    x, y, vis = mat['x'], mat['y'], mat['visibility']
+    if drop_occluded:
+        x = np.where(vis, x, 0.)
+        y = np.where(vis, y, 0.)
+    poses = np.stack([x, y], axis=-1)          # (T, 13, 2)
+    poses = poses.reshape(poses.shape[0], -1)  # (T, 26)
+    return poses.astype(np.float32), int(mat['train']), str(mat['action'])
 
 
-def load_sequence(seq_folder: str, num_joints: int = 17) -> np.ndarray:
-    """
-        Loads a sequence of 2D keypoints from text files in the given folder.
-        Args:
-            seq_folder (str): Path to the folder containing the sequence files.
-            num_joints (int): Number of joints/keypoints per frame.
-        Returns:
-            np.ndarray: A 2D array of shape (num_frames, num_joints * 2) containing the 2D keypoints.
-    """
-    txt_files = glob.glob(os.path.join(seq_folder, '*.txt'))
-    if not txt_files:
-        return None
-    
-    def get_frame_index(fp):
-        """
-            Extracts the frame index from the filename.
-            Args:
-                fp (str): File path.
-            Returns:
-                int: Frame index extracted from the filename.
-        """
-        fname = os.path.basename(fp)
-        parts = fname.split('_f')
-        if len(parts) < 2:
-            return 0
-        frame_str = parts[1].split('.')[0]
-        return int(''.join(filter(str.isdigit, frame_str))) 
-    
-    # sort files based on frame index
-    txt_files = sorted(txt_files, key=get_frame_index)
-
-    # load keypoints from each file
-    # shape of each keypoint: (num_joints, 3) -> (x, y, confidence)
-    frames_2d = []
-    for fp in txt_files:
-        keypoints_2d = parse_pose_file(fp, num_joints)
-        frames_2d.append(keypoints_2d.flatten())
-    return np.vstack(frames_2d)
-
-def collect_all_valid_subjects(parent_folder: str, min_cameras: int = 5) -> Dict[str, Dict[str, List[Tuple[np.ndarray, int]]]]:
-
-
-    # subject ID to label mapping
-    subject_ids = sorted([
-    d for d in os.listdir(parent_folder)
-    if os.path.isdir(os.path.join(parent_folder, d)) and not d.startswith(".")
-    ])
-    subject_id_to_label = {sid: idx for idx, sid in enumerate(subject_ids)}
-
-    # subject id: data
-    valid_subjects = {}
-
-    # iterate over each subject
-    for subject_id in sorted(os.listdir(parent_folder)):        
-        subject_path = os.path.join(parent_folder, subject_id)
-        if not os.path.isdir(subject_path):
-            continue
-        
-        # map subject_id like 0013 to a number
-        label = subject_id_to_label[subject_id]
-
-        # collect sequences + labels for each camera
-        cam_seqs_labels = collect_sequences_by_camera(subject_path, label=label)
-
-        if len(cam_seqs_labels) >= min_cameras:
-            valid_subjects[subject_id] = cam_seqs_labels
-
-    # print the number of valid subjects
-    print(f"Number of valid subjects with at least {min_cameras} cameras: {len(valid_subjects)}")
-    
-    return valid_subjects
-
-
-def collect_sequences_by_camera(subject_folder: str, label: int) -> Dict[str, List[Tuple[np.ndarray, int]]]:
-    sequences_with_labels_by_cam: Dict[str, List[Tuple[np.ndarray, int]]] = {}
-
-    for cam_folder in os.listdir(subject_folder):
-        cam_path = os.path.join(subject_folder, cam_folder)
-
-        if not os.path.isdir(cam_path):
-            continue
-
-        if "_" in cam_folder and cam_folder.startswith("camid"):
-            cam_id = cam_folder.split("_")[0]
-
-            for seq_folder in os.listdir(cam_path):
-                seq_path = os.path.join(cam_path, seq_folder)
-                if not os.path.isdir(seq_path):
-                    continue
-
-                if any(f.endswith('.txt') for f in os.listdir(seq_path)):
-                    seq_data = load_sequence(seq_path)
-                    if seq_data is not None and seq_data.shape[0] > 0:
-                        if cam_id not in sequences_with_labels_by_cam:
-                            sequences_with_labels_by_cam[cam_id] = []
-                        sequences_with_labels_by_cam[cam_id].append((seq_data, label))
-
-    return sequences_with_labels_by_cam
-
-def aggregate_train_val_data_by_camera_split(
-    valid_subjects: Dict[str, Dict[str, List[Tuple[np.ndarray, int]]]],
-    train_ratio: float = 0.75,
-    seed: int = 42
+def build_penn_action_lists(root: str
 ) -> Tuple[List[np.ndarray], List[int], List[np.ndarray], List[int]]:
-
-    random.seed(seed)
-    train_sequences = []
-    train_labels = []
-    val_sequences = []
-    val_labels = []
-
-    for subject_id, cam_seqs_with_labels in valid_subjects.items():
-        cam_ids = sorted(cam_seqs_with_labels.keys())
-        num_total = len(cam_ids)
-
-        # determine number of cameras for training
-        num_train = max(1, int(num_total * train_ratio))
-        # also ensure that we have at least one camera for validation
-        num_train = min(num_train, num_total - 1)
-
-        random.shuffle(cam_ids)
-        train_cams = cam_ids[:num_train]
-        val_cams = cam_ids[num_train:]
-
-        # Aggregate sequences
-        for cam in train_cams:
-            for seq_data, label in cam_seqs_with_labels[cam]:
-                train_sequences.append(seq_data)
-                train_labels.append(label)
-        for cam in val_cams:
-            for seq_data, label in cam_seqs_with_labels[cam]:
-                val_sequences.append(seq_data)
-                val_labels.append(label)
-    
-    return train_sequences, train_labels, val_sequences, val_labels
-
-
-def get_num_joints_for_modality(modality_name):
     """
-        Returns the number of joints for a given modality.
-        Args:
-            modality_name (str): Name of the body modality.
-        Returns:
-            int: Number of joints for the specified modality.
+    Returns train_sequences, train_labels, test_sequences, test_labels.
+    Label indices are 0 .. 15 in the order you encounter them.
     """
-    if modality_name == "Torso":
-        return 9
-    elif modality_name in ["Left_Arm", "Right_Arm", "Left_Leg", "Right_Leg"]:
-        return 2
-    else:
-        raise ValueError("Unknown modality")
+    label2idx: Dict[str,int] = {}
+    train_seq, train_lbl, test_seq, test_lbl = [], [], [], []
+
+    for mat_path in sorted(glob.glob(os.path.join(root, 'labels', '*.mat'))):
+        seq, is_train, action = load_mat_pose(mat_path)
+
+        # map action string -> int label
+        if action not in label2idx:
+            label2idx[action] = len(label2idx)
+        lbl = label2idx[action]
+
+        if is_train == 1:
+            train_seq.append(seq)
+            train_lbl.append(lbl)
+        elif is_train == -1:
+            test_seq.append(seq)
+            test_lbl.append(lbl)
+        else:
+            raise ValueError(f"Invalid is_train value: {is_train}")
+
+    print(f'#classes={len(label2idx)} | train videos={len(train_seq)} | test videos={len(test_seq)}')
+    return train_seq, train_lbl, test_seq, test_lbl
+
+def split_train_val(train_seq, train_lbl, val_ratio=0.15, seed=42):
+    tr_idx, val_idx = train_test_split(
+        np.arange(len(train_seq)),
+        test_size=val_ratio,
+        random_state=seed,
+        stratify=train_lbl
+    )
+    tr_seq  = [train_seq[i] for i in tr_idx]
+    tr_lbl  = [train_lbl[i] for i in tr_idx]
+    val_seq = [train_seq[i] for i in val_idx]
+    val_lbl = [train_lbl[i] for i in val_idx]
+
+    return tr_seq, tr_lbl, val_seq, val_lbl
 
 
 def collate_fn_batch_padding(batch):
@@ -243,16 +133,41 @@ def collate_fn_inference(batch):
     return batch, labels
 
 
-if __name__ == "__main__":
-    # Example usage
-    root_dir = "2D_Poses_50/"
-    MIN_CAMERAS = 3
-    valid_subjects = collect_all_valid_subjects(root_dir, min_cameras=3)
+# if __name__ == "__main__":    
+#     set_seed(42)
+#     root = "Penn_Action/"
 
-    print(f"the number of valid subjects: {len(valid_subjects)}")
+#     train_seq, train_lbl, test_seq, test_lbl = build_penn_action_lists(root)
+#     train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.15)
 
-    train_sequences, train_labels, val_sequences, val_labels = aggregate_train_val_data_by_camera_split(
-        valid_subjects,
-        train_ratio=0.75,
-        seed=42
-    )
+#     train_ds = ActionRecognitionDataset(train_seq, train_lbl)
+#     val_ds   = ActionRecognitionDataset(val_seq, val_lbl)
+#     test_ds  = ActionRecognitionDataset(test_seq, test_lbl)
+    
+#     # data loader
+#     train_loader = torch.utils.data.DataLoader(
+#         train_ds,
+#         batch_size=16,
+#         shuffle=True,
+#         collate_fn=collate_fn_batch_padding
+#     )
+#     val_loader = torch.utils.data.DataLoader(
+#         val_ds,
+#         batch_size=16,
+#         shuffle=False,
+#         collate_fn=collate_fn_batch_padding
+#     )
+#     test_loader = torch.utils.data.DataLoader(
+#         test_ds,
+#         batch_size=16,
+#         shuffle=False,
+#         collate_fn=collate_fn_batch_padding
+#     )
+
+#     # check the data loader
+#     print("Train dataset size:", len(train_loader.dataset))
+#     print("Example batch shape:", next(iter(train_loader))[0].shape)
+#     print("Validation dataset size:", len(val_loader.dataset))
+#     print("Example batch shape:", next(iter(val_loader))[0].shape)
+#     print("Test dataset size:", len(test_loader.dataset))
+#     print("Example batch shape:", next(iter(test_loader))[0].shape)

@@ -10,7 +10,7 @@ from pretraining import BaseT1
 import matplotlib.pyplot as plt
 
 
-def load_T1(model_path: str, num_joints: int = 17, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
+def load_T1(model_path: str, num_joints: int = 13, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
                 device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT1:
     """
         loads a BaseT1 model from a checkpoint

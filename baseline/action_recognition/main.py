@@ -5,7 +5,7 @@ import torch
 import argparse
 from typing import List, Tuple
 from itertools import combinations
-from base_dataset import GaitRecognitionDataset
+from base_dataset import ActionRecognitionDataset
 from torch import nn
 from torch import optim
 from torch import Tensor
@@ -17,12 +17,12 @@ from finetuning import load_T1, finetuning, GaitRecognitionHead
 #from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
 
-from utils import set_seed, get_num_joints_for_modality, collate_fn_finetuning, aggregate_train_val_data_by_camera_split, collect_all_valid_subjects
+from utils import set_seed, build_penn_action_lists, split_train_val, collate_fn_batch_padding, collate_fn_finetuning, NUM_JOINTS_PENN
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
     parser.add_argument("--pretrain", action='store_true', help="Run the stage of pretraining")
-    parser.add_argument("--root_dir", type=str, default="2D_Poses_50/", help="Root directory of the dataset")
+    parser.add_argument("--root_dir", type=str, default="Penn_Action/", help="Root directory of the dataset")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for training")
     parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
     parser.add_argument("--hidden_size", type=int, default=64, help="Hidden size for the model")
@@ -51,46 +51,33 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     print("=" * 50)
-    print(f"[INFO] Starting Gait3D dataset processing on {device}...")
+    print(f"[INFO] Starting Penn Action dataset processing on {device}...")
     print("=" * 50)
 
-    MIN_CAMERAS = 3
-
     # load the dataset
-    valid_subjects = collect_all_valid_subjects(root_dir, min_cameras=MIN_CAMERAS)
+    train_seq, train_lbl, test_seq, test_lbl = build_penn_action_lists(root_dir)
+    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.15)
 
+    train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
+    val_dataset = ActionRecognitionDataset(val_seq, val_lbl)
+    
+    test_dataset = ActionRecognitionDataset(test_seq, test_lbl)
+    
     # get the number of classes
-    num_classes = len(valid_subjects)
+    num_classes = len(set(train_lbl))
     print(f"[INFO] Number of classes: {num_classes}")
     print("=" * 100)
 
 
-    # split the dataset into training and validation sets
-    train_sequences, train_labels, val_sequences, val_labels = aggregate_train_val_data_by_camera_split(
-        valid_subjects,
-        train_ratio=0.75,
-        seed=42
-    )
 
-
-    # label remapping (IMPORTANT ALL THE TIME!)
-    unique_train_labels = sorted(set(train_labels))
-    label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(unique_train_labels)}
-    train_labels = [label2new[old_lbl] for old_lbl in train_labels]
+    # # label remapping (IMPORTANT ALL THE TIME!)
+    # unique_train_labels = sorted(set(train_labels))
+    # label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(unique_train_labels)}
+    # train_labels = [label2new[old_lbl] for old_lbl in train_labels]
     
-    uniqueu_val_labels = sorted(set(val_labels))
-    label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(uniqueu_val_labels)}
-    val_labels = [label2new[old_lbl] for old_lbl in val_labels]
-
-    # dataset creation of the entire skeleton
-    train_dataset = GaitRecognitionDataset(train_sequences, train_labels)
-    val_dataset = GaitRecognitionDataset(val_sequences, val_labels)
-
-    # figure out how many joints
-    num_joints = get_num_joints_for_modality("Torso") + get_num_joints_for_modality("Left_Arm") + \
-        get_num_joints_for_modality("Right_Arm") + get_num_joints_for_modality("Left_Leg") + \
-        get_num_joints_for_modality("Right_Leg")
-
+    # uniqueu_val_labels = sorted(set(val_labels))
+    # label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(uniqueu_val_labels)}
+    # val_labels = [label2new[old_lbl] for old_lbl in val_labels]
 
     if pretrain == True: 
         """
@@ -101,12 +88,9 @@ def main():
         print(f"Starting Pretraining...")
         print(f"==========================")
         
-        
-        print(f"[INFO] Number of joints in skeletons: {num_joints}")
-
         # instantiate the model
         model = BaseT1(
-            num_joints=num_joints,
+            num_joints=NUM_JOINTS_PENN,
             d_model=hidden_size,
             nhead=4,
             num_layers=2
@@ -126,7 +110,7 @@ def main():
         )
 
         # save pretrained model
-        torch.save(model.state_dict(), f"baseline_checkpoints/pretrained.pt")
+        torch.save(model.state_dict(), f"action_checkpoints/pretrained.pt")
 
         print("Aha! pretraining is done!")
         print("=" * 100)
@@ -139,8 +123,8 @@ def main():
 
     # load T1 models
     t1 = load_T1(
-        model_path="baseline_checkpoints/pretrained.pt",
-        num_joints=num_joints,
+        model_path="action_checkpoints/pretrained.pt",
+        num_joints=NUM_JOINTS_PENN,
         d_model=hidden_size,
         nhead=4,
         num_layers=2,
@@ -152,8 +136,8 @@ def main():
 
 
    
-    train_finetuning_dataset = GaitRecognitionDataset(train_sequences, train_labels)
-    val_finetuning_dataset = GaitRecognitionDataset(val_sequences, val_labels)
+    train_finetuning_dataset = ActionRecognitionDataset(train_seq, train_lbl)
+    val_finetuning_dataset = ActionRecognitionDataset(val_seq, val_lbl)
 
 
     train_finetuning_dataloader = torch.utils.data.DataLoader(
@@ -172,8 +156,8 @@ def main():
 
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)
 
-    freezeT1 = False
-    unfreeze_layers = None
+    freezeT1 = True
+    unfreeze_layers = [1]
 
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
@@ -195,12 +179,12 @@ def main():
         print(f"[INFO] Unfreezing layers: {unfreeze_layers}...")
 
     # save the finetuned models
-    torch.save(trained_T2.state_dict(), f"baseline_checkpoints/finetuned_T2.pt")
-    torch.save(train_cross_attn.state_dict(), f"baseline_checkpoints/finetuned_cross_attn.pt")
-    torch.save(train_head.state_dict(), f"baseline_checkpoints/finetuned_head.pt")
+    torch.save(trained_T2.state_dict(), f"action_checkpoints/finetuned_T2.pt")
+    torch.save(train_cross_attn.state_dict(), f"action_checkpoints/finetuned_cross_attn.pt")
+    torch.save(train_head.state_dict(), f"action_checkpoints/finetuned_head.pt")
 
     if any(param.requires_grad for param in t1.parameters()):
-        torch.save(t1.state_dict(), f"baseline_checkpoints/finetuned_T1.pt")
+        torch.save(t1.state_dict(), f"action_checkpoints/finetuned_T1.pt")
 
     print("Aha! finetuned models saved successfully!")
 

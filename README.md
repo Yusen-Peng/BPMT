@@ -8,14 +8,15 @@ Dataset zoo: (I am currently using Penn Action)
 
 | dataset | #videos | #actions | dimension | available? |
 | ------- | ------- | -------- | --------- | ---------- |
-| **Penn Action** | 2,325 | 15 | **2D** | downloaded (3GB) |
+| **Penn Action** (2013) | 2,326 | 15 | **2D** | downloaded (3GB) |
 | NTU RGB+D  | 56,880 | 60 | 3D | under request |
 | Skeletics-152 | 122,621 | 152 | 3D | downloadable (over 50GB!) |
 
 
 ## Existing State-of-the-art
 
-TBD
+3DA (best) with Pr-VIPE, UNIK, HDM-BG, 3D Deep, PoseMap, MultitaskCNN, STAR: 
+![alt text](docs/3D_deformable_transformer.png)
 
 ## Baseline Design (Action Recognition)
 
@@ -43,15 +44,14 @@ Finetuning:
 
 | #subject | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------|------------|--------|-------------|-------------|--------|------------|
-| <tr><td colspan="10" align="center">Mini Experiments (n = 50/300)</td></tr> |
-| 50 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | TBD | 
-| 50 | linear | no  | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | TBD |
-| 50 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | TBD |
-| 300 | linear | yes | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | TBD |
-| 300 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | TBD |
-| 300 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 100 | TBD |
-| <tr><td colspan="10" align="center">Complete Experiments (n = 2325)</td></tr> |
-| 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
+| <tr><td colspan="10" align="center">Complete Experiments (n = 2326)</td></tr> |
+| 2326 | linear | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 84.93% |
+| 2326 | linear | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 85.96% |
+| 2326 | linear | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 87.36% |
+| <tr><td colspan="10" align="center">Complete Experiments without held-out validation (n = 2326)</td></tr> |
+| 2326 | linear | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | TBD |
+| 2326 | linear | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | TBD |
+| 2326 | linear | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | TBD |
 
 ## BPMT 1.0 - Experiment (Action Recognition)
 
@@ -97,9 +97,6 @@ Finetuning:
 
 TBD
 
-<!-- ## Baseline - Experiment (close-set classification) -->
-
-
 ## Baseline - Experiment (Gait Recognition)
 | #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | R1-acc (completely unseen people)|
 |------------------|------------------|------------|------------|--------|-------------|-------------|--------|--------------------------|
@@ -111,6 +108,8 @@ TBD
 | 300 | 109 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 6.24% |
 | 300 | 109 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 7.02% |
 | <tr><td colspan="10" align="center">Complete Experiments (n = 3000)</td></tr> |
+| 3000 | 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
+| 3000 | 3000 | linear | no | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
 | 3000 | 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
 
 <!-- ## BPMT 1.0 - Experiment (close-set classification)

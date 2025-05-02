@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from utils import collate_fn_batch_padding
 from tqdm import tqdm
 
-POSITIONAL_UPPER_BOUND = 500
+POSITIONAL_UPPER_BOUND = 1000
 
 class BaseT1(nn.Module):
     """
