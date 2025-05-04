@@ -121,7 +121,7 @@ def main():
     print(f"[INFO] Starting Gait3D dataset processing on {device}...")
     print("=" * 50)
 
-    MIN_CAMERAS = 3
+    MIN_CAMERAS = 1
 
     # load the dataset
     valid_subjects = collect_all_valid_subjects(root_dir, min_cameras=MIN_CAMERAS)
@@ -159,7 +159,7 @@ def main():
     )
 
     # load T1 model
-    unfreeze_layers = [1]
+    unfreeze_layers = ["entire"]
     if unfreeze_layers is None:
         t1 = load_T1("baseline_checkpoints/pretrained.pt", d_model=hidden_size, device=device)
     else:

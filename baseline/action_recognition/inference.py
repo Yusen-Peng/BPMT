@@ -93,7 +93,9 @@ def main():
 
     # Set the device
 
-    hidden_size = 64
+    hidden_size = 256
+    n_heads = 8
+    num_layers = 4
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     print("=" * 50)
@@ -102,7 +104,7 @@ def main():
 
     # load the dataset
     train_seq, train_lbl, test_seq, test_lbl = build_penn_action_lists(root_dir)
-    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.15)
+    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
     
     test_dataset = ActionRecognitionDataset(test_seq, test_lbl)
     
@@ -117,15 +119,14 @@ def main():
     )
 
     # load T1 model
-    unfreeze_layers = [1]
+    unfreeze_layers = "entire"
     if unfreeze_layers is None:
-        t1 = load_T1("action_checkpoints/pretrained.pt", d_model=hidden_size, device=device)
+        t1 = load_T1("action_checkpoints/pretrained.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     else:
-        t1 = load_T1("action_checkpoints/finetuned_T1.pt", d_model=hidden_size, device=device)
+        t1 = load_T1("action_checkpoints/finetuned_T1.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
         print(f"************Unfreezing layers: {unfreeze_layers}")
     
-    t2 = load_T2("action_checkpoints/finetuned_T2.pt", d_model=hidden_size, device=device)
-
+    t2 = load_T2("action_checkpoints/finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     # load the cross attention module
     cross_attn = load_cross_attn("action_checkpoints/finetuned_cross_attn.pt", d_model=hidden_size, device=device)
 

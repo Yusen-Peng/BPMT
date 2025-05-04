@@ -42,16 +42,22 @@ Finetuning:
 
 ## Baseline - Experiment (Action Recognition)
 
-| #subject | decoder | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
-|------------------|------------|------------|--------|-------------|-------------|--------|------------|
-| <tr><td colspan="10" align="center">Complete Experiments (n = 2326)</td></tr> |
-| 2326 | linear | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 84.93% |
-| 2326 | linear | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 85.96% |
-| 2326 | linear | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 87.36% |
-| <tr><td colspan="10" align="center">Complete Experiments without held-out validation (n = 2326)</td></tr> |
-| 2326 | linear | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | TBD |
-| 2326 | linear | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | TBD |
-| 2326 | linear | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | TBD |
+| #subject | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
+|------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
+| <tr><td colspan="10" align="center">Complete Experiments, 15% held-out validation (n = 2326)</td></tr> |
+| 2326 | linear | 64 | 4 | 2 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 84.93% |
+| 2326 | linear | 64 | 4 | 2 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 85.96% |
+| 2326 | linear | 64 | 4 | 2 | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 87.36% |
+| <tr><td colspan="10" align="center">Complete Experiments. 5% held-out validation (n = 2326)</td></tr> |
+| 2326 | linear | 64 | 4 | 2 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 83.71% |
+| 2326 | linear | 64 | 4 | 2 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 86.89% |
+| 2326 | linear | 64 | 4 | 2 | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 88.95% |
+| 2326 | linear | 256 | 8 | 4 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 85.11% |
+| 2326 | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 200 | 89.70% |
+| 2326 | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | **400** | **91.10%** |
+| 2326 | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 91.01% |
+| 2326 | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 700 | 89.42% |
+| 2326 | linear | 256 | 8 | 4 | finetune layer #4 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 490 | 88.39% |
 
 ## BPMT 1.0 - Experiment (Action Recognition)
 
@@ -108,18 +114,11 @@ TBD
 | 300 | 109 | linear | no | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 6.24% |
 | 300 | 109 | linear | finetune layer #2 | 1e-4 | 5000 | 1e-5, wd=1e-4 | 30 | 7.02% |
 | <tr><td colspan="10" align="center">Complete Experiments (n = 3000)</td></tr> |
-| 3000 | 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
-| 3000 | 3000 | linear | no | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
-| 3000 | 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | TBD |
+| 3000 | 3000 | linear | yes | 1e-5 | 500 | 1e-5, wd=1e-4 | 1000 | 2.08% |
+| 3000 | 3000 | linear | no | 1e-5 | 500 | 1e-5, wd=1e-4 | 200 | 2.94% |
+| 3000 | 3000 | linear | no | 1e-5 | 500 | 1e-5, wd=1e-4 | 500 | 2.24% |
+| 3000 | 3000 | linear | no | 1e-5 | 500 | 1e-5, wd=1e-4 | **1000** | **3.57%** |
 
-<!-- ## BPMT 1.0 - Experiment (close-set classification)
-
-| #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | clf-acc | 
-|------------------|------------------|------------|------------|--------|-------------|-------------|--------|-------------|----------------|--------------------|--------------|
-| 50 | 27 | linear | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 26.6% |
-| 50 | 27 | linear | yes | 1e-4 | 1000 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 130 | 25.9% |           
-| 300 | 109 | linear | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 400 | 6% |
-| 300 | 109 | linear | yes | 1e-4 | 1000 | yes | 1e-4 | 1000 | 1e-6, wd=1e-4 | 1000 | 7.35% |  -->
 
 ## BPMT 1.0 Experiment (Gait Recognition)
 | #subject scanned | #subject actual | decoder | freeze T1? | T1-lr | #epochs | freeze T2? | T1-lr | #epochs | ft-lr | ft-#epochs | R1-acc (seen people from training) | 

@@ -45,9 +45,15 @@ def main():
 
     print(f"pretrain?: {pretrain}")
 
-    # Set the device
+    # transformer parameters
+    hidden_size = 256
+    n_heads = 8
+    num_layers = 4
+    print(f"hidden_size: {hidden_size}")
+    print(f"n_heads: {n_heads}")
+    print(f"num_layers: {num_layers}")
 
-    hidden_size = 64
+    # Set the device
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     print("=" * 50)
@@ -56,7 +62,7 @@ def main():
 
     # load the dataset
     train_seq, train_lbl, test_seq, test_lbl = build_penn_action_lists(root_dir)
-    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.15)
+    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
 
     train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_dataset = ActionRecognitionDataset(val_seq, val_lbl)
@@ -92,8 +98,8 @@ def main():
         model = BaseT1(
             num_joints=NUM_JOINTS_PENN,
             d_model=hidden_size,
-            nhead=4,
-            num_layers=2
+            nhead=n_heads,
+            num_layers=num_layers,
         ).to(device)
         
         # training
@@ -126,15 +132,13 @@ def main():
         model_path="action_checkpoints/pretrained.pt",
         num_joints=NUM_JOINTS_PENN,
         d_model=hidden_size,
-        nhead=4,
-        num_layers=2,
+        nhead=n_heads,
+        num_layers=num_layers,
         freeze=True,
         device=device
     )
 
     print("pretrained model loaded successfully!")
-
-
    
     train_finetuning_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_finetuning_dataset = ActionRecognitionDataset(val_seq, val_lbl)
@@ -156,8 +160,8 @@ def main():
 
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)
 
-    freezeT1 = True
-    unfreeze_layers = [1]
+    freezeT1 = False
+    unfreeze_layers = None # finetune the entire T1 model
 
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
@@ -165,8 +169,8 @@ def main():
         t1=t1,
         gait_head=gait_head_template,
         d_model=hidden_size,
-        nhead=4,
-        num_layers=2,
+        nhead=n_heads,
+        num_layers=num_layers,
         num_epochs=num_epochs,
         lr=1e-5,
         freezeT1=freezeT1,
