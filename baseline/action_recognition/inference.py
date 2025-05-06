@@ -121,6 +121,7 @@ def main():
     # load T1 model
     unfreeze_layers = "entire"
     if unfreeze_layers is None:
+        print("************Freezing all layers")
         t1 = load_T1("action_checkpoints/pretrained.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     else:
         t1 = load_T1("action_checkpoints/finetuned_T1.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)

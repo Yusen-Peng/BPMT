@@ -35,7 +35,12 @@ class BaseT1(nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
         # reconstruction head (only used during training)
-        self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
+        #self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
+        self.reconstruction_head = nn.Sequential(
+            nn.Linear(d_model, d_model),
+            nn.ReLU(),
+            nn.Linear(d_model, num_joints * 2)
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """

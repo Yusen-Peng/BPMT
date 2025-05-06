@@ -61,14 +61,12 @@ def main():
     print("=" * 50)
 
     # load the dataset
-    train_seq, train_lbl, test_seq, test_lbl = build_penn_action_lists(root_dir)
+    train_seq, train_lbl, _, _ = build_penn_action_lists(root_dir)
     train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
 
     train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_dataset = ActionRecognitionDataset(val_seq, val_lbl)
-    
-    test_dataset = ActionRecognitionDataset(test_seq, test_lbl)
-    
+        
     # get the number of classes
     num_classes = len(set(train_lbl))
     print(f"[INFO] Number of classes: {num_classes}")
@@ -110,7 +108,7 @@ def main():
             model=model,
             num_epochs=num_epochs,
             batch_size=batch_size,
-            lr=1e-4,
+            lr=1e-5, # change it from 1e-4 to 1e-5
             mask_ratio=0.15,
             device=device
         )
@@ -139,6 +137,7 @@ def main():
     )
 
     print("pretrained model loaded successfully!")
+
    
     train_finetuning_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_finetuning_dataset = ActionRecognitionDataset(val_seq, val_lbl)
@@ -161,7 +160,7 @@ def main():
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)
 
     freezeT1 = False
-    unfreeze_layers = None # finetune the entire T1 model
+    unfreeze_layers = None # freeze all layers
 
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
