@@ -6,11 +6,12 @@ In this thesis project, I aim to design BPMT, Body Part as Modality Transformer,
 
 Dataset zoo: (I am currently using Penn Action)
 
-| dataset | #videos | #actions | dimension | available? |
+| dataset | #videos | #actions | dimension | #joints | available? |
 | ------- | ------- | -------- | --------- | ---------- |
-| **Penn Action** (2013) | 2,326 | 15 | **2D** | downloaded (3GB) |
-| NTU RGB+D  | 56,880 | 60 | 3D | under request |
-| Skeletics-152 | 122,621 | 152 | 3D | downloadable (over 50GB!) |
+| Penn Action (2013) | 2,326 | 15 | 2D | 13 | downloaded (3GB) |
+| NTU RGB+D (2016)  | 56,880 | 60 | 3D | 25 | downloaded (6GB) |
+| NTU RGB+D 120 (2019) | ?? | 120 | 3d | ?? | downloadable |
+| Skeletics-152 | 122,621 | 152 | 3D | | downloadable (over 50GB!) |
 
 
 ## Existing State-of-the-art
@@ -40,28 +41,34 @@ Second-stage pretraining:
 Finetuning:
 ![alt text](docs/finetuning_classification.png)
 
-## Baseline - Experiment (Action Recognition)
+## Baseline - Experiment (Penn Action Dataset)
 
-| #subject | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
+| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
-| <tr><td colspan="10" align="center">Complete Experiments, 15% held-out validation (n = 2326)</td></tr> |
-| 2326 | linear | 64 | 4 | 2 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 84.93% |
-| 2326 | linear | 64 | 4 | 2 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 85.96% |
-| 2326 | linear | 64 | 4 | 2 | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 87.36% |
-| <tr><td colspan="10" align="center">Complete Experiments. 5% held-out validation (n = 2326)</td></tr> |
-| 2326 | linear | 64 | 4 | 2 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 83.71% |
-| 2326 | linear | 64 | 4 | 2 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 86.89% |
-| 2326 | linear | 64 | 4 | 2 | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 88.95% |
-| 2326 | linear | 256 | 8 | 4 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 85.11% |
-| 2326 | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 200 | 89.70% |
-| 2326 | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | **400** | **91.10%** |
-| 2326 | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | **500** | **91.01%** |
-| 2326 | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 700 | 89.42% |
-| 2326 | linear | 256 | 8 | 4 | finetune layer #4 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 400 | 86.89% |
-| 2326 | linear | 256 | 8 | 4 | finetune layer #4 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 490 | 88.39% |
-| 2326 | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 600 | 89.51% |
-| 2326 | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | **700** | **90.45%** |
-| 2326 | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 1000 | 89.89% |
+| <tr><td colspan="11" align="center">Complete Experiments, 15% held-out validation (n = 2326)</td></tr> |
+| no | linear | 64 | 4 | 2 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 84.93% |
+| no | linear | 64 | 4 | 2 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 85.96% |
+| no | linear | 64 | 4 | 2 | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 87.36% |
+| <tr><td colspan="11" align="center">Complete Experiments. 5% held-out validation (n = 2326)</td></tr> |
+| no | linear | 64 | 4 | 2 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 83.71% |
+| no | linear | 64 | 4 | 2 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 86.89% |
+| no | linear | 64 | 4 | 2 | finetune layer #2 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 88.95% |
+| no | linear | 256 | 8 | 4 | yes | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 85.11% |
+| no | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 200 | 89.70% |
+| no | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | **400** | **91.10%** |
+| no | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | **500** | **91.01%** |
+| no | linear | 256 | 8 | 4 | no  | 1e-4 | 1000 | 1e-5, wd=1e-4 | 700 | 89.42% |
+| no | linear | 256 | 8 | 4 | finetune layer #4 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 400 | 86.89% |
+| no | linear | 256 | 8 | 4 | finetune layer #4 | 1e-4 | 1000 | 1e-5, wd=1e-4 | 490 | 88.39% |
+| no | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 600 | 89.51% |
+| no | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | **700** | **90.45%** |
+| no | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 1000 | 89.89% |
+| 30% | linear | 256 | 8 | 4 | yes | 1e-5 | 1000 | 1e-5, wd=1e-4 | 400 | 79.31% |
+| 30% | linear | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 400 | 87.17% |
+| 30% | linear | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 500 | 86.89% |
+| 30% | linear | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 700 | 86.42% |
+| 30% | linear | 256 | 8 | 4 | finetune layer #4 | 1e-5 | 1000 | 1e-5, wd=1e-4 | 100 | TBD |
+
 
 ## BPMT 1.0 - Experiment (Action Recognition)
 

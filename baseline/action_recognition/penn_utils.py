@@ -11,7 +11,6 @@ import os
 import glob
 from tqdm import tqdm
 from typing import List, Tuple, Dict
-from base_dataset import ActionRecognitionDataset
 
 NUM_JOINTS_PENN = 13
 

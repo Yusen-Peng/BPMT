@@ -14,7 +14,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
 from base_dataset import ActionRecognitionDataset
-from utils import set_seed, build_penn_action_lists, split_train_val, NUM_JOINTS_PENN, collate_fn_inference
+from penn_utils import set_seed, build_penn_action_lists, split_train_val, NUM_JOINTS_PENN, collate_fn_inference
 from finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
 
 def evaluate(

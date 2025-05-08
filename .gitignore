@@ -10,6 +10,8 @@ Gait3D-Benchmark/
 Gait3D-Benchmark/datasets/
 Gait3D-Benchmark/datasets/pretreatment.log
 GT_frames/
+nturgb+d_skeletons/
+NTU_dataset.zip
 */pth
 rtmlib/
 *.pt

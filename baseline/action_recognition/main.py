@@ -16,8 +16,7 @@ from finetuning import load_T1, finetuning, GaitRecognitionHead
 #from second_phase_baseline import BaseT2, train_T2, load_T1
 #from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
-
-from utils import set_seed, build_penn_action_lists, split_train_val, collate_fn_batch_padding, collate_fn_finetuning, NUM_JOINTS_PENN
+from penn_utils import set_seed, build_penn_action_lists, split_train_val, collate_fn_finetuning, NUM_JOINTS_PENN
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
@@ -71,17 +70,6 @@ def main():
     num_classes = len(set(train_lbl))
     print(f"[INFO] Number of classes: {num_classes}")
     print("=" * 100)
-
-
-
-    # # label remapping (IMPORTANT ALL THE TIME!)
-    # unique_train_labels = sorted(set(train_labels))
-    # label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(unique_train_labels)}
-    # train_labels = [label2new[old_lbl] for old_lbl in train_labels]
-    
-    # uniqueu_val_labels = sorted(set(val_labels))
-    # label2new = {old_lbl: new_lbl for new_lbl, old_lbl in enumerate(uniqueu_val_labels)}
-    # val_labels = [label2new[old_lbl] for old_lbl in val_labels]
 
     if pretrain == True: 
         """
@@ -161,6 +149,14 @@ def main():
 
     freezeT1 = False
     unfreeze_layers = None # freeze all layers
+
+    if freezeT1 and (unfreeze_layers is None):
+        print("[INFO] freezing the entire T1 model...")
+    elif freezeT1 and (unfreeze_layers is not None):
+        print(f"[INFO] layerwise finetuning...")
+        print(f"[INFO] unfreezing layers: {unfreeze_layers}...")
+    elif not freezeT1:
+        print("[INFO] finetuningv the entire T1 model...")
 
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,

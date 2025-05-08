@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-from utils import collate_fn_pairs
+from penn_utils import collate_fn_pairs
 from tqdm import tqdm
 from typing import Tuple, Dict
 from pretraining import BaseT1

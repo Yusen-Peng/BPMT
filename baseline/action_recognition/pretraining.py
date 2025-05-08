@@ -3,8 +3,9 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from utils import collate_fn_batch_padding
+from penn_utils import collate_fn_batch_padding
 from tqdm import tqdm
+from typing import Tuple
 
 POSITIONAL_UPPER_BOUND = 1000
 
@@ -35,12 +36,12 @@ class BaseT1(nn.Module):
         self.transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
 
         # reconstruction head (only used during training)
-        #self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
-        self.reconstruction_head = nn.Sequential(
-            nn.Linear(d_model, d_model),
-            nn.ReLU(),
-            nn.Linear(d_model, num_joints * 2)
-        )
+        self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
+        # self.reconstruction_head = nn.Sequential(
+        #     nn.Linear(d_model, d_model),
+        #     nn.ReLU(),
+        #     nn.Linear(d_model, num_joints * 2)
+        # )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -76,7 +77,34 @@ class BaseT1(nn.Module):
         encoded = encoded.transpose(0,1)
 
         return encoded
+    
 
+PAD_IDX = 0.0
+
+def mask_keypoints(inputs: torch.Tensor, mask_ratio: float = 0.15) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Randomly masks a subset of timesteps in each sequence.
+
+    Args:
+        inputs (torch.Tensor): (B, T, D) input sequence of keypoints.
+        mask_ratio (float): Fraction of timesteps to mask.
+
+    Returns:
+        masked_inputs (torch.Tensor): Input with some timesteps zeroed out.
+        mask (torch.Tensor): Binary mask of shape (B, T), 1 for masked, 0 for unmasked.
+    """
+    B, T, _ = inputs.shape
+    mask = torch.zeros(B, T, dtype=torch.bool, device=inputs.device)
+
+    for i in range(B):
+        num_to_mask = max(1, int(mask_ratio * T))
+        mask_indices = torch.randperm(T, device=inputs.device)[:num_to_mask]
+        mask[i, mask_indices] = 1
+
+    masked_inputs = inputs.clone()
+    masked_inputs[mask.unsqueeze(-1).expand_as(inputs)] = PAD_IDX
+
+    return masked_inputs, mask
 
 def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
     
@@ -108,36 +136,23 @@ def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr
         model.train()
         train_loss = 0.0
         for sequences, _ in train_loader:
-            # input sequences: (B, T, 2*num_joints)
             sequences = sequences.float().to(device)
+            masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
 
-            # perform masking
-            #masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
+            recons = model(masked_inputs)
 
-            # forward pass
-            #recons = model(masked_inputs)
-            recons = model(sequences)
+            loss_matrix = criterion(recons, sequences)  # (B, T, D)
+            mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)  # (B, T, D)
+            masked_loss = loss_matrix * mask_broadcasted
 
-            # compute the reconstruction loss
-            loss = criterion(recons, sequences)
-            loss_mean = loss.mean()
+            num_masked = mask_broadcasted.sum()
+            loss = masked_loss.sum() / (num_masked + 1e-8)
 
-            # we only do MSE on masked positions
-            # we also need to broadcast mask to match the shape 
-            # mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
-            # masked_loss = loss_matrix * mask_broadcasted
-
-            # compute the average loss per masked position
-            #num_masked = mask_broadcasted.sum()
-            #loss = masked_loss.sum() / (num_masked + 1e-8)
-
-            # backpropagation
             optimizer.zero_grad()
-            loss_mean.backward()
+            loss.backward()
             optimizer.step()
 
-            # accumulate loss
-            train_loss += loss_mean.item() * sequences.size(0)
+            train_loss += loss.item() * sequences.size(0)
 
         # compute the average training loss
         train_loss /= len(train_dataset) 
@@ -148,17 +163,15 @@ def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr
         with torch.no_grad():
             for sequences, _ in val_loader:
                 sequences = sequences.float().to(device)
-                #masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
-                #recons = model(masked_inputs)
-                recons = model(sequences)
+                masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
+                recons = model(masked_inputs)
 
-                loss = criterion(recons, sequences)
-                loss_mean = loss.mean()
-                #mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
-                #masked_loss = loss_matrix * mask_broadcasted
-                #num_masked = mask_broadcasted.sum()
-                #loss = masked_loss.sum() / (num_masked + 1e-8)
-                val_loss += loss_mean.item() * sequences.size(0)
+                loss_matrix = criterion(recons, sequences)
+                mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
+                masked_loss = loss_matrix * mask_broadcasted
+                num_masked = mask_broadcasted.sum()
+                loss = masked_loss.sum() / (num_masked + 1e-8)
+                val_loss += loss.item() * sequences.size(0)
 
         val_loss /= len(val_dataset)
 
