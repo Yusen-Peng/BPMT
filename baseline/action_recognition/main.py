@@ -51,6 +51,7 @@ def main():
     print(f"hidden_size: {hidden_size}")
     print(f"n_heads: {n_heads}")
     print(f"num_layers: {num_layers}")
+    print(f"batch_size: {batch_size}")
 
     # Set the device
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -90,14 +91,16 @@ def main():
         
         # training
         # dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
+        mask_ratio = 0.3
+        lr = 1e-4
         train_T1(
             train_dataset=train_dataset,
             val_dataset=val_dataset,
             model=model,
             num_epochs=num_epochs,
             batch_size=batch_size,
-            lr=1e-5, # change it from 1e-4 to 1e-5
-            mask_ratio=0.15,
+            lr=lr,
+            mask_ratio=mask_ratio,
             device=device
         )
 
@@ -156,7 +159,7 @@ def main():
         print(f"[INFO] layerwise finetuning...")
         print(f"[INFO] unfreezing layers: {unfreeze_layers}...")
     elif not freezeT1:
-        print("[INFO] finetuningv the entire T1 model...")
+        print("[INFO] finetuning the entire T1 model...")
 
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,

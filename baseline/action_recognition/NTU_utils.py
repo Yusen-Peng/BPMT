@@ -76,7 +76,6 @@ def build_ntu_skeleton_lists_auto(
     for i, filepath in tqdm(enumerate(sorted(glob.glob(os.path.join(skeleton_root, '*.skeleton'))))):
         filename = os.path.basename(filepath)
 
-        
         # Extract action class index: "A001" → 1
         action_idx = int(filename[17:20]) - 1  # zero-based
 
@@ -88,6 +87,12 @@ def build_ntu_skeleton_lists_auto(
 
         sequences.append(skeleton)
         labels.append(action_idx)
+
+        if i % 1001 == 0:
+            tqdm.write(f"[INFO] Loaded #{i} skeleton file...")
+            tqdm.write(f"skeleton shape: {skeleton.shape}")
+            tqdm.write(f"labels: {action_idx}")        
+
 
     return sequences, labels
 
@@ -118,7 +123,11 @@ def split_train_val(
 
 
 if __name__ == "__main__":
+    import time
+    t_start = time.time()
     all_seq, all_lbl = build_ntu_skeleton_lists_auto('nturgb+d_skeletons')
+    t_end = time.time()
+    print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")
     print(f"[VERIFY] Number of sequences: {len(all_seq)}")
     print(f"[VERIFY] Number of unique labels: {len(set(all_lbl))}")
     tr_seq, tr_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)
