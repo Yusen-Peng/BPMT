@@ -11,6 +11,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 NUM_JOINTS_NTU = 25
 OFFICIAL_XSUB_TRAIN_SUBJECTS = [1, 2, 4, 5, 8, 9, 13, 14, 15, 16, 17, 18, 19, 25, 27, 28, 31, 34, 35, 38]
+OFFICIAL_XVIEW_TRAIN_CAMERAS = [2, 3]
 
 def collate_fn_batch_padding(batch):
     """
@@ -95,35 +96,41 @@ def build_ntu_skeleton_lists_xsub(
 
     return sequences, labels
 
-def build_ntu_skeleton_lists_auto(
+def build_ntu_skeleton_lists_xview(
     skeleton_root: str,
+    is_train: bool = True,
+    train_cameras: List[int] = OFFICIAL_XVIEW_TRAIN_CAMERAS,
+    num_joints: int = NUM_JOINTS_NTU
 ) -> Tuple[List[np.ndarray], List[int]]:
     """
-    Automatically assigns labels by parsing action index from filename.
-    Returns sequences and labels.
+    Build NTU RGB+D dataset using Cross-View split.
+    Args:
+        skeleton_root: path to folder with .skeleton files
+        is_train: True for train split, False for test split
+        train_cameras: list of camera IDs used for training (default: [2, 3])
+        num_joints: number of joints (default: 25 for NTU)
+    Returns:
+        sequences, labels
     """
     sequences, labels = [], []
 
-    for i, filepath in tqdm(enumerate(sorted(glob.glob(os.path.join(skeleton_root, '*.skeleton'))))):
+    for filepath in tqdm(sorted(glob.glob(os.path.join(skeleton_root, '*.skeleton')))):
         filename = os.path.basename(filepath)
+        camera_id = int(filename[5:8])  # extract "C###" → camera ID
 
-        # Extract action class index: "A001" → 1
-        action_idx = int(filename[17:20]) - 1  # zero-based
+        # Check if sample belongs to current split
+        if (is_train and camera_id not in train_cameras) or (not is_train and camera_id in train_cameras):
+            continue
 
-        skeleton = read_ntu_skeleton_file(filepath)  # shape (T, 75)
+        # Extract action label (zero-based)
+        action_idx = int(filename[17:20]) - 1
 
-        # Normalize to hip (joint 0: x, y, z are the first 3 dims)
-        hip = skeleton[:, :3]                          # (T, 3)
-        skeleton = skeleton - np.tile(hip, (1, 25))    # (T, 75)
+        skeleton = read_ntu_skeleton_file(filepath, num_joints)
+        hip = skeleton[:, :3]
+        skeleton = skeleton - np.tile(hip, (1, num_joints))
 
         sequences.append(skeleton)
         labels.append(action_idx)
-
-        if i % 1001 == 0:
-            tqdm.write(f"[INFO] Loaded #{i} skeleton file...")
-            tqdm.write(f"skeleton shape: {skeleton.shape}")
-            tqdm.write(f"labels: {action_idx}")        
-
 
     return sequences, labels
 
@@ -156,7 +163,10 @@ def split_train_val(
 if __name__ == "__main__":
     import time
     t_start = time.time()
-    all_seq, all_lbl = build_ntu_skeleton_lists_auto('nturgb+d_skeletons')
+    
+    # all_seq, all_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=True)
+    all_seq, all_lbl = build_ntu_skeleton_lists_xview('nturgb+d_skeletons', is_train=True
+
     t_end = time.time()
     print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")
     print(f"[VERIFY] Number of sequences: {len(all_seq)}")
