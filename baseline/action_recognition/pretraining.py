@@ -150,7 +150,7 @@ def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr
             else:
                 # Regular full reconstruction
                 masked_inputs = sequences
-                mask = torch.ones_like(sequences[..., 0])  # (B, T)
+                mask = torch.ones_like(sequences[..., 0])
 
             recons = model(masked_inputs)
 
@@ -175,7 +175,7 @@ def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr
             for sequences, _ in val_loader:
                 sequences = sequences.float().to(device)
 
-                if mask_ratio:
+                if mask_ratio is not None:
                     masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
                 else:
                     masked_inputs = sequences

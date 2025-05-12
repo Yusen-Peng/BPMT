@@ -13,12 +13,6 @@ Dataset zoo: (I am currently using Penn Action)
 | NTU RGB+D 120 (2019) | ?? | 120 | 3d | ?? | downloadable |
 | Skeletics-152 | 122,621 | 152 | 3D | ?? | downloadable (over 50GB!) |
 
-
-## Existing State-of-the-art
-
-3DA (best) with Pr-VIPE, UNIK, HDM-BG, 3D Deep, PoseMap, MultitaskCNN, STAR: 
-![alt text](docs/3D_deformable_transformer.png)
-
 ## TLCA: Transfer Learning with Cross Attention 
 
 Pretraining:
@@ -42,6 +36,9 @@ Finetuning:
 ![alt text](docs/finetuning_classification.png)
 
 ## TLCA - Experiment (Penn Action Dataset)
+
+3DA (best) with Pr-VIPE, UNIK, HDM-BG, 3D Deep, PoseMap, MultitaskCNN, STAR: 
+![alt text](docs/3D_deformable_transformer.png)
 
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
@@ -89,15 +86,24 @@ Finetuning:
 | 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 88.67% |
 | 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 700 | **89.04%** |
 | 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1000 | 88.30% |
-| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1000 | 88.39 |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1000 | 88.39% |
 
 ## TLCA - Experiment (NTU RGB+D dataset)
 
+![alt text](docs/NTU_comparison.png)
 
-| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
+| <tr><td colspan="11" align="center"> cross-subject evaluation </td></tr> |
+| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy | 
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
-| <tr><td colspan="11" align="center"> let's start with 30% masked pretraining </td></tr> |
+| <tr><td colspan="11" align="center"> let's start with regular pretraining </td></tr> |
+| no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 10 | 63.56% |
+| no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 50 | **71.33%** |
+| no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | TBD |
+| <tr><td colspan="11" align="center"> let's do 30% masked pretraining now </td></tr> |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4 | 500 | TBD |
+
+
+| <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 
 
 

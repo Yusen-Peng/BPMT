@@ -10,6 +10,7 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 
 NUM_JOINTS_NTU = 25
+OFFICIAL_XSUB_TRAIN_SUBJECTS = [1, 2, 4, 5, 8, 9, 13, 14, 15, 16, 17, 18, 19, 25, 27, 28, 31, 34, 35, 38]
 
 def collate_fn_batch_padding(batch):
     """
@@ -69,6 +70,30 @@ def read_ntu_skeleton_file(
         # reshape from (T, 25, 3) to (T, 75)
         return xyz.reshape(xyz.shape[0], -1)
     
+
+def build_ntu_skeleton_lists_xsub(
+    skeleton_root: str,
+    is_train: bool = True,
+    train_subjects: List[int] = OFFICIAL_XSUB_TRAIN_SUBJECTS,
+    num_joints: int = NUM_JOINTS_NTU
+) -> Tuple[List[np.ndarray], List[int]]:
+    sequences, labels = [], []
+
+    for filepath in tqdm(sorted(glob.glob(os.path.join(skeleton_root, '*.skeleton')))):
+        filename = os.path.basename(filepath)
+        subject_id = int(filename[9:12])
+
+        if (is_train and subject_id not in train_subjects) or (not is_train and subject_id in train_subjects):
+            continue
+
+        action_idx = int(filename[17:20]) - 1
+        skeleton = read_ntu_skeleton_file(filepath, num_joints)
+        hip = skeleton[:, :3]
+        skeleton = skeleton - np.tile(hip, (1, num_joints))
+        sequences.append(skeleton)
+        labels.append(action_idx)
+
+    return sequences, labels
 
 def build_ntu_skeleton_lists_auto(
     skeleton_root: str,

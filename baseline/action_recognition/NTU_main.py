@@ -18,7 +18,7 @@ from finetuning import load_T1, finetuning, GaitRecognitionHead
 #from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
 from penn_utils import set_seed
-from NTU_utils import build_ntu_skeleton_lists_auto, split_train_val, NUM_JOINTS_NTU, collate_fn_finetuning
+from NTU_utils import build_ntu_skeleton_lists_xsub, split_train_val, NUM_JOINTS_NTU, collate_fn_finetuning
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
@@ -59,17 +59,16 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     print("=" * 50)
-    print(f"[INFO] Starting Penn Action dataset processing on {device}...")
+    print(f"[INFO] Starting NTU dataset processing on {device}...")
     print("=" * 50)
 
     # load the dataset
     import time
     t_start = time.time()
-    all_seq, all_lbl = build_ntu_skeleton_lists_auto('nturgb+d_skeletons')
+    all_seq, all_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=True)
     t_end = time.time()
-    print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")
-    print(f"[VERIFY] Number of sequences: {len(all_seq)}")
-    print(f"[VERIFY] Number of unique labels: {len(set(all_lbl))}")
+    print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")    
+    assert len(all_seq) == 40320
     train_seq, train_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)
     train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_dataset = ActionRecognitionDataset(val_seq, val_lbl)
@@ -102,7 +101,7 @@ def main():
         
         # training
         # dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
-        mask_ratio = 0.3
+        mask_ratio = None
         if mask_ratio is not None:
             print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
         else:
