@@ -92,8 +92,8 @@ Finetuning:
 
 ![alt text](docs/NTU_comparison.png)
 
-| <tr><td colspan="11" align="center"> cross-subject evaluation </td></tr> |
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy | 
+| <tr><td colspan="11" align="center"> cross-subject evaluation </td></tr> |
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
 | <tr><td colspan="11" align="center"> let's start with regular pretraining </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 10 | 63.56% |
@@ -101,9 +101,8 @@ Finetuning:
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | TBD |
 | <tr><td colspan="11" align="center"> let's do 30% masked pretraining now </td></tr> |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4 | 500 | TBD |
-
-
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
+| no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | TBD |
 
 
 
