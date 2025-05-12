@@ -10,13 +10,15 @@ from torch import nn
 from torch import optim
 from torch import Tensor
 from torch.nn import functional as F
+from torch.utils.data import DataLoader
 from pretraining import train_T1, BaseT1
 from finetuning import load_T1, finetuning, GaitRecognitionHead
 #from first_phase_baseline import BaseT1, train_T1
 #from second_phase_baseline import BaseT2, train_T2, load_T1
 #from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
-from penn_utils import set_seed, build_penn_action_lists, split_train_val, collate_fn_finetuning, NUM_JOINTS_PENN
+from penn_utils import set_seed
+from NTU_utils import build_ntu_skeleton_lists_auto, split_train_val, NUM_JOINTS_NTU, collate_fn_finetuning
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
@@ -61,12 +63,18 @@ def main():
     print("=" * 50)
 
     # load the dataset
-    train_seq, train_lbl, _, _ = build_penn_action_lists(root_dir)
-    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
-
+    import time
+    t_start = time.time()
+    all_seq, all_lbl = build_ntu_skeleton_lists_auto('nturgb+d_skeletons')
+    t_end = time.time()
+    print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")
+    print(f"[VERIFY] Number of sequences: {len(all_seq)}")
+    print(f"[VERIFY] Number of unique labels: {len(set(all_lbl))}")
+    train_seq, train_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)
     train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_dataset = ActionRecognitionDataset(val_seq, val_lbl)
-        
+
+
     # get the number of classes
     num_classes = len(set(train_lbl))
     print(f"[INFO] Number of classes: {num_classes}")
@@ -82,9 +90,10 @@ def main():
         print(f"==========================")
         
         # instantiate the model
-        three_d = False
+        three_d = True
+
         model = BaseT1(
-            num_joints=NUM_JOINTS_PENN,
+            num_joints=NUM_JOINTS_NTU,
             three_d=three_d,
             d_model=hidden_size,
             nhead=n_heads,
@@ -94,7 +103,11 @@ def main():
         # training
         # dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
         mask_ratio = 0.3
-        print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
+        if mask_ratio is not None:
+            print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
+        else:
+            print(f"[INFO] no masked pretraining, only regular pretraining")
+
         lr = 1e-4
         train_T1(
             train_dataset=train_dataset,
@@ -108,7 +121,7 @@ def main():
         )
 
         # save pretrained model
-        torch.save(model.state_dict(), f"action_checkpoints/pretrained.pt")
+        torch.save(model.state_dict(), f"action_checkpoints/NTU_pretrained.pt")
 
         print("Aha! pretraining is done!")
         print("=" * 100)
@@ -120,10 +133,10 @@ def main():
 
 
     # load T1 models
-    three_d = False
+    three_d = True
     t1 = load_T1(
-        model_path="action_checkpoints/Penn_pretrained.pt",
-        num_joints=NUM_JOINTS_PENN,
+        model_path="action_checkpoints/NTU_pretrained.pt",
+        num_joints=NUM_JOINTS_NTU,
         three_d=three_d,
         d_model=hidden_size,
         nhead=n_heads,
@@ -185,12 +198,12 @@ def main():
         print(f"[INFO] Unfreezing layers: {unfreeze_layers}...")
 
     # save the finetuned models
-    torch.save(trained_T2.state_dict(), f"action_checkpoints/Penn_finetuned_T2.pt")
-    torch.save(train_cross_attn.state_dict(), f"action_checkpoints/Penn_finetuned_cross_attn.pt")
-    torch.save(train_head.state_dict(), f"action_checkpoints/Penn_finetuned_head.pt")
+    torch.save(trained_T2.state_dict(), f"action_checkpoints/NTU_finetuned_T2.pt")
+    torch.save(train_cross_attn.state_dict(), f"action_checkpoints/NTU_finetuned_cross_attn.pt")
+    torch.save(train_head.state_dict(), f"action_checkpoints/NTU_finetuned_head.pt")
 
     if any(param.requires_grad for param in t1.parameters()):
-        torch.save(t1.state_dict(), f"action_checkpoints/Penn_finetuned_T1.pt")
+        torch.save(t1.state_dict(), f"action_checkpoints/NTU_finetuned_T1.pt")
 
     print("Aha! finetuned models saved successfully!")
 

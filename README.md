@@ -7,11 +7,11 @@ In this thesis project, I aim to design BPMT, Body Part as Modality Transformer,
 Dataset zoo: (I am currently using Penn Action)
 
 | dataset | #videos | #actions | dimension | #joints | available? |
-| ------- | ------- | -------- | --------- | ---------- |
+| ------- | ------- | -------- | --------- | ---------- | ------- |
 | Penn Action (2013) | 2,326 | 15 | 2D | 13 | downloaded (3GB) |
-| NTU RGB+D (2016)  | 56,880 | 60 | 3D | 25 | downloaded (6GB) |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | downloaded (6GB) |
 | NTU RGB+D 120 (2019) | ?? | 120 | 3d | ?? | downloadable |
-| Skeletics-152 | 122,621 | 152 | 3D | | downloadable (over 50GB!) |
+| Skeletics-152 | 122,621 | 152 | 3D | ?? | downloadable (over 50GB!) |
 
 
 ## Existing State-of-the-art
@@ -19,7 +19,7 @@ Dataset zoo: (I am currently using Penn Action)
 3DA (best) with Pr-VIPE, UNIK, HDM-BG, 3D Deep, PoseMap, MultitaskCNN, STAR: 
 ![alt text](docs/3D_deformable_transformer.png)
 
-## Baseline Design (Action Recognition)
+## TLCA: Transfer Learning with Cross Attention 
 
 Pretraining:
 ![alt text](docs/baseline_pretraining_classification.png)
@@ -27,7 +27,7 @@ Pretraining:
 Cascading Finetuning:
 ![alt text](docs/baseline_finetuning_classification.png)
 
-## BPMT 1.0 - Design (Action Recognition)
+## BPMT 1.0 (Action Recognition)
 
 Baseline Transformer (T1 and T2):
 ![alt text](docs/baseline_transformer.png)
@@ -41,7 +41,7 @@ Second-stage pretraining:
 Finetuning:
 ![alt text](docs/finetuning_classification.png)
 
-## Baseline - Experiment (Penn Action Dataset)
+## TLCA - Experiment (Penn Action Dataset)
 
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
@@ -63,11 +63,43 @@ Finetuning:
 | no | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 600 | 89.51% |
 | no | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | **700** | **90.45%** |
 | no | MLP | 256 | 8 | 4 | no  | 1e-5 | 1000 | 1e-5, wd=1e-4 | 1000 | 89.89% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 300 | 86.61% |
+| <tr><td colspan="11" align="center"> now, let's do **30%** masked pretraining </td></tr> |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 87.17% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 700 | 87.27% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1000 | **89.23%** |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1500 | 87.73% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1000 | **89.23%** | 
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1500 | 87.73% | 
+| 30% | MLP | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 86.89% |
+| 30% | MLP | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1000 | 87.45% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 89.70% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | **89.98%** |
+| <tr><td colspan="11" align="center"> *cosine scheduler* didn't improve the performance... </td></tr> |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4 | 500 | 86.99% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4 | 1000 | **88.20%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4 | 1200 | 87.92% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4, epoch-cosine | 800 | 86.52% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4, epoch-cosine | 1000 | 86.80% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4, epoch-cosine | 1500 | 86.80% |
+| <tr><td colspan="11" align="center"> now, try **40%** masked pretraining instead </td></tr> |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 400 | 87.55% |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | **88.20%** |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 600 | 87.36% |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 700 | 87.83% |
+| <tr><td colspan="11" align="center"> now, try 20% masked pretraining instead </td></tr> |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 400 | 87.73% |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 88.67% |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 700 | **89.04%** |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1000 | 88.30% |
+| 40% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 1000 | 88.39 |
+
+## TLCA - Experiment (NTU RGB+D dataset)
+
+
+| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
+|------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
+| <tr><td colspan="11" align="center"> let's start with 30% masked pretraining </td></tr> |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4 | 500 | TBD |
+
+
 
 ## BPMT 1.0 - Experiment (Action Recognition)
 

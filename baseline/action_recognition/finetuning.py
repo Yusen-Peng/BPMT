@@ -8,15 +8,17 @@ from tqdm import tqdm
 from typing import Tuple, Dict
 from pretraining import BaseT1
 import matplotlib.pyplot as plt
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 
-def load_T1(model_path: str, num_joints: int = 13, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
+
+def load_T1(model_path: str, num_joints: int = 13, three_d: bool = False, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
                 device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT1:
     """
         loads a BaseT1 model from a checkpoint
     """
 
-    model = BaseT1(num_joints=num_joints, d_model=d_model, nhead=nhead, num_layers=num_layers)
+    model = BaseT1(num_joints=num_joints, three_d=three_d, d_model=d_model, nhead=nhead, num_layers=num_layers)
     model.load_state_dict(torch.load(model_path, map_location='cpu'))
 
     # optionally freeze the model parameters
@@ -131,6 +133,11 @@ def finetuning(
     optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
     criterion = nn.CrossEntropyLoss()
 
+    # scheduler = CosineAnnealingLR(
+    #     optimizer,
+    #     T_max=num_epochs,
+    #     eta_min=1e-7
+    # )
 
     train_losses, val_losses = [], []
     train_accuracies, val_accuracies = [], []
@@ -175,6 +182,7 @@ def finetuning(
         train_losses.append(avg_loss)
         train_accuracies.append(train_acc)
         
+        #scheduler.step()
 
         # Validation
         gait_head.eval()

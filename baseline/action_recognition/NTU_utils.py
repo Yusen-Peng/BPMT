@@ -9,6 +9,7 @@ from tqdm import tqdm
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
+NUM_JOINTS_NTU = 25
 
 def collate_fn_batch_padding(batch):
     """
@@ -24,10 +25,15 @@ def collate_fn_batch_padding(batch):
     labels = torch.stack(labels, dim=0)
     return padded_seq, labels
 
+def collate_fn_finetuning(batch):
+    batch, labels = zip(*batch)
+    batch = pad_sequence(batch, batch_first=True, padding_value=0.0)
+    labels = torch.stack(labels, dim=0)
+    return batch, labels
 
 def read_ntu_skeleton_file(
     filepath: str,
-    num_joints: int = 25
+    num_joints: int = NUM_JOINTS_NTU
 ) -> np.ndarray:
     """
     Read an NTU RGB+D .skeleton file and return a NumPy array
