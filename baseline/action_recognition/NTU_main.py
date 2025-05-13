@@ -101,7 +101,7 @@ def main():
         
         # training
         # dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
-        mask_ratio = None
+        mask_ratio = 0.3
         if mask_ratio is not None:
             print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
         else:
@@ -146,11 +146,8 @@ def main():
 
     print("pretrained model loaded successfully!")
 
-    return
-
     train_finetuning_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_finetuning_dataset = ActionRecognitionDataset(val_seq, val_lbl)
-
 
     train_finetuning_dataloader = torch.utils.data.DataLoader(
         train_finetuning_dataset,

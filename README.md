@@ -96,14 +96,15 @@ Finetuning:
 | <tr><td colspan="11" align="center"> cross-subject evaluation </td></tr> |
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
 | <tr><td colspan="11" align="center"> let's start with regular pretraining </td></tr> |
-| no | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | TBD | TBD |
-
-
+| no | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 20 | 70.19% |
+| no | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 50 | 70.46% |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 10 | 63.56% |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 50 | 71.33% |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | **71.91%** |
 | <tr><td colspan="11" align="center"> let's do 30% masked pretraining now </td></tr> |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 300 | 1e-5, wd=1e-4 | 500 | TBD |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 100 | 1e-5, wd=1e-4 | 50 | 70.08% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 100 | 1e-5, wd=1e-4 | 100 | **70.45%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4, batch-cosine | 100 | 1e-5, wd=1e-4 | 300 | running now |
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | TBD |
 

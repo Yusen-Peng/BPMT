@@ -134,9 +134,6 @@ def main():
 
     print("pretrained model loaded successfully!")
 
-
-    return
-
     train_finetuning_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_finetuning_dataset = ActionRecognitionDataset(val_seq, val_lbl)
 
