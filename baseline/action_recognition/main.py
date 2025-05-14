@@ -32,6 +32,8 @@ def parse_args():
 
 def main():
     set_seed(42)
+    masking_strategy = "frame"
+    mask_ratio = 0.3
 
     args = parse_args()
     root_dir = args.root_dir
@@ -93,10 +95,10 @@ def main():
         
         # training
         # dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
-        mask_ratio = 0.3
         print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
         lr = 1e-4
         train_T1(
+            masking_strategy=masking_strategy,
             train_dataset=train_dataset,
             val_dataset=val_dataset,
             model=model,
@@ -107,8 +109,9 @@ def main():
             device=device
         )
 
+        print("[TEST] testing global joint masking" + "=" * 40)
         # save pretrained model
-        torch.save(model.state_dict(), f"action_checkpoints/pretrained.pt")
+        torch.save(model.state_dict(), f"action_checkpoints/Penn_pretrained.pt")
 
         print("Aha! pretraining is done!")
         print("=" * 100)

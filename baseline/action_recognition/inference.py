@@ -122,14 +122,14 @@ def main():
     unfreeze_layers = "entire"
     if unfreeze_layers is None:
         print("************Freezing all layers")
-        t1 = load_T1("action_checkpoints/pretrained.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
+        t1 = load_T1("action_checkpoints/Penn_pretrained.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     else:
-        t1 = load_T1("action_checkpoints/finetuned_T1.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
+        t1 = load_T1("action_checkpoints/Penn_finetuned_T1.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
         print(f"************Unfreezing layers: {unfreeze_layers}")
     
-    t2 = load_T2("action_checkpoints/finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
+    t2 = load_T2("action_checkpoints/Penn_finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     # load the cross attention module
-    cross_attn = load_cross_attn("action_checkpoints/finetuned_cross_attn.pt", d_model=hidden_size, device=device)
+    cross_attn = load_cross_attn("action_checkpoints/Penn_finetuned_cross_attn.pt", d_model=hidden_size, device=device)
 
     # load the gait recognition head
     gait_head = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes)

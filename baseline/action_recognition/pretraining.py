@@ -46,6 +46,7 @@ class BaseT1(nn.Module):
             self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
         
         
+        # MLP reconstruction head (optional)
         # self.reconstruction_head = nn.Sequential(
         #     nn.Linear(d_model, d_model),
         #     nn.ReLU(),
@@ -90,18 +91,7 @@ class BaseT1(nn.Module):
 
 PAD_IDX = 0.0
 
-def mask_keypoints(inputs: torch.Tensor, mask_ratio: float = 0.15) -> Tuple[torch.Tensor, torch.Tensor]:
-    """
-    Randomly masks a subset of timesteps in each sequence.
-
-    Args:
-        inputs (torch.Tensor): (B, T, D) input sequence of keypoints.
-        mask_ratio (float): Fraction of timesteps to mask.
-
-    Returns:
-        masked_inputs (torch.Tensor): Input with some timesteps zeroed out.
-        mask (torch.Tensor): Binary mask of shape (B, T), 1 for masked, 0 for unmasked.
-    """
+def mask_random_frames(inputs: torch.Tensor, mask_ratio: float = 0.15) -> Tuple[torch.Tensor, torch.Tensor]:
     B, T, _ = inputs.shape
     mask = torch.zeros(B, T, dtype=torch.bool, device=inputs.device)
 
@@ -115,7 +105,46 @@ def mask_keypoints(inputs: torch.Tensor, mask_ratio: float = 0.15) -> Tuple[torc
 
     return masked_inputs, mask
 
-def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
+
+def mask_random_global_joints(inputs: torch.Tensor, num_joints: int, joint_dim: int, mask_ratio: float = 0.3) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Randomly masks out a percentage of joint slots globally across all frames.
+
+    Args:
+        inputs: Tensor of shape [B, T, C] where C = num_joints * joint_dim
+        num_joints: Number of joints per frame
+        joint_dim: Number of values per joint (e.g. 2 for (x,y), 3 for (x,y,conf))
+        mask_ratio: Percentage of joint slots (T * num_joints) to mask out
+
+    Returns:
+        masked_inputs: Same shape as inputs, with PAD_IDX in masked positions
+        mask: Boolean tensor of shape [B, T, num_joints], True at masked joints
+    """
+    B, T, C = inputs.shape
+    assert C == num_joints * joint_dim
+
+    masked_inputs = inputs.clone()
+    mask = torch.zeros(B, T, num_joints, dtype=torch.bool, device=inputs.device)
+
+    total_slots = T * num_joints
+    num_to_mask = max(1, int(mask_ratio * total_slots))
+
+    for i in range(B):
+        indices = torch.randperm(total_slots, device=inputs.device)[:num_to_mask]
+        # Map flat indices to (t, j)
+        t_indices = indices // num_joints
+        j_indices = indices % num_joints
+        mask[i, t_indices, j_indices] = 1
+
+    # Expand mask to [B, T, C] by repeating each joint's mask across joint_dim
+    expanded_mask = mask.repeat_interleave(joint_dim, dim=2)  # shape [B, T, C]
+
+    masked_inputs[expanded_mask] = PAD_IDX
+
+    return masked_inputs, mask
+
+
+def train_T1(masking_strategy, train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
     
     train_loader = DataLoader(
         train_dataset,
@@ -146,7 +175,9 @@ def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr
 
               # Masked pretraining
             if mask_ratio is not None:
-                masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
+                if masking_strategy == "frame":
+                    masked_inputs, mask = mask_random_frames(sequences, mask_ratio=mask_ratio)
+                
             else:
                 # Regular full reconstruction
                 masked_inputs = sequences
@@ -176,7 +207,8 @@ def train_T1(train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr
                 sequences = sequences.float().to(device)
 
                 if mask_ratio is not None:
-                    masked_inputs, mask = mask_keypoints(sequences, mask_ratio=mask_ratio)
+                    if masking_strategy == "frame":
+                        masked_inputs, mask = mask_random_frames(sequences, mask_ratio=mask_ratio)
                 else:
                     masked_inputs = sequences
                     mask = torch.ones_like(sequences[..., 0])
