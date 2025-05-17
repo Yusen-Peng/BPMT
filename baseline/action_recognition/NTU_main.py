@@ -44,6 +44,11 @@ def main():
     device = args.device
     pretrain = args.pretrain
 
+
+    mask_strategy = "global_joint"
+    mask_ratio = 0.3
+    val_ratio = 0.05
+
     print(f"pretrain?: {pretrain}")
 
     # transformer parameters
@@ -101,14 +106,16 @@ def main():
         
         # training
         # dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
-        mask_ratio = 0.3
         if mask_ratio is not None:
             print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
         else:
             print(f"[INFO] no masked pretraining, only regular pretraining")
 
         lr = 1e-4
+        print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
+        print(f"[INFO] train/val split ratio: {val_ratio * 100}%")
         train_T1(
+            masking_strategy=mask_strategy,
             train_dataset=train_dataset,
             val_dataset=val_dataset,
             model=model,

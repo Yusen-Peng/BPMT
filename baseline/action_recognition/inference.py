@@ -133,7 +133,7 @@ def main():
 
     # load the gait recognition head
     gait_head = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes)
-    gait_head.load_state_dict(torch.load("action_checkpoints/finetuned_head.pt", map_location="cpu"))
+    gait_head.load_state_dict(torch.load("action_checkpoints/Penn_finetuned_head.pt", map_location="cpu"))
     gait_head = gait_head.to(device)
 
     print("Aha! All models loaded successfully!")

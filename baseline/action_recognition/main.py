@@ -32,8 +32,10 @@ def parse_args():
 
 def main():
     set_seed(42)
-    masking_strategy = "frame"
+    # masking_strategy = "frame", "global_joint"
+    masking_strategy = "global_joint"
     mask_ratio = 0.3
+    val_ratio = 0.05
 
     args = parse_args()
     root_dir = args.root_dir
@@ -64,7 +66,7 @@ def main():
 
     # load the dataset
     train_seq, train_lbl, _, _ = build_penn_action_lists(root_dir)
-    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
+    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=val_ratio)
 
     train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_dataset = ActionRecognitionDataset(val_seq, val_lbl)
@@ -96,6 +98,7 @@ def main():
         # training
         # dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
         print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
+        print(f"[INFO] train/val split ratio: {val_ratio * 100}%")
         lr = 1e-4
         train_T1(
             masking_strategy=masking_strategy,

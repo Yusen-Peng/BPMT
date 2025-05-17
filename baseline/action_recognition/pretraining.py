@@ -25,6 +25,7 @@ class BaseT1(nn.Module):
         super(BaseT1, self).__init__()
         self.num_joints = num_joints
         self.d_model = d_model
+        self.three_d = three_d
 
         # keypoint embedding
         if three_d:
@@ -126,25 +127,25 @@ def mask_random_global_joints(inputs: torch.Tensor, num_joints: int, joint_dim: 
     masked_inputs = inputs.clone()
     mask = torch.zeros(B, T, num_joints, dtype=torch.bool, device=inputs.device)
 
+    # the total number of slots per sample in the batch
     total_slots = T * num_joints
     num_to_mask = max(1, int(mask_ratio * total_slots))
 
     for i in range(B):
         indices = torch.randperm(total_slots, device=inputs.device)[:num_to_mask]
-        # Map flat indices to (t, j)
+
+        # 1D to 2D index mapping
         t_indices = indices // num_joints
         j_indices = indices % num_joints
         mask[i, t_indices, j_indices] = 1
 
-    # Expand mask to [B, T, C] by repeating each joint's mask across joint_dim
+    # expand mask to [B, T, C] by repeating each joint's mask across joint_dim
     expanded_mask = mask.repeat_interleave(joint_dim, dim=2)  # shape [B, T, C]
 
     masked_inputs[expanded_mask] = PAD_IDX
-
     return masked_inputs, mask
 
-
-def train_T1(masking_strategy, train_dataset, val_dataset, model, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
+def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
     
     train_loader = DataLoader(
         train_dataset,
@@ -177,16 +178,28 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model, num_epochs=50,
             if mask_ratio is not None:
                 if masking_strategy == "frame":
                     masked_inputs, mask = mask_random_frames(sequences, mask_ratio=mask_ratio)
-                
+                elif masking_strategy == "global_joint":
+                    joint_dim = 3 if model.three_d == True else 2
+                    masked_inputs, mask = mask_random_global_joints(sequences, num_joints=model.num_joints, joint_dim=joint_dim, mask_ratio=mask_ratio)                
+                else:
+                    raise ValueError(f"Unknown masking strategy: {masking_strategy}")
             else:
-                # Regular full reconstruction
                 masked_inputs = sequences
                 mask = torch.ones_like(sequences[..., 0])
 
             recons = model(masked_inputs)
 
             loss_matrix = criterion(recons, sequences)
-            mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
+
+            # loss_matrix already exists
+            
+            joint_dim = 3 if model.three_d else 2
+            if masking_strategy == "frame":
+                mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
+
+            elif masking_strategy == "global_joint":
+                mask_broadcasted = mask.repeat_interleave(joint_dim, dim=-1)
+            
             masked_loss = loss_matrix * mask_broadcasted
             num_masked = mask_broadcasted.sum()
             loss = masked_loss.sum() / (num_masked + 1e-8)
@@ -209,6 +222,11 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model, num_epochs=50,
                 if mask_ratio is not None:
                     if masking_strategy == "frame":
                         masked_inputs, mask = mask_random_frames(sequences, mask_ratio=mask_ratio)
+                    elif masking_strategy == "global_joint":
+                        joint_dim = 3 if model.three_d == True else 2
+                        masked_inputs, mask = mask_random_global_joints(sequences, num_joints=model.num_joints, joint_dim=joint_dim, mask_ratio=mask_ratio)
+                    else:
+                        raise ValueError(f"Unknown masking strategy: {masking_strategy}")
                 else:
                     masked_inputs = sequences
                     mask = torch.ones_like(sequences[..., 0])
@@ -216,7 +234,14 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model, num_epochs=50,
                 recons = model(masked_inputs)
 
                 loss_matrix = criterion(recons, sequences)
-                mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
+
+                joint_dim = 3 if model.three_d else 2
+                if masking_strategy == "frame":
+                    mask_broadcasted = mask.unsqueeze(-1).expand_as(recons)
+
+                elif masking_strategy == "global_joint":
+                    mask_broadcasted = mask.repeat_interleave(joint_dim, dim=-1)
+                
                 masked_loss = loss_matrix * mask_broadcasted
                 num_masked = mask_broadcasted.sum()
                 loss = masked_loss.sum() / (num_masked + 1e-8)
