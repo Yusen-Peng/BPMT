@@ -35,7 +35,7 @@ Second-stage pretraining:
 Finetuning:
 ![alt text](docs/finetuning_classification.png)
 
-## Baseline - Experiment (Penn Action Dataset)
+## Baseline - Experiment (Penn Action Dataset) - ALREADY OUTPERFORM STATE-OF-THE-ART!!! (94.66%)
 
 3DA (best) with Pr-VIPE, UNIK, HDM-BG, 3D Deep, PoseMap, MultitaskCNN, STAR: 
 ![alt text](docs/3D_deformable_transformer.png)
@@ -43,7 +43,7 @@ Finetuning:
 The current best training setup (95%-5% train-val split):
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 300 | **92.88%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 1e-5, wd=1e-4 | **1000** | **94.66%** |
 
 
 The complete experiment tuning logs:
@@ -114,9 +114,7 @@ The complete experiment tuning logs:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 600 | 92.13% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 900 | **92.42%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 1000 | 91.95% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | running |
-
-
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | **94.66%** |
 | <tr><td colspan="11" align="center"> *ablation study*: **too many layers** can cause overfitting... </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 100 | 89.89% |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 300 | 86.52% |
