@@ -6,12 +6,12 @@ In this thesis project, I aim to design BPMT, Body Part as Modality Transformer,
 
 Dataset zoo: (I am currently using Penn Action)
 
-| dataset | #videos | #actions | dimension | #joints | available? |
+| dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
-| Penn Action (2013) | 2,326 | 15 | 2D | 13 | downloaded (3GB) |
-| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | downloaded (6GB) |
-| NTU RGB+D 120 (2019) | ?? | 120 | 3d | ?? | downloadable |
-| Skeletics-152 | 122,621 | 152 | 3D | ?? | downloadable (over 50GB!) |
+| Penn Action (2013) | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, 73.21% < 92.6% (SkateFormer) |
+| NTU RGB+D 120 (2019) | ?? | 120 | 3d | ?? | N/A |
+| Skeletics-152 | 122,621 | 152 | 3D | ?? | N/A |
 
 ## Baseline - TLCA: Transfer Learning with Cross Attention 
 
