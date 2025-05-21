@@ -13,7 +13,7 @@ Dataset zoo: (I am currently using Penn Action)
 | NTU RGB+D 120 (2019) | ?? | 120 | 3d | ?? | downloadable |
 | Skeletics-152 | 122,621 | 152 | 3D | ?? | downloadable (over 50GB!) |
 
-## TLCA: Transfer Learning with Cross Attention 
+## Baseline - TLCA: Transfer Learning with Cross Attention 
 
 Pretraining:
 ![alt text](docs/baseline_pretraining_classification.png)
@@ -35,7 +35,7 @@ Second-stage pretraining:
 Finetuning:
 ![alt text](docs/finetuning_classification.png)
 
-## TCLA - Experiment (Penn Action Dataset)
+## Baseline - Experiment (Penn Action Dataset)
 
 3DA (best) with Pr-VIPE, UNIK, HDM-BG, 3D Deep, PoseMap, MultitaskCNN, STAR: 
 ![alt text](docs/3D_deformable_transformer.png)
@@ -108,17 +108,30 @@ The complete experiment tuning logs:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 300 | 91.57% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 91.57% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 200 | 91.20% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 300 | **92.88%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **600** | 1e-5, wd=1e-4 | 300 | **92.88%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 400 | **92.42%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 500 | 91.57% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 600 | 92.13% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 900 | **92.42%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 1000 | 91.95% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | running |
+
+
 | <tr><td colspan="11" align="center"> *ablation study*: **too many layers** can cause overfitting... </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 100 | 89.89% |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 300 | 86.52% |
 
-## TLCA - Experiment (NTU RGB+D dataset)
+## Baseline - Experiment (NTU RGB+D dataset)
+
+Many folks have done data augmentation (still using only skeleton data):
+
+1. E1: joint modality only
+2. E2: joint + bone modalities
+3. E4: joint + bone + joint motion + bone motion modalities
+
+People usually: 
+
+*train separate networks for each modality and ensemble their outputs*
 
 ![alt text](docs/NTU_comparison.png)
 
