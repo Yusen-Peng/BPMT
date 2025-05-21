@@ -9,8 +9,7 @@ from typing import Tuple, Dict
 from pretraining import BaseT1
 import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import CosineAnnealingLR
-
-
+from transformers import get_cosine_schedule_with_warmup
 
 def load_T1(model_path: str, num_joints: int = 13, three_d: bool = False, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
                 device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT1:
@@ -129,8 +128,18 @@ def finetuning(
          list(t2.parameters()) + \
          list(cross_attn.parameters()) + \
          list(gait_head.parameters())
-    
-    optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
+
+    #optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
+    optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=1e-4)
+    num_training_steps = num_epochs
+    num_warmup_steps = int(0.05 * num_training_steps)
+
+    scheduler = get_cosine_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=num_warmup_steps,
+        num_training_steps=num_training_steps,
+    )
+
     criterion = nn.CrossEntropyLoss()
 
     # scheduler = CosineAnnealingLR(
@@ -182,7 +191,8 @@ def finetuning(
         train_losses.append(avg_loss)
         train_accuracies.append(train_acc)
         
-        #scheduler.step()
+        # learning rate scheduler step
+        scheduler.step()
 
         # Validation
         gait_head.eval()

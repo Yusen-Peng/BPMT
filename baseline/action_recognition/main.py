@@ -171,6 +171,11 @@ def main():
     elif not freezeT1:
         print("[INFO] finetuning the entire T1 model...")
 
+
+    # finetuning learning rate
+    fn_lr = 3e-5
+
+
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
         val_loader=val_finetuning_dataloader,
@@ -180,7 +185,7 @@ def main():
         nhead=n_heads,
         num_layers=num_layers,
         num_epochs=num_epochs,
-        lr=1e-5,
+        lr=fn_lr,
         freezeT1=freezeT1,
         unfreeze_layers=unfreeze_layers,
         device=device
