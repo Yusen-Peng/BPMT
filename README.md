@@ -4,16 +4,18 @@ In this thesis project, I aim to design BPMT, Body Part as Modality Transformer,
 
 # Human Action Recognition: a close-set classification problem
 
-Dataset zoo: (I am currently using Penn Action)
+Baseline results: 
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
 | Penn Action (2013) | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
-| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, 73.21% < 92.6% (SkateFormer) |
-| NTU RGB+D 120 (2019) | ?? | 120 | 3d | ?? | N/A |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **73.21%** < 92.6% (SkateFormer) - cross subject |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, N/A < 92.6% (SkateFormer) - cross view |
+| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | not yet,  N/A < 87.7%  (SkateFormer) - cross subject |
+| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | not yet,  N/A < 89.3%  (SkateFormer) - cross view |
 | Skeletics-152 | 122,621 | 152 | 3D | ?? | N/A |
 
-## Baseline - TLCA: Transfer Learning with Cross Attention 
+## Baseline - (TLCA: Transfer Learning with Cross Attention) 
 
 Pretraining:
 ![alt text](docs/baseline_pretraining_classification.png)
@@ -35,7 +37,7 @@ Second-stage pretraining:
 Finetuning:
 ![alt text](docs/finetuning_classification.png)
 
-## Baseline - Experiment (Penn Action Dataset) - ALREADY OUTPERFORM STATE-OF-THE-ART!!! (94.66%)
+## Baseline - Experiment (Penn Action Dataset) - ALREADY OUTPERFORM STATE-OF-THE-ART (94.66%)
 
 3DA (best) with Pr-VIPE, UNIK, HDM-BG, 3D Deep, PoseMap, MultitaskCNN, STAR: 
 ![alt text](docs/3D_deformable_transformer.png)
@@ -100,7 +102,7 @@ The complete experiment tuning logs:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 91.48% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 500 | 91.01% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 200 | 91.67% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 300 | **92.42%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 300 | 92.42% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 350 | 91.76% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 400 | 91.95% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 500 | 91.39% |
@@ -108,13 +110,13 @@ The complete experiment tuning logs:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 300 | 91.57% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 91.57% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 200 | 91.20% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **600** | 1e-5, wd=1e-4 | 300 | **92.88%** |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 400 | **92.42%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 300 | 92.88% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 400 | 92.42% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 500 | 91.57% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 600 | 92.13% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 900 | **92.42%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 900 | 92.42% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 600 | 1e-5, wd=1e-4 | 1000 | 91.95% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | **94.66%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 1e-5, wd=1e-4 | **1000** | **94.66%** |
 | <tr><td colspan="11" align="center"> *ablation study*: **too many layers** can cause overfitting... </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 100 | 89.89% |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 300 | 86.52% |
@@ -165,10 +167,7 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 71.99% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 72.33% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.21%** |
-
-
-
-
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 72.94% |
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | TBD |
 
