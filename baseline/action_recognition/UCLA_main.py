@@ -168,7 +168,7 @@ def main():
 
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)
 
-    freezeT1 = False
+    freezeT1 = True
     unfreeze_layers = None # freeze all layers
 
     if freezeT1 and (unfreeze_layers is None):

@@ -124,7 +124,7 @@ def main():
     )
 
     # load T1 model
-    unfreeze_layers = "entire"
+    unfreeze_layers = None
     if unfreeze_layers is None:
         print("************Freezing all layers")
         t1 = load_T1("action_checkpoints/NUCLA_pretrained.pt", 
