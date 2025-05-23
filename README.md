@@ -2,9 +2,7 @@
 
 In this thesis project, I aim to design BPMT, Body Part as Modality Transformer, which can achieve efficient and accurate (i) Human Action Recognition and (ii) Human Gait Recognition, respectively.
 
-# Human Action Recognition: a close-set classification problem
-
-Baseline results: 
+## Baseline results
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
@@ -13,6 +11,11 @@ Baseline results:
 | NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, N/A < 92.6% (SkateFormer) - cross view |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | not yet,  N/A < 87.7%  (SkateFormer) - cross subject |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | not yet,  N/A < 89.3%  (SkateFormer) - cross view |
+
+| N-UCLA (2014) | 1,494 | 12 | 3D | 20 | not yet, N/A < 98.3% (SkateFormer) - cross view |
+
+
+
 | Skeletics-152 | 122,621 | 152 | 3D | ?? | N/A |
 
 ## Baseline - (TLCA: Transfer Learning with Cross Attention) 
@@ -37,7 +40,7 @@ Second-stage pretraining:
 Finetuning:
 ![alt text](docs/finetuning_classification.png)
 
-## Baseline - Experiment (Penn Action Dataset) - ALREADY OUTPERFORM STATE-OF-THE-ART (94.66%)
+## Baseline - Experiment (Penn Action) - ALREADY OUTPERFORM STATE-OF-THE-ART (94.66%)
 
 3DA (best) with Pr-VIPE, UNIK, HDM-BG, 3D Deep, PoseMap, MultitaskCNN, STAR: 
 ![alt text](docs/3D_deformable_transformer.png)
@@ -121,7 +124,7 @@ The complete experiment tuning logs:
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 100 | 89.89% |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 300 | 86.52% |
 
-## Baseline - Experiment (NTU RGB+D dataset)
+## Baseline - Experiment (NTU RGB+D 60)
 
 Many folks have done data augmentation (still using only skeleton data):
 
@@ -146,9 +149,16 @@ cross-subject evaluation:
 
 The complete experiment tuning logs:
 
+## THE MAJOR BOTTLENECK (MOST LIKELY)
+
+This might be the biggest issue now: What should be the strategy in the case of multiple bodies within one frame?
+
+currently, I only keep the first body and skip the others
+
 cross-subject evaluation:
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
 |--------------------|---------|---------|--------|------------|------------|--------|----------|----------------|----------|----------|
+| <tr><td colspan="11" align="center"> multiple bodies: **skipping** </td></tr> |
 | <tr><td colspan="11" align="center"> **regular** pretraining </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 20 | 70.19% |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 50 | 70.46% |
@@ -168,8 +178,34 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 72.33% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.21%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 72.94% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 300 | TBD |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 500 | TBD |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 1000 | running |
+
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | TBD |
+
+
+
+## Baseline - Experiment (NW-UCLA)
+
+| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
+
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 50 | 65.95% |
+
+
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 20 | 65.73% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 30 | **69.40%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 50 | **69.40%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 67.03% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 61.21% |
+
+
+
+
+
+
+
 
 
 ## BPMT 1.0 - Experiment (Action Recognition)

@@ -1,0 +1,46 @@
+/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/transformer.py:385: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.self_attn.batch_first was not True(use batch_first for better inference performance)
+  warnings.warn(
+pretrain?: False
+hidden_size: 256
+n_heads: 8
+num_layers: 4
+batch_size: 4
+==================================================
+[INFO] Starting NW-UCLA dataset processing on cuda...
+==================================================
+==[WARNING] view_1/a01_s08_e02/frame_448_tc_16822477_skeletons.txt has insufficient data.==
+==[WARNING] view_1/a02_s07_e00/frame_34_tc_18690058_skeletons.txt has insufficient data.==
+==[WARNING] view_1/a02_s10_e02/frame_481_tc_9105107_skeletons.txt has insufficient data.==
+======[WARNING] view_1/a03_s06_e01 from view_1 has no valid skeletons. Skipping.======
+==[WARNING] view_1/a03_s07_e02/frame_401_tc_18896479_skeletons.txt has insufficient data.==
+==[WARNING] view_1/a04_s01_e01/frame_357_tc_90965087_skeletons.txt has insufficient data.==
+==[WARNING] view_1/a04_s05_e07/frame_726_tc_22588507_skeletons.txt has insufficient data.==
+==[WARNING] view_1/a05_s07_e00/frame_105_tc_19107376_skeletons.txt has insufficient data.==
+======[WARNING] view_1/a05_s07_e00 from view_1 has no valid skeletons. Skipping.======
+==[WARNING] view_1/a09_s07_e02/frame_966_tc_19483432_skeletons.txt has insufficient data.==
+==[WARNING] view_1/a11_s08_e00/frame_223_tc_18117784_skeletons.txt has insufficient data.==
+======[WARNING] view_2/a01_s06_e03 from view_2 has no valid skeletons. Skipping.======
+==[WARNING] view_2/a02_s07_e03/frame_601_tc_20343653_skeletons.txt has insufficient data.==
+======[WARNING] view_2/a02_s10_e03 from view_2 has no valid skeletons. Skipping.======
+======[WARNING] view_2/a03_s09_e01 from view_2 has no valid skeletons. Skipping.======
+======[WARNING] view_2/a03_s09_e03 from view_2 has no valid skeletons. Skipping.======
+==[WARNING] view_2/a03_s10_e01/frame_334_tc_10880180_skeletons.txt has insufficient data.==
+======[WARNING] view_2/a12_s06_e00 from view_2 has no valid skeletons. Skipping.======
+==[WARNING] view_3/a02_s07_e03/frame_601_tc_20343653_skeletons.txt has insufficient data.==
+======[WARNING] view_3/a02_s10_e03 from view_3 has no valid skeletons. Skipping.======
+======[WARNING] view_3/a03_s09_e01 from view_3 has no valid skeletons. Skipping.======
+======[WARNING] view_3/a03_s09_e03 from view_3 has no valid skeletons. Skipping.======
+==[WARNING] view_3/a03_s10_e01/frame_334_tc_10880180_skeletons.txt has insufficient data.==
+==[WARNING] view_3/a08_s10_e00/frame_375_tc_4253772_skeletons.txt has insufficient data.==
+==[WARNING] view_3/a11_s07_e03/frame_1013_tc_14074160_skeletons.txt has insufficient data.==
+#classes=12 | train_videos=1020 | test_videos=464
+[INFO] Number of classes: 12
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+pretrained model loaded successfully!
+[INFO] finetuning the entire T1 model...
+is T1 freezed? False
+unfreezing layers: None
+  0%|          | 0/500 [00:00<?, ?it/s]  0%|          | 1/500 [00:05<42:15,  5.08s/it]
