@@ -150,11 +150,12 @@ cross-subject evaluation:
 
 ## The complete experiment tuning logs:
 
-### THE MAJOR BOTTLENECK (MOST LIKELY)
+### potential bottleneck for NTU 60
 
-This might be the biggest issue now: What should be the strategy in the case of multiple bodies within one frame?
-
-currently, I only keep the first body and skip the others
+1. Z-normalization is missing (I only have hip centering so far)
+2. model is relatively small (hidden size = 256, only 4 layers)
+3. using the first body when multiple people appear on the same frame
+4. no data augmentation
 
 cross-subject evaluation:
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
@@ -179,9 +180,13 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 72.33% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.21%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 72.94% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 100 | running |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 300 | TBD |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 500 | TBD |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 1000 | running |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 1000 | 72.51% |
+
+
+
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | TBD |
 
@@ -191,6 +196,16 @@ cross-subject evaluation:
 
 ![alt text](docs/NTU_comparison.png)
 
+### potential bottleneck for N-UCLA
+
+1. No Hip-Centering or Normalization
+2. model is relatively small (hidden size = 256, only 4 layers)
+3. using the first body when multiple people appear on the same frame
+4. no data augmentation
+
+The following bottleneck is ***under discussion***:
+
+1. is (T, 20, 3) -> (T × 20, 3) better than -> (T, 20X3)?
 
 
 
@@ -221,7 +236,9 @@ The current best training setup (95%-5% train-val split):
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | 66.16% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 400 | 64.44% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 500 | 69.18% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 600 | running |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 600 | 65.52% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 800 | 66.59% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | running |
 
 
 ## Baseline - Experiment (Skeletics-152, cross-view) 
