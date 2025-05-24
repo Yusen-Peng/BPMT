@@ -131,14 +131,14 @@ def finetuning(
 
     #optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
     optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=1e-4)
-    # num_training_steps = num_epochs
-    # num_warmup_steps = int(0.05 * num_training_steps)
+    num_training_steps = num_epochs
+    num_warmup_steps = int(0.05 * num_training_steps)
 
-    # scheduler = get_cosine_schedule_with_warmup(
-    #     optimizer,
-    #     num_warmup_steps=num_warmup_steps,
-    #     num_training_steps=num_training_steps,
-    # )
+    scheduler = get_cosine_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=num_warmup_steps,
+        num_training_steps=num_training_steps,
+    )
 
     criterion = nn.CrossEntropyLoss()
 
@@ -192,7 +192,7 @@ def finetuning(
         train_accuracies.append(train_acc)
         
         # learning rate scheduler step
-        # scheduler.step()
+        scheduler.step()
 
         # Validation
         gait_head.eval()

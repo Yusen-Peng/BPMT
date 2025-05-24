@@ -168,7 +168,7 @@ def main():
 
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)
 
-    freezeT1 = True
+    freezeT1 = False
     unfreeze_layers = None # freeze all layers
 
     if freezeT1 and (unfreeze_layers is None):
@@ -181,7 +181,7 @@ def main():
 
 
     # finetuning learning rate
-    fn_lr = 1e-5
+    fn_lr = 3e-5
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
         val_loader=val_finetuning_dataloader,

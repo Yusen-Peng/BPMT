@@ -7,16 +7,17 @@ In this thesis project, I aim to design BPMT, Body Part as Modality Transformer,
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
 | Penn Action (2013) | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
-| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **73.21%** < 92.6% (SkateFormer) - cross subject |
-| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, N/A < 92.6% (SkateFormer) - cross view |
-| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | not yet,  N/A < 87.7%  (SkateFormer) - cross subject |
-| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | not yet,  N/A < 89.3%  (SkateFormer) - cross view |
+| N-UCLA (2014) | 1,494 | 12 | 3D | 20 | not yet, **69.83%** << 98.3% (SkateFormer) - cross view |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **73.21%** << 92.6% (SkateFormer) - cross subject |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
+| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
+| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
+| Skeletics-152 (2020) | 125,657 | 152 | 3D | 25 | N/A < 56.39% (MS-G3D) |
 
-| N-UCLA (2014) | 1,494 | 12 | 3D | 20 | not yet, N/A < 98.3% (SkateFormer) - cross view |
+Why other datasets are not considered because:
 
-
-
-| Skeletics-152 | 122,621 | 152 | 3D | ?? | N/A |
+1. FineGym: three-level hierarchy (actions + sub-actions)
+2. Kinetics (skeleton): too many videos: 500,000 - maybe wait for a sec
 
 ## Baseline - (TLCA: Transfer Learning with Cross Attention) 
 
@@ -147,9 +148,9 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.21%** |
 
 
-The complete experiment tuning logs:
+## The complete experiment tuning logs:
 
-## THE MAJOR BOTTLENECK (MOST LIKELY)
+### THE MAJOR BOTTLENECK (MOST LIKELY)
 
 This might be the biggest issue now: What should be the strategy in the case of multiple bodies within one frame?
 
@@ -181,29 +182,57 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 300 | TBD |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 500 | TBD |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 1000 | running |
-
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | TBD |
 
 
+## Baseline - Experiment (NW-UCLA, cross-view) - concern: what's the exact split??
 
-## Baseline - Experiment (NW-UCLA)
+
+![alt text](docs/NTU_comparison.png)
+
+
+
+
+The current best training setup (95%-5% train-val split):
 
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 200 | **69.83%** |
+
+## The complete experiment tuning logs:
+
+| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
+|--------------------|---------|---------|--------|------------|------------|--------|----------|----------------|----------|----------|
+| <tr><td colspan="11" align="center"> minimal backbone </td></tr> |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 57.97% (100 epochs pretraining is too weak) |
+| <tr><td colspan="11" align="center"> medium backbone </td></tr> |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 50 | 65.95% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 63.15% |
 | 30% | linear | 256 | 8 | 4 | yes | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 65.73% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 20 | 65.73% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 30 | **69.40%** |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 50 | **69.40%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 30 | 69.40% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 50 | 69.40% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 67.03% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 61.21% |
+| <tr><td colspan="11" align="center"> strong backbone </td></tr>
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 50 | 65.73% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 100 | 66.59% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 200 | **69.83%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | 66.16% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 400 | 64.44% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 500 | 69.18% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 600 | running |
 
 
+## Baseline - Experiment (Skeletics-152, cross-view) 
+
+Current state of the art:
+
+![alt text](docs/Benchmark_Results_on_Skeletics-152.png)
 
 
-
-
+| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
+|--------------------|---------|---------|--------|------------|------------|--------|----------|----------------|----------|----------|
 
 
 
