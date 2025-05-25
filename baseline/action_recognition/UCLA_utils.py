@@ -42,6 +42,7 @@ def load_nucla_skeleton_file(path: str) -> np.ndarray:
 
     # sanity check
     assert len(joints) == NUM_JOINTS_NUCLA, f"From {path} - Expected {NUM_JOINTS_NUCLA} joints, but got {len(joints)}"
+
     return np.array(joints, dtype=np.float32)
 
 def build_nucla_action_lists_cross_view(
@@ -79,7 +80,20 @@ def build_nucla_action_lists_cross_view(
                 print(f"======[WARNING] {action_path[7:]} from {view} has no valid skeletons. Skipping.======")
                 continue
 
-            seq = np.stack(seq, axis=0).reshape(len(seq), -1)
+            # Stack all frames in the video
+            seq = np.stack(seq, axis=0)  # shape (T, 20, 3)
+
+            # Center each frame around the hip (joint 0)
+            hip = seq[:, 0:1, :]  # shape (T, 1, 3)
+            seq = seq - hip       # shape (T, 20, 3)
+
+            # Flatten per frame: (T, 20, 3) → (T, 60)
+            seq = seq.reshape(seq.shape[0], -1)  # (T, 60)
+
+            # Normalize the *entire sequence*
+            mean = seq.mean(axis=0, keepdims=True)  # shape (1, 60)
+            std = seq.std(axis=0, keepdims=True) + 1e-8
+            seq = (seq - mean) / std  # shape (T, 60)
 
             if view in train_views:
                 train_seq.append(seq)

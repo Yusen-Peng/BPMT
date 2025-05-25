@@ -1,46 +1,0 @@
-/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/transformer.py:385: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.self_attn.batch_first was not True(use batch_first for better inference performance)
-  warnings.warn(
-pretrain?: False
-hidden_size: 256
-n_heads: 8
-num_layers: 4
-batch_size: 4
-==================================================
-[INFO] Starting NW-UCLA dataset processing on cuda...
-==================================================
-==[WARNING] view_1/a01_s08_e02/frame_448_tc_16822477_skeletons.txt has insufficient data.==
-==[WARNING] view_1/a02_s07_e00/frame_34_tc_18690058_skeletons.txt has insufficient data.==
-==[WARNING] view_1/a02_s10_e02/frame_481_tc_9105107_skeletons.txt has insufficient data.==
-======[WARNING] view_1/a03_s06_e01 from view_1 has no valid skeletons. Skipping.======
-==[WARNING] view_1/a03_s07_e02/frame_401_tc_18896479_skeletons.txt has insufficient data.==
-==[WARNING] view_1/a04_s01_e01/frame_357_tc_90965087_skeletons.txt has insufficient data.==
-==[WARNING] view_1/a04_s05_e07/frame_726_tc_22588507_skeletons.txt has insufficient data.==
-==[WARNING] view_1/a05_s07_e00/frame_105_tc_19107376_skeletons.txt has insufficient data.==
-======[WARNING] view_1/a05_s07_e00 from view_1 has no valid skeletons. Skipping.======
-==[WARNING] view_1/a09_s07_e02/frame_966_tc_19483432_skeletons.txt has insufficient data.==
-==[WARNING] view_1/a11_s08_e00/frame_223_tc_18117784_skeletons.txt has insufficient data.==
-======[WARNING] view_2/a01_s06_e03 from view_2 has no valid skeletons. Skipping.======
-==[WARNING] view_2/a02_s07_e03/frame_601_tc_20343653_skeletons.txt has insufficient data.==
-======[WARNING] view_2/a02_s10_e03 from view_2 has no valid skeletons. Skipping.======
-======[WARNING] view_2/a03_s09_e01 from view_2 has no valid skeletons. Skipping.======
-======[WARNING] view_2/a03_s09_e03 from view_2 has no valid skeletons. Skipping.======
-==[WARNING] view_2/a03_s10_e01/frame_334_tc_10880180_skeletons.txt has insufficient data.==
-======[WARNING] view_2/a12_s06_e00 from view_2 has no valid skeletons. Skipping.======
-==[WARNING] view_3/a02_s07_e03/frame_601_tc_20343653_skeletons.txt has insufficient data.==
-======[WARNING] view_3/a02_s10_e03 from view_3 has no valid skeletons. Skipping.======
-======[WARNING] view_3/a03_s09_e01 from view_3 has no valid skeletons. Skipping.======
-======[WARNING] view_3/a03_s09_e03 from view_3 has no valid skeletons. Skipping.======
-==[WARNING] view_3/a03_s10_e01/frame_334_tc_10880180_skeletons.txt has insufficient data.==
-==[WARNING] view_3/a08_s10_e00/frame_375_tc_4253772_skeletons.txt has insufficient data.==
-==[WARNING] view_3/a11_s07_e03/frame_1013_tc_14074160_skeletons.txt has insufficient data.==
-#classes=12 | train_videos=1020 | test_videos=464
-[INFO] Number of classes: 12
-====================================================================================================
-====================================================================================================
-====================================================================================================
-====================================================================================================
-pretrained model loaded successfully!
-[INFO] finetuning the entire T1 model...
-is T1 freezed? False
-unfreezing layers: None
-  0%|          | 0/1000 [00:00<?, ?it/s]  0%|          | 1/1000 [00:04<1:15:43,  4.55s/it]  0%|          | 2/1000 [00:09<1:21:10,  4.88s/it]  0%|          | 3/1000 [00:13<1:16:07,  4.58s/it]  0%|          | 4/1000 [00:18<1:16:52,  4.63s/it]  0%|          | 5/1000 [00:23<1:18:58,  4.76s/it]  1%|          | 6/1000 [00:28<1:19:46,  4.82s/it]  1%|          | 7/1000 [00:32<1:16:32,  4.62s/it]  1%|          | 8/1000 [00:37<1:14:53,  4.53s/it]  1%|          | 9/1000 [00:42<1:18:19,  4.74s/it]  1%|          | 10/1000 [00:46<1:15:50,  4.60s/it]  1%|          | 11/1000 [00:51<1:15:38,  4.59s/it]  1%|          | 12/1000 [00:55<1:16:50,  4.67s/it]  1%|▏         | 13/1000 [01:00<1:17:36,  4.72s/it]  1%|▏         | 14/1000 [01:05<1:17:24,  4.71s/it]  2%|▏         | 15/1000 [01:09<1:14:38,  4.55s/it]  2%|▏         | 16/1000 [01:14<1:16:52,  4.69s/it]  2%|▏         | 17/1000 [01:19<1:16:04,  4.64s/it]  2%|▏         | 18/1000 [01:23<1:13:13,  4.47s/it]  2%|▏         | 19/1000 [01:27<1:14:03,  4.53s/it]  2%|▏         | 20/1000 [01:32<1:13:17,  4.49s/it]  2%|▏         | 21/1000 [01:36<1:11:08,  4.36s/it]  2%|▏         | 22/1000 [01:40<1:11:52,  4.41s/it]  2%|▏         | 23/1000 [01:45<1:13:48,  4.53s/it]  2%|▏         | 24/1000 [01:49<1:11:21,  4.39s/it]  2%|▎         | 25/1000 [01:54<1:10:38,  4.35s/it]  3%|▎         | 26/1000 [01:58<1:13:19,  4.52s/it]  3%|▎         | 27/1000 [02:03<1:12:14,  4.45s/it]  3%|▎         | 28/1000 [02:07<1:10:37,  4.36s/it]  3%|▎         | 29/1000 [02:12<1:13:50,  4.56s/it]  3%|▎         | 30/1000 [02:17<1:14:20,  4.60s/it]  3%|▎         | 31/1000 [02:21<1:13:15,  4.54s/it]  3%|▎         | 32/1000 [02:26<1:13:29,  4.56s/it]  3%|▎         | 33/1000 [02:30<1:14:41,  4.63s/it]  3%|▎         | 34/1000 [02:35<1:15:25,  4.68s/it]  4%|▎         | 35/1000 [02:40<1:14:20,  4.62s/it]  4%|▎         | 36/1000 [02:45<1:16:52,  4.78s/it]  4%|▎         | 37/1000 [02:49<1:15:20,  4.69s/it]  4%|▍         | 38/1000 [02:54<1:14:15,  4.63s/it]  4%|▍         | 39/1000 [02:59<1:16:40,  4.79s/it]  4%|▍         | 40/1000 [03:03<1:15:01,  4.69s/it]  4%|▍         | 41/1000 [03:08<1:13:55,  4.63s/it]  4%|▍         | 42/1000 [03:13<1:16:03,  4.76s/it]  4%|▍         | 43/1000 [03:17<1:13:03,  4.58s/it]  4%|▍         | 44/1000 [03:22<1:12:23,  4.54s/it]  4%|▍         | 45/1000 [03:27<1:13:57,  4.65s/it]  5%|▍         | 46/1000 [03:31<1:12:26,  4.56s/it]  5%|▍         | 47/1000 [03:35<1:11:55,  4.53s/it]  5%|▍         | 48/1000 [03:40<1:13:04,  4.61s/it]  5%|▍         | 49/1000 [03:45<1:13:21,  4.63s/it]  5%|▌         | 50/1000 [03:49<1:12:23,  4.57s/it]  5%|▌         | 51/1000 [03:54<1:14:18,  4.70s/it]  5%|▌         | 52/1000 [03:59<1:12:29,  4.59s/it]  5%|▌         | 53/1000 [04:03<1:11:50,  4.55s/it]  5%|▌         | 54/1000 [04:08<1:14:08,  4.70s/it]  6%|▌         | 55/1000 [04:12<1:12:32,  4.61s/it]  6%|▌         | 56/1000 [04:17<1:12:08,  4.59s/it]  6%|▌         | 57/1000 [04:22<1:15:24,  4.80s/it]  6%|▌         | 58/1000 [04:27<1:13:11,  4.66s/it]  6%|▌         | 59/1000 [04:31<1:10:10,  4.48s/it]  6%|▌         | 60/1000 [04:36<1:13:42,  4.70s/it]  6%|▌         | 61/1000 [04:40<1:10:19,  4.49s/it]  6%|▌         | 62/1000 [04:44<1:09:15,  4.43s/it]  6%|▋         | 63/1000 [04:49<1:11:19,  4.57s/it]  6%|▋         | 64/1000 [04:54<1:12:22,  4.64s/it]  6%|▋         | 65/1000 [04:58<1:11:49,  4.61s/it]  7%|▋         | 66/1000 [05:03<1:12:09,  4.64s/it]  7%|▋         | 67/1000 [05:08<1:13:35,  4.73s/it]  7%|▋         | 68/1000 [05:12<1:11:06,  4.58s/it]  7%|▋         | 69/1000 [05:17<1:13:19,  4.73s/it]  7%|▋         | 70/1000 [05:22<1:13:05,  4.72s/it]  7%|▋         | 71/1000 [05:26<1:10:39,  4.56s/it]  7%|▋         | 72/1000 [05:31<1:12:14,  4.67s/it]  7%|▋         | 73/1000 [05:36<1:12:53,  4.72s/it]  7%|▋         | 74/1000 [05:40<1:11:20,  4.62s/it]  8%|▊         | 75/1000 [05:45<1:11:30,  4.64s/it]  8%|▊         | 76/1000 [05:50<1:11:30,  4.64s/it]  8%|▊         | 77/1000 [05:54<1:08:55,  4.48s/it]  8%|▊         | 78/1000 [05:59<1:10:59,  4.62s/it]  8%|▊         | 79/1000 [06:03<1:10:54,  4.62s/it]  8%|▊         | 80/1000 [06:08<1:10:22,  4.59s/it]  8%|▊         | 81/1000 [06:13<1:10:48,  4.62s/it]  8%|▊         | 82/1000 [06:18<1:12:03,  4.71s/it]  8%|▊         | 83/1000 [06:22<1:12:28,  4.74s/it]  8%|▊         | 84/1000 [06:27<1:12:00,  4.72s/it]  8%|▊         | 85/1000 [06:32<1:12:56,  4.78s/it]  9%|▊         | 86/1000 [06:37<1:12:19,  4.75s/it]

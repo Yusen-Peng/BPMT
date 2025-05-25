@@ -15,7 +15,8 @@ N_UCLA/
 NTU_dataset.zip
 */pth
 rtmlib/
-skeletics-152-data.zip
+VIBE_results_temp/
+*.zip
 *.pt
 nohup.out
 N_UCLA.txt

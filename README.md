@@ -6,13 +6,19 @@ In this thesis project, I aim to design BPMT, Body Part as Modality Transformer,
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
-| Penn Action (2013) | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
+| <span style="color:red"> Penn Action (2013) </span> | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
 | N-UCLA (2014) | 1,494 | 12 | 3D | 20 | not yet, **69.83%** << 98.3% (SkateFormer) - cross view |
 | NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **73.21%** << 92.6% (SkateFormer) - cross subject |
 | NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
 | Skeletics-152 (2020) | 125,657 | 152 | 3D | 25 | N/A < 56.39% (MS-G3D) |
+
+## current issue with Skeletics-152
+
+NOTE: can't keep Skeletics-152 dataset for now: disk will be full!!!!
+
+## Issues with other datasets
 
 Why other datasets are not considered because:
 
@@ -180,8 +186,7 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 72.33% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.21%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 72.94% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 100 | running |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 300 | TBD |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 300 | running |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 500 | TBD |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 1000 | 72.51% |
 
@@ -229,7 +234,7 @@ The current best training setup (95%-5% train-val split):
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 50 | 69.40% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 67.03% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 61.21% |
-| <tr><td colspan="11" align="center"> strong backbone </td></tr>
+| <tr><td colspan="11" align="center"> strong backbone </td></tr> |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 50 | 65.73% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 100 | 66.59% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 200 | **69.83%** |
@@ -238,7 +243,10 @@ The current best training setup (95%-5% train-val split):
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 500 | 69.18% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 600 | 65.52% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 800 | 66.59% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | running |
+| <tr><td colspan="11" align="center"> hip-centering + Z-normalization </td></tr> |
+
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 200 | running |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | 60.99% |
 
 
 ## Baseline - Experiment (Skeletics-152, cross-view) 
