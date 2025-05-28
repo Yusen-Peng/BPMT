@@ -17,6 +17,7 @@ from UCLA_finetuning import load_T1, finetuning, GaitRecognitionHead
 #from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
 from UCLA_utils import set_seed, build_nucla_action_lists_cross_view, split_train_val, collate_fn_finetuning, NUM_JOINTS_NUCLA
+from SF_UCLA_loader import SF_UCLA_Dataset
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
@@ -65,26 +66,82 @@ def main():
     print("=" * 50)
 
     # load the dataset
-    train_seq, train_lbl, test_seq, test_lbl = build_nucla_action_lists_cross_view(
-        root=root_dir,
-        train_views=['view_1', 'view_2'],
-        test_views=['view_3']
+    # train_seq, train_lbl, test_seq, test_lbl = build_nucla_action_lists_cross_view(
+    #     root=root_dir,
+    #     train_views=['view_1', 'view_2'],
+    #     test_views=['view_3']
+    # )
+
+    
+    train_data_path = 'N-UCLA_processed/'
+    train_label_path = 'N-UCLA_processed/train_label.pkl'
+
+    data_type = 'j'
+    repeat = 10
+    p = 0.5
+
+    train_dataset_pre = SF_UCLA_Dataset(
+        data_path=train_data_path,
+        label_path=train_label_path,
+        data_type=data_type,
+        window_size=-1, 
+        partition=True, 
+        repeat=repeat,
+        p=p,
+        debug=False
     )
 
+    train_seq = []
+    train_lbl = []
+
+    for i in range(len(train_dataset_pre)):
+        data, _, label, _ = train_dataset_pre[i]
+        # FIXME: a better reshape strategy
+        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
+        train_seq.append(data_tensor)
+        train_lbl.append(label)
+
+    print(f"Collected {len(train_seq)} sequences for train + val.")
+    print(f"Each sequence shape: {train_seq[0].shape}")  # (64, 60)
+
+    # train-val split
     train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=val_ratio)
 
+    test_data_path = 'N-UCLA_processed/'
+    test_label_path = 'N-UCLA_processed/val_label.pkl'
+
+    test_dataset_pre = SF_UCLA_Dataset(
+        data_path=test_data_path,
+        label_path=test_label_path,
+        data_type='j', 
+        window_size=64, 
+        partition=True, 
+        repeat=1, 
+        p=0.5, 
+        debug=False
+    )
+
+    test_seq = []
+    test_lbl = []
+    for i in range(len(test_dataset_pre)):
+        data, _, label, _ = test_dataset_pre[i]
+        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
+        test_seq.append(data_tensor)
+        test_lbl.append(label)
+    
+    print(f"Collected {len(test_seq)} sequences for test.")
+    print(f"Each sequence shape: {test_seq[0].shape}")  # (64, 60)
+
+
     num_classes = max(train_lbl + val_lbl + test_lbl) + 1
-
-
-
     train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_dataset = ActionRecognitionDataset(val_seq, val_lbl)
-        
+
     # get the number of classes
     print(f"[INFO] Number of classes: {num_classes}")
     print("=" * 100)
 
-    if pretrain == True: 
+    if pretrain == True:
         """
             pretraining on the whole dataset
         """

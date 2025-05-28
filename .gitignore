@@ -15,6 +15,7 @@ N_UCLA/
 NTU_dataset.zip
 */pth
 rtmlib/
+N-UCLA_processed/
 VIBE_results_temp/
 *.zip
 *.pt
