@@ -215,6 +215,7 @@ The following bottleneck is ***under discussion***:
 The current best training setup (95%-5% train-val split):
 
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
+|------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | **87.28%** |
 
 
