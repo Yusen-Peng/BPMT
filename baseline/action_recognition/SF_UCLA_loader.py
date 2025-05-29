@@ -1722,5 +1722,3 @@ def skateformer_collate_fn(batch):
 #         print(f"Batch X shape: {xb.shape}")  # should be (B, 64, 60)
 #         print(f"Batch Y shape: {yb.shape}")  # should be (B,)
 #         break
-
-    
