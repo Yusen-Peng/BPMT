@@ -147,14 +147,16 @@ def main():
     test_data_path = 'N-UCLA_processed/'
     test_label_path = 'N-UCLA_processed/val_label.pkl'
 
+    P_INFERENCE_MODE = 0.0
+    REPEAT_INFERENCE_MODE = 1
     test_dataset_pre = SF_UCLA_Dataset(
         data_path=test_data_path,
         label_path=test_label_path,
         data_type='j', 
-        window_size=64, 
+        window_size=-1, 
         partition=True, 
-        repeat=1, 
-        p=0.5, 
+        repeat=REPEAT_INFERENCE_MODE, 
+        p=P_INFERENCE_MODE, 
         debug=False
     )
 
