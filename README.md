@@ -154,14 +154,7 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.56%** |
 
 
-## The complete experiment tuning logs:
-
-### potential bottleneck for NTU 60
-
-1. Z-normalization is missing (I only have hip centering so far)
-2. model is relatively small (hidden size = 256, only 4 layers)
-3. using the first body when multiple people appear on the same frame
-4. no data augmentation
+## The complete experiment tuning logs
 
 cross-subject evaluation:
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
@@ -194,6 +187,34 @@ cross-subject evaluation:
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | Need to run one here... |
 
 
+Use SkateFormer data loader instead of my own data loader because:
+
+1. (really) comprehensive regularization
+    1. Shear (deformation)
+    2. rotate
+    3. scale
+    4. spatial flip
+    5. temporal flip
+    6. Gaussian noise
+    7. Gaussian blur
+    8. drop axis
+    9. drop joint 
+
+
+| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
+|--------------------|---------|---------|--------|------------|------------|--------|----------|----------------|----------|----------|
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '123456789ab' | 1e-5, wd=1e-4 | 100, reg: '128' | 64.29% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '23689' | 1e-5, wd=1e-4 | 100, reg: '23689' | 63.93% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '23689' | 1e-5, wd=1e-4 | 100, reg: '' | 65.66% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '23689' | 1e-5, wd=1e-4 | 200, reg: '' | 65.89% |
+
+
+
+
+
+
+
+
 ## Baseline - Experiment (NW-UCLA, cross-view) - concern: what's the exact split??
 
 
@@ -216,7 +237,7 @@ The current best training setup (95%-5% train-val split):
 
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | **87.28%** |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | **87.93%** |
 
 
 
@@ -260,16 +281,25 @@ Use SkateFormer data loader instead of my own data loader because:
 
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
 |--------------------|---------|---------|--------|------------|------------|--------|----------|----------------|----------|----------|
+| <tr><td colspan="11" align="center"> small backbone </td></tr> |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 20 | 84.48% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 50 | 86.64% | 
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.13% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 200 | 84.27% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.56% |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | **87.28%** |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 87.28% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 300 | 85.13% |
+| <tr><td colspan="11" align="center"> medium backbone </td></tr> |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 84.05% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 200 | 84.05%  |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | **87.93%** |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 1000 | 85.99% |
+| <tr><td colspan="11" align="center"> strong backbone </td></tr> |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | running |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | 87.72% |
 
 
-## Baseline - Experiment (Skeletics-152, cross-view) 
+## Baseline - Experiment (Skeletics-152, cross-view)
 
 Current state of the art:
 

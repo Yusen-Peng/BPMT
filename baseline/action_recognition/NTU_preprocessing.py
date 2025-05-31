@@ -62,9 +62,8 @@ def preprocess(split='xsub'):
         data = read_skeleton(filepath)             # (T, 25, 3)
         data = pad_sequence(data, MAX_FRAMES)      # (MAX_FRAMES, 25, 3)
 
-        # (T, 25, 3) → (T, 2, 25, 3) where only person 0 is filled
-        padded = np.zeros((MAX_FRAMES, 2, NUM_JOINTS, 3), dtype=np.float32)
-        padded[:, 0, :, :] = data
+        # FIXME: encode one person for now!
+        padded = data
 
         if split == 'xsub':
             if subject_id in XSUB_TRAIN_SUBJECTS:
@@ -83,7 +82,7 @@ def preprocess(split='xsub'):
                 test_labels.append(action_id)
 
     # Convert to numpy arrays
-    x_train = np.array(train_data)   # (N, T, 2, 25, 3)
+    x_train = np.array(train_data)
     x_test = np.array(test_data)
 
     y_train = np.array(train_labels).reshape(-1, 1)

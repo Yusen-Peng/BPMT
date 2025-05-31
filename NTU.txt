@@ -1,0 +1,83 @@
+nohup: ignoring input
+/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/transformer.py:385: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.self_attn.batch_first was not True(use batch_first for better inference performance)
+  warnings.warn(
+pretrain?: True
+hidden_size: 256
+n_heads: 8
+num_layers: 4
+batch_size: 4
+==================================================
+[INFO] Starting NTU dataset processing on cuda...
+==================================================
+Collected 40320 sequences for train + val.
+Each sequence shape: torch.Size([64, 144])
+[INFO] Time taken to load NTU skeletons: 28.67 seconds
+[INFO] Number of classes: 60
+====================================================================================================
+
+==========================
+Starting Pretraining...
+==========================
+[INFO] Mask ratio: 30.0%
+[INFO] Mask ratio: 30.0%
+[INFO] train/val split ratio: 5.0%
+  0%|          | 0/300 [00:00<?, ?it/s]/home/peng.1007/BPMT/baseline/action_recognition/base_dataset.py:15: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  seq   = torch.tensor(self.seqs[idx],   dtype=torch.float32)
+                                         0%|          | 0/300 [00:44<?, ?it/s]  0%|          | 1/300 [00:44<3:42:42, 44.69s/it]                                                   0%|          | 1/300 [01:28<3:42:42, 44.69s/it]  1%|          | 2/300 [01:28<3:39:10, 44.13s/it]                                                   1%|          | 2/300 [02:11<3:39:10, 44.13s/it]  1%|          | 3/300 [02:11<3:37:07, 43.86s/it]                                                   1%|          | 3/300 [02:56<3:37:07, 43.86s/it]  1%|▏         | 4/300 [02:56<3:37:30, 44.09s/it]                                                   1%|▏         | 4/300 [03:40<3:37:30, 44.09s/it]  2%|▏         | 5/300 [03:40<3:36:40, 44.07s/it]                                                   2%|▏         | 5/300 [04:25<3:36:40, 44.07s/it]  2%|▏         | 6/300 [04:25<3:37:35, 44.41s/it]                                                   2%|▏         | 6/300 [05:08<3:37:35, 44.41s/it]  2%|▏         | 7/300 [05:08<3:34:39, 43.96s/it]                                                   2%|▏         | 7/300 [05:54<3:34:39, 43.96s/it]  3%|▎         | 8/300 [05:54<3:36:21, 44.46s/it]                                                   3%|▎         | 8/300 [06:38<3:36:21, 44.46s/it]  3%|▎         | 9/300 [06:38<3:35:58, 44.53s/it]                                                   3%|▎         | 9/300 [07:23<3:35:58, 44.53s/it]  3%|▎         | 10/300 [07:23<3:35:40, 44.62s/it]                                                    3%|▎         | 10/300 [08:08<3:35:40, 44.62s/it]  4%|▎         | 11/300 [08:08<3:35:33, 44.75s/it]                                                    4%|▎         | 11/300 [08:50<3:35:33, 44.75s/it]  4%|▍         | 12/300 [08:50<3:30:44, 43.91s/it]                                                    4%|▍         | 12/300 [09:34<3:30:44, 43.91s/it]  4%|▍         | 13/300 [09:34<3:29:56, 43.89s/it]                                                    4%|▍         | 13/300 [10:16<3:29:56, 43.89s/it]  5%|▍         | 14/300 [10:16<3:27:06, 43.45s/it]                                                    5%|▍         | 14/300 [10:59<3:27:06, 43.45s/it]  5%|▌         | 15/300 [10:59<3:24:30, 43.05s/it]                                                    5%|▌         | 15/300 [11:42<3:24:30, 43.05s/it]  5%|▌         | 16/300 [11:42<3:24:41, 43.24s/it]                                                    5%|▌         | 16/300 [12:25<3:24:41, 43.24s/it]  6%|▌         | 17/300 [12:25<3:23:01, 43.04s/it]                                                    6%|▌         | 17/300 [13:07<3:23:01, 43.04s/it]  6%|▌         | 18/300 [13:07<3:21:13, 42.81s/it]                                                    6%|▌         | 18/300 [13:51<3:21:13, 42.81s/it]  6%|▋         | 19/300 [13:51<3:22:17, 43.19s/it]                                                    6%|▋         | 19/300 [14:36<3:22:17, 43.19s/it]  7%|▋         | 20/300 [14:36<3:23:29, 43.61s/it]                                                    7%|▋         | 20/300 [15:18<3:23:29, 43.61s/it]  7%|▋         | 21/300 [15:18<3:21:13, 43.27s/it]                                                    7%|▋         | 21/300 [16:02<3:21:13, 43.27s/it]  7%|▋         | 22/300 [16:02<3:21:10, 43.42s/it]                                                    7%|▋         | 22/300 [16:47<3:21:10, 43.42s/it]  8%|▊         | 23/300 [16:47<3:22:11, 43.80s/it]                                                    8%|▊         | 23/300 [17:29<3:22:11, 43.80s/it]  8%|▊         | 24/300 [17:29<3:19:42, 43.42s/it]                                                    8%|▊         | 24/300 [18:11<3:19:42, 43.42s/it]  8%|▊         | 25/300 [18:11<3:17:00, 42.98s/it]                                                    8%|▊         | 25/300 [18:53<3:17:00, 42.98s/it]  9%|▊         | 26/300 [18:53<3:14:58, 42.69s/it]                                                    9%|▊         | 26/300 [19:36<3:14:58, 42.69s/it]  9%|▉         | 27/300 [19:36<3:14:59, 42.86s/it]  9%|▉         | 27/300 [19:48<3:20:13, 44.01s/it]
+[Epoch 1/300] Train Loss: 0.0042, Val Loss: 0.0018
+[Epoch 2/300] Train Loss: 0.0017, Val Loss: 0.0013
+[Epoch 3/300] Train Loss: 0.0014, Val Loss: 0.0012
+[Epoch 4/300] Train Loss: 0.0012, Val Loss: 0.0011
+[Epoch 5/300] Train Loss: 0.0011, Val Loss: 0.0010
+[Epoch 6/300] Train Loss: 0.0011, Val Loss: 0.0010
+[Epoch 7/300] Train Loss: 0.0011, Val Loss: 0.0009
+[Epoch 8/300] Train Loss: 0.0010, Val Loss: 0.0009
+[Epoch 9/300] Train Loss: 0.0010, Val Loss: 0.0009
+[Epoch 10/300] Train Loss: 0.0010, Val Loss: 0.0009
+[Epoch 11/300] Train Loss: 0.0010, Val Loss: 0.0009
+[Epoch 12/300] Train Loss: 0.0009, Val Loss: 0.0009
+[Epoch 13/300] Train Loss: 0.0009, Val Loss: 0.0009
+[Epoch 14/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 15/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 16/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 17/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 18/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 19/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 20/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 21/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 22/300] Train Loss: 0.0009, Val Loss: 0.0008
+[Epoch 23/300] Train Loss: 0.0008, Val Loss: 0.0008
+[Epoch 24/300] Train Loss: 0.0008, Val Loss: 0.0008
+[Epoch 25/300] Train Loss: 0.0008, Val Loss: 0.0008
+[Epoch 26/300] Train Loss: 0.0008, Val Loss: 0.0008
+[Epoch 27/300] Train Loss: 0.0008, Val Loss: 0.0008
+Traceback (most recent call last):
+  File "/home/peng.1007/BPMT/baseline/action_recognition/NTU_main.py", line 240, in <module>
+    main()
+  File "/home/peng.1007/BPMT/baseline/action_recognition/NTU_main.py", line 140, in main
+    train_T1(
+  File "/home/peng.1007/BPMT/baseline/action_recognition/NTU_pretraining.py", line 188, in train_T1
+    recons = model(masked_inputs)
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/peng.1007/BPMT/baseline/action_recognition/NTU_pretraining.py", line 70, in forward
+    encoded = self.transformer_encoder(keypoint_embedding_with_pos)
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/transformer.py", line 517, in forward
+    output = mod(
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1739, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1750, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/transformer.py", line 922, in forward
+    x = self.norm2(x + self._ff_block(x))
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/transformer.py", line 947, in _ff_block
+    x = self.linear2(self.dropout(self.activation(self.linear1(x))))
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/functional.py", line 1704, in relu
+    result = torch.relu(input)
+KeyboardInterrupt

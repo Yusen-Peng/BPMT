@@ -17,6 +17,7 @@ from base_dataset import ActionRecognitionDataset
 from penn_utils import set_seed, collate_fn_inference
 from NTU_utils import build_ntu_skeleton_lists_xsub, split_train_val, NUM_JOINTS_NTU
 from finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
+from SF_NTU_loader import SF_NTU_Dataset
 
 def evaluate(
     data_loader: DataLoader,
@@ -104,7 +105,31 @@ def main():
     print("=" * 50)
 
     # load the dataset
-    test_seq, test_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=False)
+    # test_seq, test_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=False)
+    
+    test_dataset_pre = SF_NTU_Dataset(
+        data_path='NTU_SF_xsub.npz',
+        p_interval=[0.5, 1.0],
+        split='test',
+        data_type='j',
+        aug_method='',
+        intra_p=0,
+        inter_p=0,
+        window_size=64,
+        debug=False,
+        thres=1,
+        uniform=False,
+        partition=True
+    )
+
+    test_seq = []
+    test_lbl = []
+
+    for i in range(len(test_dataset_pre)):
+        data, _, label, _ = test_dataset_pre[i]
+        data_tensor = torch.from_numpy(data)
+        test_seq.append(data_tensor)
+        test_lbl.append(label)
 
     assert len(test_seq) == 16560
 
@@ -119,16 +144,16 @@ def main():
         test_dataset,
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=collate_fn_inference
+        #collate_fn=collate_fn_inference
     )
 
     # load T1 model
     unfreeze_layers = "entire"
     if unfreeze_layers is None:
         print("************Freezing all layers")
-        t1 = load_T1("action_checkpoints/NTU_pretrained.pt", d_model=hidden_size, num_joints=NUM_JOINTS_NTU, three_d=True, nhead=n_heads, num_layers=num_layers, device=device)
+        t1 = load_T1("action_checkpoints/NTU_pretrained.pt", d_model=hidden_size, num_joints=NUM_JOINTS_NTU * 2, three_d=True, nhead=n_heads, num_layers=num_layers, device=device)
     else:
-        t1 = load_T1("action_checkpoints/NTU_finetuned_T1.pt", d_model=hidden_size, num_joints=NUM_JOINTS_NTU, three_d=True, nhead=n_heads, num_layers=num_layers, device=device)
+        t1 = load_T1("action_checkpoints/NTU_finetuned_T1.pt", d_model=hidden_size, num_joints=NUM_JOINTS_NTU * 2, three_d=True, nhead=n_heads, num_layers=num_layers, device=device)
         print(f"************Unfreezing layers: {unfreeze_layers}")
     
     t2 = load_T2("action_checkpoints/NTU_finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
