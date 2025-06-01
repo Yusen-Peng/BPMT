@@ -13,3 +13,58 @@ Traceback (most recent call last):
   File "<frozen importlib._bootstrap_external>", line 153, in _path_is_mode_type
   File "<frozen importlib._bootstrap_external>", line 147, in _path_stat
 KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/peng.1007/BPMT/baseline/action_recognition/NTU_inference.py", line 4, in <module>
+    import torch
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/__init__.py", line 2108, in <module>
+    from torch import _VF as _VF, functional as functional  # usort: skip
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/functional.py", line 7, in <module>
+    import torch.nn.functional as F
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/__init__.py", line 8, in <module>
+    from torch.nn.modules import *  # usort: skip # noqa: F403
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/__init__.py", line 2, in <module>
+    from .linear import Bilinear, Identity, LazyLinear, Linear  # usort: skip
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 7, in <module>
+    from torch.nn import functional as F, init
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1006, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 688, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 879, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 975, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1074, in get_data
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/peng.1007/BPMT/baseline/action_recognition/NTU_main.py", line 4, in <module>
+    import torch
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/__init__.py", line 2108, in <module>
+    from torch import _VF as _VF, functional as functional  # usort: skip
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/functional.py", line 7, in <module>
+    import torch.nn.functional as F
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/__init__.py", line 8, in <module>
+    from torch.nn.modules import *  # usort: skip # noqa: F403
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/__init__.py", line 2, in <module>
+    from .linear import Bilinear, Identity, LazyLinear, Linear  # usort: skip
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 7, in <module>
+    from torch.nn import functional as F, init
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/nn/functional.py", line 11, in <module>
+    from torch._jit_internal import (
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/_jit_internal.py", line 43, in <module>
+    import torch.distributed.rpc
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/distributed/rpc/__init__.py", line 77, in <module>
+    from .server_process_global_profiler import _server_process_global_profile
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/distributed/rpc/server_process_global_profiler.py", line 8, in <module>
+    from torch.autograd.profiler_legacy import profile
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/autograd/__init__.py", line 582, in <module>
+    from . import profiler
+  File "/home/peng.1007/miniconda3/envs/BPMT_env/lib/python3.10/site-packages/torch/autograd/profiler.py", line 2, in <module>
+    import uuid
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1002, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 945, in _find_spec
+  File "<frozen importlib._bootstrap_external>", line 1439, in find_spec
+  File "<frozen importlib._bootstrap_external>", line 1411, in _get_spec
+  File "<frozen importlib._bootstrap_external>", line 1577, in find_spec
+  File "<frozen importlib._bootstrap_external>", line 161, in _path_isfile
+  File "<frozen importlib._bootstrap_external>", line 153, in _path_is_mode_type
+  File "<frozen importlib._bootstrap_external>", line 147, in _path_stat
+KeyboardInterrupt

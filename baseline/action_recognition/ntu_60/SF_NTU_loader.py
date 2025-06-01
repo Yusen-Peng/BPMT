@@ -41,16 +41,16 @@ class SF_NTU_Dataset(Dataset):
 
     def __getitem__(self, index):
         data_numpy = self.data[index]  # (T, V, C)
+        print(f"[DEBUG] Data shape: {data_numpy.shape}")
         label = self.label[index]
 
         valid_frame_num = np.sum(np.any(data_numpy != 0, axis=(1, 2)))
         data_numpy = data_numpy[:valid_frame_num]
 
         if valid_frame_num < self.thres:
-            padded = np.zeros((self.window_size, 24, 3), dtype=np.float32)
+            padded = np.zeros((self.window_size, NUM_JOINTS, 3), dtype=np.float32)
             index_t = np.linspace(-1, 1, self.window_size)
 
-            # reshape from (T, 24, 3) to (T, 24 * 3)
             padded = padded.reshape(self.window_size, -1)
 
             return padded, index_t, label, index
@@ -60,7 +60,6 @@ class SF_NTU_Dataset(Dataset):
 
         index_t = np.linspace(-1, 1, self.window_size)
         
-        # reshape from (T, 24, 3) to (T, 24 * 3)
         data_numpy = data_numpy.reshape(self.window_size, -1)
         
         return data_numpy.astype(np.float32), index_t.astype(np.float32), label, index
@@ -152,17 +151,11 @@ def pad_sequence(seq, max_len=MAX_FRAMES):
         pad = np.zeros((max_len - T, V, C), dtype=np.float32)
         return np.concatenate([seq, pad], axis=0)
 
-# if __name__ == '__main__':
-#     # create the dataset
-#     train_dataset = NTUDataset3D(
-#         data_path='NTU_SF_xsub.npz',
-#         split='train',
-#         window_size=64,
-#         aug_method=''
-#     )
-
-#     # CHECK THE SHAPE
-#     for i in range(len(train_dataset)):
-#         data, index_t, label, idx = train_dataset[i]
-#         if i % 100 == 0:
-#             print(f"Sample {i}: data shape: {data.shape}, index_t shape: {index_t.shape}, label: {label}, idx: {idx}")
+if __name__ == "__main__":
+    # Example usage
+    dataset = SF_NTU_Dataset(data_path='NTU_SF_xsub.npz', split='train', window_size=64, aug_method='')
+    for i in range(len(dataset)):
+        data, index_t, label, idx = dataset[i]
+        print(f"Data shape: {data.shape}, Index T shape: {index_t.shape}, Label: {label}, Index: {idx}")
+        if i == 5:  # Just to limit the output
+            break

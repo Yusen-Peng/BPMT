@@ -46,6 +46,7 @@ class BaseT1(nn.Module):
         else:   
             self.reconstruction_head = nn.Linear(d_model, num_joints * 2)
         
+        
         # MLP reconstruction head (optional)
         # self.reconstruction_head = nn.Sequential(
         #     nn.Linear(d_model, d_model),
@@ -85,8 +86,8 @@ class BaseT1(nn.Module):
         keypoint_embedding_with_pos = keypoint_embedding_with_pos.transpose(0,1)
         encoded = self.transformer_encoder(keypoint_embedding_with_pos)
         encoded = encoded.transpose(0,1)
-        return encoded
 
+        return encoded
     
 
 PAD_IDX = 0.0
@@ -120,7 +121,8 @@ def mask_random_global_joints(inputs: torch.Tensor, num_joints: int, joint_dim: 
         masked_inputs: Same shape as inputs, with PAD_IDX in masked positions
         mask: Boolean tensor of shape [B, T, num_joints], True at masked joints
     """
-    B, T, _ = inputs.shape
+    B, T, C = inputs.shape
+    assert C == num_joints * joint_dim
 
     masked_inputs = inputs.clone()
     mask = torch.zeros(B, T, num_joints, dtype=torch.bool, device=inputs.device)
@@ -149,13 +151,13 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_ep
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
-        #collate_fn=collate_fn_batch_padding
+        collate_fn=collate_fn_batch_padding
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=batch_size,
         shuffle=False,
-        #collate_fn=collate_fn_batch_padding
+        collate_fn=collate_fn_batch_padding
     )
 
     criterion = nn.MSELoss(reduction='none')

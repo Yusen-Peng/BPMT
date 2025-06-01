@@ -13,9 +13,12 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from NTU_pretraining import train_T1, BaseT1
 from finetuning import load_T1, finetuning, GaitRecognitionHead
+#from first_phase_baseline import BaseT1, train_T1
+#from second_phase_baseline import BaseT2, train_T2, load_T1
+#from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
+
 from penn_utils import set_seed
 from NTU_utils import build_ntu_skeleton_lists_xsub, split_train_val, NUM_JOINTS_NTU, collate_fn_finetuning
-from SF_NTU_loader import SF_NTU_Dataset
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
@@ -67,25 +70,7 @@ def main():
     # load the dataset
     import time
     t_start = time.time()
-
-    train_dataset_pre = SF_NTU_Dataset(
-        data_path='NTU_SF_xsub.npz',
-        split='train',
-        window_size=64,
-        aug_method=''
-    )
-
-    all_seq = []
-    all_lbl = []
-
-    for i in range(len(train_dataset_pre)):
-        data, _, label, _ = train_dataset_pre[i]
-        data_tensor = torch.from_numpy(data)
-        all_seq.append(data_tensor)
-        all_lbl.append(label)
-
-    print(f"Collected {len(all_seq)} sequences for train + val.")
-    print(f"Each sequence shape: {all_seq[0].shape}")
+    all_seq, all_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=True)
     t_end = time.time()
     print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")    
     assert len(all_seq) == 40320
@@ -112,7 +97,7 @@ def main():
         three_d = True
 
         model = BaseT1(
-            num_joints= NUM_JOINTS_NTU,
+            num_joints=NUM_JOINTS_NTU,
             three_d=three_d,
             d_model=hidden_size,
             nhead=n_heads,

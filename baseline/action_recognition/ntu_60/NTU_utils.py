@@ -9,7 +9,7 @@ from tqdm import tqdm
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
-NUM_JOINTS_NTU = 24
+NUM_JOINTS_NTU = 25
 OFFICIAL_XSUB_TRAIN_SUBJECTS = [1, 2, 4, 5, 8, 9, 13, 14, 15, 16, 17, 18, 19, 25, 27, 28, 31, 34, 35, 38]
 OFFICIAL_XVIEW_TRAIN_CAMERAS = [2, 3]
 
@@ -186,4 +186,3 @@ if __name__ == "__main__":
         shuffle=False,
         collate_fn=collate_fn_batch_padding
     )
-
