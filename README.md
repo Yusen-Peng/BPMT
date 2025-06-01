@@ -170,7 +170,7 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | 70.45% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 300 | 71.67% |
 | <tr><td colspan="11" align="center"> 30% masked pretraining - random global joints </td></tr> |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | 71.57% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | 71.27% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 200 | 70.24% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 300 | 72.65% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 500 | 72.31% |
@@ -183,6 +183,17 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.56%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 500 | 73.17% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 1000 | 72.51% |
+
+
+
+| <tr><td colspan="11" align="center"> larger model </td></tr> |
+
+
+| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | ? |
+
+
+
+
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | Need to run one here... |
 
@@ -207,7 +218,7 @@ Attempted to use SkateFormer data loader instead of my own data loader - bad per
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '23689' | 1e-5, wd=1e-4 | 100, reg: '' | 65.66% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '23689' | 1e-5, wd=1e-4 | 200, reg: '' | 65.89% |
 
-## Baseline - Experiment (NW-UCLA, cross-view) - concern: what's the exact split??
+## Baseline - Experiment (NW-UCLA, cross-view)
 
 
 ![alt text](docs/NTU_comparison.png)
