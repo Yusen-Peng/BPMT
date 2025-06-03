@@ -2,13 +2,21 @@
 
 In this thesis project, I aim to design BPMT, Body Part as Modality Transformer, which can achieve efficient and accurate (i) Human Action Recognition and (ii) Human Gait Recognition, respectively.
 
+## Under Discussion
+
+1. for NTU, batch-level padding (current setup) OR fixed-length sequence?
+
+![alt text](docs/ntu_seq_length_distribution.png)
+
+2. can't fit Skeletics152 - disk is full (do we have a "shared" directory to store datasets?)
+
 ## Baseline results
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
 | Penn Action (2013) | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
 | N-UCLA (2014) | 1,494 | 12 | 3D | 20 | not yet, **88.79%** < 98.3% (SkateFormer) - cross view |
-| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **73.56%** << 92.6% (SkateFormer) - cross subject |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **74.79%%** << 92.6% (SkateFormer) - cross subject |
 | NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
@@ -151,7 +159,7 @@ cross-subject evaluation:
 
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.56%** |
+| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 100 | **74.79%** |
 
 
 ## The complete experiment tuning logs
@@ -183,13 +191,9 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.56%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 500 | 73.17% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 3e-5, wd=1e-4, cosine + warmup | 1000 | 72.51% |
-
-
-
 | <tr><td colspan="11" align="center"> larger model </td></tr> |
-
-
-| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | ? |
+| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 100 | **74.79%** |
+| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 74.75% |
 
 
 
