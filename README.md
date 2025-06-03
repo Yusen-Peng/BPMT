@@ -1,6 +1,16 @@
 # BPMT: Body Part as Modality Transformer for Efficient and Accurate Human Action and Gait Recognition
 
-In this thesis project, I aim to design BPMT, Body Part as Modality Transformer, which can achieve efficient and accurate (i) Human Action Recognition and (ii) Human Gait Recognition, respectively.
+## Baseline results
+
+| dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
+| ------- | ------- | -------- | --------- | ---------- | ------- |
+| Penn Action (2013) | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
+| N-UCLA (2014) | 1,494 | 12 | 3D | 20 | not yet, **88.79%** < 98.3% (SkateFormer) - cross view |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **74.79%** << 92.6% (SkateFormer) - cross subject |
+| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
+| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
+| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
+| Skeletics-152 (2020) | 125,657 | 152 | 3D | 25 | N/A < 56.39% (MS-G3D) |
 
 ## Under Discussion
 
@@ -9,22 +19,6 @@ In this thesis project, I aim to design BPMT, Body Part as Modality Transformer,
 ![alt text](docs/ntu_seq_length_distribution.png)
 
 2. can't fit Skeletics152 - disk is full (do we have a "shared" directory to store datasets?)
-
-## Baseline results
-
-| dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
-| ------- | ------- | -------- | --------- | ---------- | ------- |
-| Penn Action (2013) | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
-| N-UCLA (2014) | 1,494 | 12 | 3D | 20 | not yet, **88.79%** < 98.3% (SkateFormer) - cross view |
-| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **74.79%%** << 92.6% (SkateFormer) - cross subject |
-| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
-| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
-| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
-| Skeletics-152 (2020) | 125,657 | 152 | 3D | 25 | N/A < 56.39% (MS-G3D) |
-
-## current issue with Skeletics-152
-
-NOTE: can't keep Skeletics-152 dataset for now: disk will be full!!!!
 
 ## Issues with other datasets
 
