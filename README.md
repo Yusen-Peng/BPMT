@@ -1,6 +1,6 @@
-# BPMT: Body Part as Modality Transformer for Efficient and Accurate Human Action and Gait Recognition
+# TLCA: Transfer Learning with Cross Attention for Action Recognition
 
-## Baseline results
+## leaderboard results
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
