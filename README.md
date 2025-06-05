@@ -4,7 +4,8 @@
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
-| Penn Action (2013) | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
+| Penn Action (2013), joint | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
+| Penn Action (2013), subtraction-bone | 2,326 | 15 | 2D | 13 | ??? 93.4% (HDM-BG) |
 | N-UCLA (2014) | 1,494 | 12 | 3D | 20 | not yet, **88.79%** < 98.3% (SkateFormer) - cross view |
 | NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | not yet, **74.79%** << 92.6% (SkateFormer) - cross subject |
 | NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
@@ -132,6 +133,11 @@ The complete experiment tuning logs:
 | <tr><td colspan="11" align="center"> *ablation study*: **too many layers** can cause overfitting... </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 100 | 89.89% |
 | 30% | linear | 512 | 8 | 8 | no | 1e-5 | 300 | 1e-5, wd=1e-4 | 300 | 86.52% |
+| <tr><td colspan="11" align="center"> *ablation study*: try subtraction-based bones </td></tr> |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 91.76% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 1e-5, wd=1e-4 | **1000** | TBD |
+
+
 
 ## Baseline - Experiment (NTU RGB+D 60)
 
