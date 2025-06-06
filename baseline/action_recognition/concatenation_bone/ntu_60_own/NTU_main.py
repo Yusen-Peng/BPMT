@@ -97,7 +97,7 @@ def main():
         three_d = True
 
         model = BaseT1(
-            num_joints=NUM_JOINTS_NTU,
+            num_joints=NUM_JOINTS_NTU*2,
             three_d=three_d,
             d_model=hidden_size,
             nhead=n_heads,
@@ -142,7 +142,7 @@ def main():
     three_d = True
     t1 = load_T1(
         model_path="action_checkpoints/NTU_pretrained.pt",
-        num_joints=NUM_JOINTS_NTU,
+        num_joints=NUM_JOINTS_NTU*2,
         three_d=three_d,
         d_model=hidden_size,
         nhead=n_heads,

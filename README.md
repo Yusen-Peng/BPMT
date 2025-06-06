@@ -5,17 +5,15 @@
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
 | Penn Action (2013), joint | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
-| Penn Action (2013), subtraction-bone | 2,326 | 15 | 2D | 13 | tie, 92.32% ~ 93.4% (HDM-BG) |
-| Penn Action (2013), concatenation-bone | 2,326 | 15 | 2D | 13 | ? |
-| Penn Action (2013), parameterization-bone | 2,326 | 15 | 2D | 13 | ? |
+| Penn Action (2013), subtraction-bone | 2,326 | 15 | 2D | 13 | tie, **92.32%** ~ 93.4% (HDM-BG) |
+| Penn Action (2013), concatenation-bone | 2,326 | 15 | 2D | 13 | tie, **93.16%** ~ 93.4% (HDM-BG) |
+| Penn Action (2013), parameterization-bone | 2,326 | 15 | 2D | 13 | yes, **93.91%** > 93.4% (HDM-BG) |
 | N-UCLA (2014), joint | 1,494 | 12 | 3D | 20 | not yet, **88.79%** < 98.3% (SkateFormer) |
 | N-UCLA (2014), subtraction-bone | 1,494 | 12 | 3D | 20 | ? |
 | N-UCLA (2014), concatenation-bone | 1,494 | 12 | 3D | 20 | ? |
-| N-UCLA (2014), parameterization-bone | 1,494 | 12 | 3D | 20 | ? |
 | NTU RGB+D (2016), joint | 56,880 | 60 | 3D | 25 | not yet, **74.79%** << 92.6% (SkateFormer) - cross subject |
-| NTU RGB+D (2016), subtraction-bone | 56,880 | 60 | 3D | 25 | ? |
+| NTU RGB+D (2016), subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
 | NTU RGB+D (2016), concatenation-bone | 56,880 | 60 | 3D | 25 | ? |
-| NTU RGB+D (2016), parameterization-bone | 56,880 | 60 | 3D | 25 | ? |
 | NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
@@ -23,18 +21,14 @@
 
 ## Under Discussion
 
-1. for NTU, batch-level padding (current setup) OR fixed-length sequence?
+1. OSC projects?
+
+2. for NTU, batch-level padding (current setup) OR fixed-length sequence?
 
 ![alt text](docs/ntu_seq_length_distribution.png)
 
-2. can't fit Skeletics152 - disk is full (do we have a "shared" directory to store datasets?)
+3. can't fit Skeletics152 - disk is full (do we have a "shared" directory to store datasets?)
 
-## Issues with other datasets
-
-Why other datasets are not considered because:
-
-1. FineGym: three-level hierarchy (actions + sub-actions)
-2. Kinetics (skeleton): too many videos: 500,000 - maybe wait for a sec
 
 ## Baseline - (TLCA: Transfer Learning with Cross Attention) 
 
@@ -149,6 +143,13 @@ The complete experiment tuning logs:
 | 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | **92.32%** |
 | 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 700 | 92.32% |
 | 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | 90.92% |
+| <tr><td colspan="11" align="center"> ablation study: concatenation-based bones </td></tr> |
+| 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 90.26% |
+| 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | 92.51% |
+| 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | **93.16%** |
+| <tr><td colspan="11" align="center"> ablation study: parameterization-based bones </td></tr> |
+| 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | **93.91%** |
+| 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | 93.45% |
 
 
 
@@ -208,7 +209,8 @@ cross-subject evaluation:
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 100 | **74.79%** |
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 74.75% |
 | <tr><td colspan="11" align="center"> ablation study: subtraction-based bones </td></tr> |
-| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | ? |
+| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | **74.23%** |
+| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | running |
 
 
 
@@ -281,7 +283,6 @@ The current best training setup (95%-5% train-val split):
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 800 | 66.59% |
 | <tr><td colspan="11" align="center"> hip-centering + Z-normalization </td></tr> |
 | 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 200 | 63.79% |
-| 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 250 | running |
 | 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | **71.55%** |
 | 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 400 | **70.47%** |
 | 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 500 | 69.18% |
@@ -315,7 +316,8 @@ Use SkateFormer data loader instead of my own data loader because:
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | 87.72% |
 | <tr><td colspan="11" align="center"> ablation study: subtraction-based bones </td></tr> |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.56% |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | ? |
+
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | 79.31% |
 
 
 ## Baseline - Experiment (Skeletics-152, cross-view)

@@ -11,18 +11,17 @@ from torch import optim
 from torch import Tensor
 from torch.nn import functional as F
 from pretraining import train_T1, BaseT1
-from UCLA_finetuning import load_T1, finetuning, GaitRecognitionHead
+from finetuning import load_T1, finetuning, GaitRecognitionHead
 #from first_phase_baseline import BaseT1, train_T1
 #from second_phase_baseline import BaseT2, train_T2, load_T1
 #from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
-from UCLA_utils import set_seed, build_nucla_action_lists_cross_view, split_train_val, collate_fn_finetuning, NUM_JOINTS_NUCLA
-from SF_UCLA_loader import SF_UCLA_Dataset
+from penn_utils import set_seed, build_penn_action_lists, split_train_val, collate_fn_finetuning, NUM_JOINTS_PENN
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
     parser.add_argument("--pretrain", action='store_true', help="Run the stage of pretraining")
-    parser.add_argument("--root_dir", type=str, default="N_UCLA/", help="Root directory of the dataset")
+    parser.add_argument("--root_dir", type=str, default="Penn_Action/", help="Root directory of the dataset")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for training")
     parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
     parser.add_argument("--hidden_size", type=int, default=64, help="Hidden size for the model")
@@ -62,88 +61,22 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     print("=" * 50)
-    print(f"[INFO] Starting NW-UCLA dataset processing on {device}...")
+    print(f"[INFO] Starting Penn Action dataset processing on {device}...")
     print("=" * 50)
 
     # load the dataset
-    # train_seq, train_lbl, test_seq, test_lbl = build_nucla_action_lists_cross_view(
-    #     root=root_dir,
-    #     train_views=['view_1', 'view_2'],
-    #     test_views=['view_3']
-    # )
-
-    
-    train_data_path = 'N-UCLA_processed/'
-    train_label_path = 'N-UCLA_processed/train_label.pkl'
-
-    data_type = 'b'
-    if data_type == 'b':
-        print("[INFO] Using subtraction-based bone data type...")
-    repeat = 10
-    p = 0.5
-
-    train_dataset_pre = SF_UCLA_Dataset(
-        data_path=train_data_path,
-        label_path=train_label_path,
-        data_type=data_type,
-        window_size=-1, 
-        partition=True, 
-        repeat=repeat,
-        p=p,
-        debug=False
-    )
-
-    train_seq = []
-    train_lbl = []
-
-    for i in range(len(train_dataset_pre)):
-        data, _, label, _ = train_dataset_pre[i]
-        # FIXME: a better reshape strategy
-        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
-        train_seq.append(data_tensor)
-        train_lbl.append(label)
-
-    print(f"Collected {len(train_seq)} sequences for train + val.")
-    print(f"Each sequence shape: {train_seq[0].shape}")  # (64, 60)
-
-    # train-val split
+    train_seq, train_lbl, _, _ = build_penn_action_lists(root_dir)
     train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=val_ratio)
 
-    test_data_path = 'N-UCLA_processed/'
-    test_label_path = 'N-UCLA_processed/val_label.pkl'
-
-    test_dataset_pre = SF_UCLA_Dataset(
-        data_path=test_data_path,
-        label_path=test_label_path,
-        data_type='j', 
-        window_size=64, 
-        partition=True, 
-        repeat=1, 
-        p=0.5, 
-        debug=False
-    )
-
-    test_seq = []
-    test_lbl = []
-    for i in range(len(test_dataset_pre)):
-        data, _, label, _ = test_dataset_pre[i]
-        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
-        test_seq.append(data_tensor)
-        test_lbl.append(label)
-    
-    print(f"Collected {len(test_seq)} sequences for test.")
-    print(f"Each sequence shape: {test_seq[0].shape}")  # (64, 60)
-
-
-    num_classes = max(train_lbl + val_lbl + test_lbl) + 1
     train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_dataset = ActionRecognitionDataset(val_seq, val_lbl)
-
+        
     # get the number of classes
+    num_classes = len(set(train_lbl))
     print(f"[INFO] Number of classes: {num_classes}")
     print("=" * 100)
 
-    if pretrain == True:
+    if pretrain == True: 
         """
             pretraining on the whole dataset
         """
@@ -153,9 +86,10 @@ def main():
         print(f"==========================")
         
         # instantiate the model
-        three_d = True
+        three_d = False
+        effective_num_joints = NUM_JOINTS_PENN
         model = BaseT1(
-            num_joints=NUM_JOINTS_NUCLA*2,
+            num_joints=effective_num_joints,
             three_d=three_d,
             d_model=hidden_size,
             nhead=n_heads,
@@ -181,7 +115,7 @@ def main():
 
         print("[TEST] testing global joint masking" + "=" * 40)
         # save pretrained model
-        torch.save(model.state_dict(), f"action_checkpoints/NUCLA_pretrained.pt")
+        torch.save(model.state_dict(), f"action_checkpoints/Penn_pretrained.pt")
 
         print("Aha! pretraining is done!")
         print("=" * 100)
@@ -193,10 +127,10 @@ def main():
 
 
     # load T1 models
-    three_d = True
+    three_d = False
     t1 = load_T1(
-        model_path="action_checkpoints/NUCLA_pretrained.pt",
-        num_joints=NUM_JOINTS_NUCLA*2,
+        model_path="action_checkpoints/Penn_pretrained.pt",
+        num_joints=NUM_JOINTS_PENN,
         three_d=three_d,
         d_model=hidden_size,
         nhead=n_heads,
@@ -241,6 +175,8 @@ def main():
 
     # finetuning learning rate
     fn_lr = 3e-5
+
+
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
         val_loader=val_finetuning_dataloader,
@@ -261,12 +197,12 @@ def main():
         print(f"[INFO] Unfreezing layers: {unfreeze_layers}...")
 
     # save the finetuned models
-    torch.save(trained_T2.state_dict(), f"action_checkpoints/NUCLA_finetuned_T2.pt")
-    torch.save(train_cross_attn.state_dict(), f"action_checkpoints/NUCLA_finetuned_cross_attn.pt")
-    torch.save(train_head.state_dict(), f"action_checkpoints/NUCLA_finetuned_head.pt")
+    torch.save(trained_T2.state_dict(), f"action_checkpoints/Penn_finetuned_T2.pt")
+    torch.save(train_cross_attn.state_dict(), f"action_checkpoints/Penn_finetuned_cross_attn.pt")
+    torch.save(train_head.state_dict(), f"action_checkpoints/Penn_finetuned_head.pt")
 
     if any(param.requires_grad for param in t1.parameters()):
-        torch.save(t1.state_dict(), f"action_checkpoints/NUCLA_finetuned_T1.pt")
+        torch.save(t1.state_dict(), f"action_checkpoints/Penn_finetuned_T1.pt")
 
     print("Aha! finetuned models saved successfully!")
 

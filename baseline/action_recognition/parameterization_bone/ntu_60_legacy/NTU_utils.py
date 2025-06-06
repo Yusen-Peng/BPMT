@@ -13,23 +13,6 @@ NUM_JOINTS_NTU = 25
 OFFICIAL_XSUB_TRAIN_SUBJECTS = [1, 2, 4, 5, 8, 9, 13, 14, 15, 16, 17, 18, 19, 25, 27, 28, 31, 34, 35, 38]
 OFFICIAL_XVIEW_TRAIN_CAMERAS = [2, 3]
 
-NTU_BONE_PAIRS = [
-    (0, 1), (1, 1), (2, 20), (3, 2), (4, 20), (5, 4), (6, 5), (7, 6),
-    (8, 20), (9, 8), (10, 9), (11, 10), (12, 0), (13, 12), (14, 13),
-    (15, 14), (16, 0), (17, 16), (18, 17), (19, 18), (20, 1), (21, 7),
-    (22, 7), (23, 11), (24, 11)
-]
-
-def joint2bone_ntu(joints: torch.Tensor) -> torch.Tensor:
-    """
-    Convert NTU joints (T, 25, 3) to bones (T, 25, 3)
-
-    Returns bone vectors in same shape as input.
-    """
-    bones = [torch.cat([joints[:, j1, :], joints[:, j2, :]], dim=-1) for j1, j2 in NTU_BONE_PAIRS]
-    return torch.stack(bones, dim=1)
-
-
 def collate_fn_batch_padding(batch):
     """
     a collate function for DataLoader that pads sequences to the maximum length in the batch.
@@ -85,15 +68,8 @@ def read_ntu_skeleton_file(
         # Crop to real frame count then flatten (T, 25*3)
         xyz = xyz[: min(total_frames, total_frames)]
 
-        # Root-normalize
-        xyz = xyz - xyz[:, 0:1, :] # subtract hip center (joint 0)
-
-        # Convert to bone (subtraction-based)
-        joints_tensor = torch.from_numpy(xyz)  # (T, 25, 3)
-        bone_tensor = joint2bone_ntu(joints_tensor)  # (T, 25, 3)
-
         # reshape from (T, 25, 3) to (T, 75)
-        return bone_tensor.reshape(xyz.shape[0], -1)
+        return xyz.reshape(xyz.shape[0], -1)
     
 
 def build_ntu_skeleton_lists_xsub(
@@ -151,7 +127,7 @@ def build_ntu_skeleton_lists_xview(
 
         skeleton = read_ntu_skeleton_file(filepath, num_joints)
         hip = skeleton[:, :3]
-        skeleton = skeleton - np.tile(hip, (1, num_joints*2))
+        skeleton = skeleton - np.tile(hip, (1, num_joints))
 
         sequences.append(skeleton)
         labels.append(action_idx)
@@ -195,11 +171,6 @@ if __name__ == "__main__":
     print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")
     print(f"[VERIFY] Number of sequences: {len(all_seq)}")
     print(f"[VERIFY] Number of unique labels: {len(set(all_lbl))}")
-
-    # shape sanity check
-    print(f"[VERIFY] Shape of first sequence: {all_seq[0].shape}")  # should be (T, 150) for NTU
-
-
     tr_seq, tr_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)
     train_set = ActionRecognitionDataset(tr_seq, tr_lbl)
     val_set = ActionRecognitionDataset(val_seq, val_lbl)

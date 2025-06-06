@@ -14,9 +14,9 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
 from base_dataset import ActionRecognitionDataset
+from penn_utils import set_seed, collate_fn_inference
+from NTU_utils import build_ntu_skeleton_lists_xsub, split_train_val, NUM_JOINTS_NTU
 from finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
-from UCLA_utils import set_seed, split_train_val, collate_fn_inference, NUM_JOINTS_NUCLA
-from SF_UCLA_loader import SF_UCLA_Dataset, skateformer_collate_fn
 
 def evaluate(
     data_loader: DataLoader,
@@ -76,7 +76,7 @@ def evaluate(
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Inference")
-    parser.add_argument("--root_dir", type=str, default="N_UCLA/", help="Root directory of the dataset")
+    parser.add_argument("--root_dir", type=str, default="", help="Root directory of the dataset")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size for Inference")
     parser.add_argument("--hidden_size", type=int, default=64, help="Hidden size for the model")
     parser.add_argument("--device", type=str, default='cuda', help="Device to use for training (cuda or cpu)")
@@ -100,89 +100,25 @@ def main():
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     print("=" * 50)
-    print(f"[INFO] Starting N-UCLA dataset processing on {device}...")
+    print(f"[INFO] Starting NTU dataset processing on {device}...")
     print("=" * 50)
 
-    # # load the dataset
-    # train_seq, train_lbl, test_seq, test_lbl = build_nucla_action_lists_cross_view(
-    #     root=root_dir,
-    #     train_views=['view_1', 'view_2'],
-    #     test_views=['view_3']
-    # )
-    # train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
+    # load the dataset
+    test_seq, test_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=False)
+
+    assert len(test_seq) == 16560
+
+    #train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
     
-    # test_dataset = ActionRecognitionDataset(test_seq, test_lbl)
-
-    train_data_path = 'N-UCLA_processed/'
-    train_label_path = 'N-UCLA_processed/train_label.pkl'
-
-
-    data_type = 'b'
-    train_dataset_pre = SF_UCLA_Dataset(
-        data_path=train_data_path,
-        label_path=train_label_path,
-        data_type=data_type, 
-        window_size=64, 
-        partition=True, 
-        repeat=1, 
-        p=0.5, 
-        debug=False
-    )
-
-    train_seq = []
-    train_lbl = []
-
-    for i in range(len(train_dataset_pre)):
-        data, _, label, _ = train_dataset_pre[i]
-        # FIXME: a better reshape strategy
-        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
-        train_seq.append(data_tensor)
-        train_lbl.append(label)
-
-    print(f"Collected {len(train_seq)} sequences for train + val.")
-    print(f"Each sequence shape: {train_seq[0].shape}")  # (64, 60)
-
-    # train-val split
-    val_ratio = 0.05
-    train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=val_ratio)
-
-    test_data_path = 'N-UCLA_processed/'
-    test_label_path = 'N-UCLA_processed/val_label.pkl'
-
-    P_INFERENCE_MODE = 0.0
-    REPEAT_INFERENCE_MODE = 1
-    test_dataset_pre = SF_UCLA_Dataset(
-        data_path=test_data_path,
-        label_path=test_label_path,
-        data_type=data_type, 
-        window_size=-1, 
-        partition=True, 
-        repeat=REPEAT_INFERENCE_MODE, 
-        p=P_INFERENCE_MODE, 
-        debug=False
-    )
-
-    test_seq = []
-    test_lbl = []
-    for i in range(len(test_dataset_pre)):
-        data, _, label, _ = test_dataset_pre[i]
-        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
-        test_seq.append(data_tensor)
-        test_lbl.append(label)
-    
-    print(f"Collected {len(test_seq)} sequences for test.")
-    print(f"Each sequence shape: {test_seq[0].shape}")  # (64, 60)
+    test_dataset = ActionRecognitionDataset(test_seq, test_lbl)
     
     # get the number of classes
-    num_classes = max(train_lbl + val_lbl + test_lbl) + 1
-    print(f"Number of classes: {num_classes}=========================")
-
-    test_dataset = ActionRecognitionDataset(test_seq, test_lbl)
+    num_classes = len(set(test_lbl))
 
     test_loader = torch.utils.data.DataLoader(
         test_dataset,
         batch_size=batch_size,
-        shuffle=False,
+        shuffle=True,
         collate_fn=collate_fn_inference
     )
 
@@ -190,32 +126,18 @@ def main():
     unfreeze_layers = "entire"
     if unfreeze_layers is None:
         print("************Freezing all layers")
-        t1 = load_T1("action_checkpoints/NUCLA_pretrained.pt", 
-                    num_joints=NUM_JOINTS_NUCLA*2,
-                    three_d=True,
-                    d_model=hidden_size, 
-                    nhead=n_heads, 
-                    num_layers=num_layers, 
-                    device=device
-                )
+        t1 = load_T1("action_checkpoints/NTU_pretrained.pt", d_model=hidden_size, num_joints=NUM_JOINTS_NTU, three_d=True, nhead=n_heads, num_layers=num_layers, device=device)
     else:
-        t1 = load_T1("action_checkpoints/NUCLA_finetuned_T1.pt",
-                    num_joints=NUM_JOINTS_NUCLA*2,
-                    three_d=True,
-                    d_model=hidden_size, 
-                    nhead=n_heads, 
-                    num_layers=num_layers, 
-                    device=device
-                )
+        t1 = load_T1("action_checkpoints/NTU_finetuned_T1.pt", d_model=hidden_size, num_joints=NUM_JOINTS_NTU, three_d=True, nhead=n_heads, num_layers=num_layers, device=device)
         print(f"************Unfreezing layers: {unfreeze_layers}")
     
-    t2 = load_T2("action_checkpoints/NUCLA_finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
+    t2 = load_T2("action_checkpoints/NTU_finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     # load the cross attention module
-    cross_attn = load_cross_attn("action_checkpoints/NUCLA_finetuned_cross_attn.pt", d_model=hidden_size, device=device)
+    cross_attn = load_cross_attn("action_checkpoints/NTU_finetuned_cross_attn.pt", d_model=hidden_size, device=device)
 
     # load the gait recognition head
     gait_head = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes)
-    gait_head.load_state_dict(torch.load("action_checkpoints/NUCLA_finetuned_head.pt", map_location="cpu"))
+    gait_head.load_state_dict(torch.load("action_checkpoints/NTU_finetuned_head.pt", map_location="cpu"))
     gait_head = gait_head.to(device)
 
     print("Aha! All models loaded successfully!")

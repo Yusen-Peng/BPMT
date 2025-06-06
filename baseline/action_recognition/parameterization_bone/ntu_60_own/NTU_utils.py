@@ -26,9 +26,9 @@ def joint2bone_ntu(joints: torch.Tensor) -> torch.Tensor:
 
     Returns bone vectors in same shape as input.
     """
-    bones = [torch.cat([joints[:, j1, :], joints[:, j2, :]], dim=-1) for j1, j2 in NTU_BONE_PAIRS]
-    return torch.stack(bones, dim=1)
-
+    bone_vecs = [joints[:, j1, :] - joints[:, j2, :] for j1, j2 in NTU_BONE_PAIRS]
+    bone_tensor = torch.stack(bone_vecs, dim=1)  # (T, 25, 3)
+    return bone_tensor
 
 def collate_fn_batch_padding(batch):
     """
@@ -151,7 +151,7 @@ def build_ntu_skeleton_lists_xview(
 
         skeleton = read_ntu_skeleton_file(filepath, num_joints)
         hip = skeleton[:, :3]
-        skeleton = skeleton - np.tile(hip, (1, num_joints*2))
+        skeleton = skeleton - np.tile(hip, (1, num_joints))
 
         sequences.append(skeleton)
         labels.append(action_idx)
@@ -195,11 +195,6 @@ if __name__ == "__main__":
     print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")
     print(f"[VERIFY] Number of sequences: {len(all_seq)}")
     print(f"[VERIFY] Number of unique labels: {len(set(all_lbl))}")
-
-    # shape sanity check
-    print(f"[VERIFY] Shape of first sequence: {all_seq[0].shape}")  # should be (T, 150) for NTU
-
-
     tr_seq, tr_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)
     train_set = ActionRecognitionDataset(tr_seq, tr_lbl)
     val_set = ActionRecognitionDataset(val_seq, val_lbl)
