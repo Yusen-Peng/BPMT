@@ -9,11 +9,12 @@
 | Penn Action (2013), concatenation-bone | 2,326 | 15 | 2D | 13 | tie, **93.16%** ~ 93.4% (HDM-BG) |
 | Penn Action (2013), parameterization-bone | 2,326 | 15 | 2D | 13 | yes, **93.91%** > 93.4% (HDM-BG) |
 | N-UCLA (2014), joint | 1,494 | 12 | 3D | 20 | not yet, **88.79%** < 98.3% (SkateFormer) |
-| N-UCLA (2014), subtraction-bone | 1,494 | 12 | 3D | 20 | ? |
-| N-UCLA (2014), concatenation-bone | 1,494 | 12 | 3D | 20 | ? |
+| N-UCLA (2014), subtraction-bone | 1,494 | 12 | 3D | 20 | **85.56%** < 98.3% (SkateFormer) |
+| N-UCLA (2014), concatenation-bone | 1,494 | 12 | 3D | 20 | **88.15%** < 98.3% (SkateFormer) |
 | NTU RGB+D (2016), joint | 56,880 | 60 | 3D | 25 | not yet, **74.79%** << 92.6% (SkateFormer) - cross subject |
 | NTU RGB+D (2016), subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
-| NTU RGB+D (2016), concatenation-bone | 56,880 | 60 | 3D | 25 | ? |
+| NTU RGB+D (2016), concatenation-bone | 56,880 | 60 | 3D | 25 | running now |
+| <tr><td colspan="6" align="center"> the remaining part of the leaderboard is not done yet... </td></tr> |
 | NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
 | NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
@@ -61,7 +62,6 @@ The current best training setup (95%-5% train-val split):
 | masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | clf-acc | 
 |------------------|------------|------------|------------|------------|------------|--------|-------------|-------------|--------|------------|
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | **1000** | 1e-5, wd=1e-4 | **1000** | **94.66%** |
-| 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | **92.32%** |
 
 
 
@@ -210,10 +210,8 @@ cross-subject evaluation:
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 74.75% |
 | <tr><td colspan="11" align="center"> ablation study: subtraction-based bones </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | **74.23%** |
-| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | running |
-
-
-
+| <tr><td colspan="11" align="center"> ablation study: concatenation-based bones </td></tr> |
+| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | running |
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | Need to run one here... |
 
@@ -302,7 +300,7 @@ Use SkateFormer data loader instead of my own data loader because:
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.13% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 200 | 84.27% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.56% |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 87.28% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | **87.28%** |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 300 | 85.13% |
 | <tr><td colspan="11" align="center"> medium backbone </td></tr> |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 84.05% |
@@ -315,9 +313,15 @@ Use SkateFormer data loader instead of my own data loader because:
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 500 | 88.15% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | 87.72% |
 | <tr><td colspan="11" align="center"> ablation study: subtraction-based bones </td></tr> |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.56% |
-
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | **85.56%** |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 300 | 85.13% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 100 | 83.19% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | 82.54% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | 79.31% |
+| <tr><td colspan="11" align="center"> ablation study: concatenation-based bones </td></tr> |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 84.27% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 84.70% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 300 | **88.15%** |
 
 
 ## Baseline - Experiment (Skeletics-152, cross-view)
