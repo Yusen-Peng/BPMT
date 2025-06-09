@@ -1,24 +1,24 @@
-# TLCA: Transfer Learning with Cross Attention for Action Recognition
+# CascadeFormer: Two-stage Cascading Transformer for Human Action Recognition
 
-## leaderboard results
+## leaderboard results (CascadeFormer baseline)
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
-| Penn Action (2013), joint | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
-| Penn Action (2013), subtraction-bone | 2,326 | 15 | 2D | 13 | tie, **92.32%** ~ 93.4% (HDM-BG) |
-| Penn Action (2013), concatenation-bone | 2,326 | 15 | 2D | 13 | tie, **93.16%** ~ 93.4% (HDM-BG) |
-| Penn Action (2013), parameterization-bone | 2,326 | 15 | 2D | 13 | yes, **93.91%** > 93.4% (HDM-BG) |
-| N-UCLA (2014), joint | 1,494 | 12 | 3D | 20 | not yet, **88.79%** < 98.3% (SkateFormer) |
-| N-UCLA (2014), subtraction-bone | 1,494 | 12 | 3D | 20 | **85.56%** < 98.3% (SkateFormer) |
-| N-UCLA (2014), concatenation-bone | 1,494 | 12 | 3D | 20 | **88.15%** < 98.3% (SkateFormer) |
-| NTU RGB+D (2016), joint | 56,880 | 60 | 3D | 25 | not yet, **74.79%** << 92.6% (SkateFormer) - cross subject |
-| NTU RGB+D (2016), subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
-| NTU RGB+D (2016), concatenation-bone | 56,880 | 60 | 3D | 25 | running now |
+| Penn Action, joint | 2,326 | 15 | 2D | 13 | yes, **94.66%** > 93.4% (HDM-BG) |
+| Penn Action, subtraction-bone | 2,326 | 15 | 2D | 13 | tie, **92.32%** ~ 93.4% (HDM-BG) |
+| Penn Action, concatenation-bone | 2,326 | 15 | 2D | 13 | tie, **93.16%** ~ 93.4% (HDM-BG) |
+| Penn Action, parameterization-bone | 2,326 | 15 | 2D | 13 | yes, **93.91%** > 93.4% (HDM-BG) |
+| N-UCLA, joint | 1,494 | 12 | 3D | 20 | not yet, **88.79%** < 98.3% (SkateFormer) |
+| N-UCLA, subtraction-bone | 1,494 | 12 | 3D | 20 | **85.56%** < 98.3% (SkateFormer) |
+| N-UCLA, concatenation-bone | 1,494 | 12 | 3D | 20 | **88.15%** < 98.3% (SkateFormer) |
+| NTU, joint | 56,880 | 60 | 3D | 25 | not yet, **74.79%** << 92.6% (SkateFormer) - cross subject |
+| NTU, subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
+| NTU, concatenation-bone | 56,880 | 60 | 3D | 25 | **73.81%**  << 92.6% (SkateFormer) - cross subject |
 | <tr><td colspan="6" align="center"> the remaining part of the leaderboard is not done yet... </td></tr> |
-| NTU RGB+D (2016) | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
-| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
-| NTU RGB+D 120 (2019) | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
-| Skeletics-152 (2020) | 125,657 | 152 | 3D | 25 | N/A < 56.39% (MS-G3D) |
+| NTU | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
+| NTU 120 | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
+| NTU 120 | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
+| Skeletics-152 | 125,657 | 152 | 3D | 25 | N/A < 56.39% (MS-G3D) |
 
 ## Under Discussion
 
@@ -30,8 +30,7 @@
 
 3. can't fit Skeletics152 - disk is full (do we have a "shared" directory to store datasets?)
 
-
-## Baseline - (TLCA: Transfer Learning with Cross Attention) 
+## Baseline
 
 Pretraining:
 ![alt text](docs/baseline_pretraining_classification.png)
@@ -211,7 +210,12 @@ cross-subject evaluation:
 | <tr><td colspan="11" align="center"> ablation study: subtraction-based bones </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | **74.23%** |
 | <tr><td colspan="11" align="center"> ablation study: concatenation-based bones </td></tr> |
-| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | running |
+| 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | **73.81%** |
+
+| <tr><td colspan="11" align="center"> a big, beautiful model </td></tr> |
+| 30% | linear | 1024 | 8 | 12 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | running |
+
+
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | Need to run one here... |
 

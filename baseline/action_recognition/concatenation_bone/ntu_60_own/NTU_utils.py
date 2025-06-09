@@ -114,7 +114,7 @@ def build_ntu_skeleton_lists_xsub(
         action_idx = int(filename[17:20]) - 1
         skeleton = read_ntu_skeleton_file(filepath, num_joints)
         hip = skeleton[:, :3]
-        skeleton = skeleton - np.tile(hip, (1, num_joints))
+        skeleton = skeleton - np.tile(hip, (1, num_joints*2))
         sequences.append(skeleton)
         labels.append(action_idx)
 
