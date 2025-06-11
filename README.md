@@ -1,12 +1,16 @@
 # CascadeFormer: Two-stage Cascading Transformer for Human Action Recognition
 
-## Leaderboard - CascadeFormer 1.0 
+## CascadeFormer 1.0
+
+### architecture
 
 Pretraining:
 ![alt text](docs/baseline_pretraining_classification.png)
 
 Cascading Finetuning:
 ![alt text](docs/baseline_finetuning_classification.png)
+
+### result leaderboard - CascadeFormer 1.0
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
@@ -21,9 +25,15 @@ Cascading Finetuning:
 | NTU, subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
 | NTU, concatenation-bone | 56,880 | 60 | 3D | 25 | **73.81%**  << 92.6% (SkateFormer) - cross subject |
 
-## Leaderboard - CascadeFormer 1.1
+## CascadeFormer 1.1 (convolution enhanced)
 
-CascadeFormer 1.1 = CascadeFormer 1.0 **3D** input (T, J, D) instead of (T, J * D)
+Pretraining:
+![alt text](docs/cascadeformer_1_1_pretrain.png)
+
+Cascading Finetuning:
+![alt text](docs/cascadeformer_1_1_finetune.png)
+
+### result leaderboard - CascadeFormer 1.1
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |

@@ -11,10 +11,8 @@ from torch import optim
 from torch import Tensor
 from torch.nn import functional as F
 from pretraining import train_T1, BaseT1
+
 from finetuning import load_T1, finetuning, GaitRecognitionHead
-#from first_phase_baseline import BaseT1, train_T1
-#from second_phase_baseline import BaseT2, train_T2, load_T1
-#from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
 from penn_utils import set_seed, build_penn_action_lists, split_train_val, collate_fn_finetuning, NUM_JOINTS_PENN
 
@@ -22,7 +20,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
     parser.add_argument("--pretrain", action='store_true', help="Run the stage of pretraining")
     parser.add_argument("--root_dir", type=str, default="Penn_Action/", help="Root directory of the dataset")
-    parser.add_argument("--batch_size", type=int, default=4, help="Batch size for training")
+    parser.add_argument("--batch_size", type=int, default=2, help="Batch size for training")
     parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
     parser.add_argument("--hidden_size", type=int, default=64, help="Hidden size for the model")
     parser.add_argument("--class_specific_split", action='store_true', help="Use class-specific split for training and validation")
@@ -123,7 +121,6 @@ def main():
     print("=" * 100)
     print("=" * 100)
     print("=" * 100)
-
 
     # load T1 models
     three_d = False

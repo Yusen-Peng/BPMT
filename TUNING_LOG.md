@@ -91,6 +91,14 @@ The complete experiment tuning logs:
 | 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | **93.91%** |
 | 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | 93.45% |
 
+| <tr><td colspan="11" align="center"> CascadeFormer 1.1 (spatial-aware) </td></tr> |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | ?? |
+
+
+
+
+
+
 ## NTU RGB+D 60
 
 Many folks have done data augmentation (still using only skeleton data):

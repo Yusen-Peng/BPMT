@@ -11,21 +11,35 @@ import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import get_cosine_schedule_with_warmup
 
-def load_T1(model_path: str, num_joints: int = 13, three_d: bool = False, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
-                device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT1:
+def load_T1(
+    model_path: str,
+    num_joints: int = 13,
+    three_d: bool = False,
+    d_model: int = 128,
+    nhead: int = 4,
+    num_layers: int = 2,
+    freeze: bool = True,
+    device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
+) -> BaseT1:
     """
-        loads a BaseT1 model from a checkpoint
+    Loads a BaseT1 model from checkpoint and optionally freezes its parameters.
+    Assumes model was trained with (B, T, J, D) format and uses joint attention.
     """
+    model = BaseT1(
+        num_joints=num_joints,
+        three_d=three_d,
+        d_model=d_model,
+        nhead=nhead,
+        num_layers=num_layers
+    )
 
-    model = BaseT1(num_joints=num_joints, three_d=three_d, d_model=d_model, nhead=nhead, num_layers=num_layers)
-    model.load_state_dict(torch.load(model_path, map_location='cpu'))
+    state_dict = torch.load(model_path, map_location='cpu')
+    model.load_state_dict(state_dict)
 
-    # optionally freeze the model parameters
     if freeze:
         for param in model.parameters():
             param.requires_grad = False
 
-    # move model to device and return the model
     return model.to(device)
 
 
@@ -52,7 +66,6 @@ class CrossAttention(nn.Module):
         out = self.norm(Q + self.dropout(attn_out))
         
         return out
-
 
 class BaseT2(nn.Module):
     def __init__(self, d_model=128, nhead=4, num_layers=2):
