@@ -16,8 +16,8 @@ from UCLA_finetuning import load_T1, finetuning, GaitRecognitionHead
 #from second_phase_baseline import BaseT2, train_T2, load_T1
 #from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
-from UCLA_utils import set_seed, build_nucla_action_lists_cross_view, split_train_val, collate_fn_finetuning, NUM_JOINTS_NUCLA
-from SF_UCLA_loader import SF_UCLA_Dataset
+from UCLA_utils import set_seed, build_nucla_action_lists_cross_view, split_train_val, NUM_JOINTS_NUCLA
+from SF_UCLA_loader import SF_UCLA_Dataset, skateformer_collate_fn
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
@@ -64,14 +64,6 @@ def main():
     print("=" * 50)
     print(f"[INFO] Starting NW-UCLA dataset processing on {device}...")
     print("=" * 50)
-
-    # load the dataset
-    # train_seq, train_lbl, test_seq, test_lbl = build_nucla_action_lists_cross_view(
-    #     root=root_dir,
-    #     train_views=['view_1', 'view_2'],
-    #     test_views=['view_3']
-    # )
-
     
     train_data_path = 'N-UCLA_processed/'
     train_label_path = 'N-UCLA_processed/train_label.pkl'
@@ -96,8 +88,7 @@ def main():
 
     for i in range(len(train_dataset_pre)):
         data, _, label, _ = train_dataset_pre[i]
-        # FIXME: a better reshape strategy
-        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
+        data_tensor = torch.from_numpy(data)
         train_seq.append(data_tensor)
         train_lbl.append(label)
 
@@ -125,12 +116,14 @@ def main():
     test_lbl = []
     for i in range(len(test_dataset_pre)):
         data, _, label, _ = test_dataset_pre[i]
-        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
+
+        data_tensor = torch.from_numpy(data)
+
         test_seq.append(data_tensor)
         test_lbl.append(label)
     
     print(f"Collected {len(test_seq)} sequences for test.")
-    print(f"Each sequence shape: {test_seq[0].shape}")  # (64, 60)
+    print(f"Each sequence shape: {test_seq[0].shape}")
 
 
     num_classes = max(train_lbl + val_lbl + test_lbl) + 1
@@ -213,14 +206,14 @@ def main():
         train_finetuning_dataset,
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=collate_fn_finetuning
+        collate_fn=skateformer_collate_fn
     )
 
     val_finetuning_dataloader = torch.utils.data.DataLoader(
         val_finetuning_dataset,
         batch_size=batch_size,
         shuffle=False,
-        collate_fn=collate_fn_finetuning
+        collate_fn=skateformer_collate_fn
     )
 
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)

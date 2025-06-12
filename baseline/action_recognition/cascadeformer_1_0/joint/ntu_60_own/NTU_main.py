@@ -54,7 +54,7 @@ def main():
     # transformer parameters
     hidden_size = 512   # 256 -> 512
     n_heads = 8
-    num_layers = 8      # 4 -> 8
+    num_layers = 12      # 4 -> 8 -> 12
     print(f"hidden_size: {hidden_size}")
     print(f"n_heads: {n_heads}")
     print(f"num_layers: {num_layers}")

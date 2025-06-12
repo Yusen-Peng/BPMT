@@ -1,0 +1,25 @@
+nohup: ignoring input
+pretrain?: False
+hidden_size: 256
+n_heads: 8
+num_layers: 4
+batch_size: 4
+==================================================
+[INFO] Starting NW-UCLA dataset processing on cuda...
+==================================================
+Collected 10200 sequences for train + val.
+Each sequence shape: torch.Size([3, 64, 20, 1])
+Collected 464 sequences for test.
+Each sequence shape: torch.Size([3, 64, 20, 1])
+[INFO] Number of classes: 10
+====================================================================================================
+====================================================================================================
+====================================================================================================
+====================================================================================================
+pretrained model loaded successfully!
+[INFO] finetuning the entire T1 model...
+is T1 freezed? False
+unfreezing layers: None
+  0%|          | 0/100 [00:00<?, ?it/s]/home/peng.1007/BPMT/baseline/action_recognition/cascadeformer_1_1/joint/n_ucla/base_dataset.py:15: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  seq   = torch.tensor(self.seqs[idx],   dtype=torch.float32)
+  1%|          | 1/100 [00:31<51:38, 31.30s/it]  2%|▏         | 2/100 [01:01<50:11, 30.73s/it]  3%|▎         | 3/100 [01:32<49:26, 30.58s/it]  4%|▍         | 4/100 [02:02<48:46, 30.49s/it]  5%|▌         | 5/100 [02:32<48:12, 30.44s/it]  6%|▌         | 6/100 [03:03<47:42, 30.45s/it]  7%|▋         | 7/100 [03:33<47:07, 30.41s/it]  8%|▊         | 8/100 [04:03<46:33, 30.37s/it]  9%|▉         | 9/100 [04:34<46:00, 30.34s/it] 10%|█         | 10/100 [05:04<45:30, 30.34s/it] 11%|█         | 11/100 [05:34<44:59, 30.33s/it] 12%|█▏        | 12/100 [06:05<44:28, 30.33s/it] 13%|█▎        | 13/100 [06:35<43:58, 30.32s/it] 14%|█▍        | 14/100 [07:05<43:34, 30.40s/it] 15%|█▌        | 15/100 [07:36<43:03, 30.40s/it] 16%|█▌        | 16/100 [08:06<42:31, 30.37s/it] 17%|█▋        | 17/100 [08:37<42:02, 30.39s/it] 18%|█▊        | 18/100 [09:07<41:30, 30.37s/it] 19%|█▉        | 19/100 [09:37<40:58, 30.35s/it]

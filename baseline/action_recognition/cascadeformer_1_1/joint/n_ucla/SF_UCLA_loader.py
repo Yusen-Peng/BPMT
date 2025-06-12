@@ -1674,51 +1674,53 @@ def import_class(name):
 
 def skateformer_collate_fn(batch):
     """
-    Convert NumPy arrays to tensors, reshape to (T, C*V), and batch into (B, T, C*V)
+    Convert NumPy arrays to tensors, reshape from (3, T, V, 1) → (T, V, 3),
+    then batch into (B, T, V, 3)
     """
-    data, _, labels, _ = zip(*batch)
+    data, labels = zip(*batch)
 
-    # Convert to tensor and reshape: (3, T, V, 1) → (T, C*V)
-    reshaped = [
-        torch.from_numpy(d).permute(1, 0, 2, 3).reshape(d.shape[1], -1)
-        for d in data
-    ]
+    reshaped = []
+    for sample in data:
+        # sample shape: (3, T, V, 1)
+        tensor = sample.squeeze(-1)     # (3, T, V)
+        tensor = tensor.permute(1, 2, 0)                  # (T, V, 3)
+        reshaped.append(tensor)
 
-    batch_data = torch.stack(reshaped)  # (B, T, C*V)
+    batch_data = torch.stack(reshaped)                   # (B, T, V, 3)
     batch_labels = torch.tensor(labels, dtype=torch.long)
 
     return batch_data, batch_labels
 
-# if __name__ == '__main__':
-#     train_data_path = 'N-UCLA_processed/'
-#     train_label_path = 'N-UCLA_processed/train_label.pkl'
+if __name__ == '__main__':
+    train_data_path = 'N-UCLA_processed/'
+    train_label_path = 'N-UCLA_processed/train_label.pkl'
 
-#     train_dataset = SF_UCLA_Dataset(
-#         data_path=train_data_path,
-#         label_path=train_label_path,
-#         data_type='j', 
-#         window_size=64, 
-#         partition=True,
-#         repeat=1,
-#         p=0.5,
-#         debug=False
-#     )
+    train_dataset = SF_UCLA_Dataset(
+        data_path=train_data_path,
+        label_path=train_label_path,
+        data_type='j', 
+        window_size=64, 
+        partition=True,
+        repeat=1,
+        p=0.5,
+        debug=False
+    )
 
-#     # some DEBUG statements to check the sanity of the dataset
-#     print(f"Dataset length: {len(train_dataset)}")
-#     print(f"First item shape: {train_dataset[0][0].shape}")
-#     print(f"First item label: {train_dataset[0][2]}")
+    # some DEBUG statements to check the sanity of the dataset
+    print(f"Dataset length: {len(train_dataset)}")
+    print(f"First item shape: {train_dataset[0][0].shape}")
+    print(f"First item label: {train_dataset[0][2]}")
 
 
-#     train_loader = DataLoader(
-#         train_dataset,
-#         batch_size=32,
-#         shuffle=True,
-#         collate_fn=skateformer_collate_fn,
-#     )
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=32,
+        shuffle=True,
+        collate_fn=skateformer_collate_fn,
+    )
 
-#     # Sample inspection
-#     for xb, yb in train_loader:
-#         print(f"Batch X shape: {xb.shape}")  # should be (B, 64, 60)
-#         print(f"Batch Y shape: {yb.shape}")  # should be (B,)
-#         break
+    # Sample inspection
+    for xb, yb in train_loader:
+        print(f"Batch X shape: {xb.shape}")  # should be (B, 64, 60)
+        print(f"Batch Y shape: {yb.shape}")  # should be (B,)
+        break

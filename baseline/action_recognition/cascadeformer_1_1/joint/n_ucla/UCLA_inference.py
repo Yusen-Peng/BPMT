@@ -102,17 +102,6 @@ def main():
     print("=" * 50)
     print(f"[INFO] Starting N-UCLA dataset processing on {device}...")
     print("=" * 50)
-
-    # # load the dataset
-    # train_seq, train_lbl, test_seq, test_lbl = build_nucla_action_lists_cross_view(
-    #     root=root_dir,
-    #     train_views=['view_1', 'view_2'],
-    #     test_views=['view_3']
-    # )
-    # train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
-    
-    # test_dataset = ActionRecognitionDataset(test_seq, test_lbl)
-
     train_data_path = 'N-UCLA_processed/'
     train_label_path = 'N-UCLA_processed/train_label.pkl'
 
@@ -133,7 +122,7 @@ def main():
     for i in range(len(train_dataset_pre)):
         data, _, label, _ = train_dataset_pre[i]
         # FIXME: a better reshape strategy
-        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
+        data_tensor = torch.from_numpy(data)
         train_seq.append(data_tensor)
         train_lbl.append(label)
 
@@ -164,7 +153,7 @@ def main():
     test_lbl = []
     for i in range(len(test_dataset_pre)):
         data, _, label, _ = test_dataset_pre[i]
-        data_tensor = torch.from_numpy(data).permute(1, 0, 2, 3).reshape(data.shape[1], -1)
+        data_tensor = torch.from_numpy(data)
         test_seq.append(data_tensor)
         test_lbl.append(label)
     
@@ -181,7 +170,7 @@ def main():
         test_dataset,
         batch_size=batch_size,
         shuffle=False,
-        collate_fn=collate_fn_inference
+        collate_fn=skateformer_collate_fn
     )
 
     # load T1 model

@@ -90,12 +90,13 @@ The complete experiment tuning logs:
 | <tr><td colspan="11" align="center"> ablation study: parameterization-based bones </td></tr> |
 | 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 500 | **93.91%** |
 | 30%, subtraction-bone | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 1e-5, wd=1e-4 | 1000 | 93.45% |
-
-| <tr><td colspan="11" align="center"> CascadeFormer 1.1 (spatial-aware) </td></tr> |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | **93.35%** |
-
-
-
+| <tr><td colspan="11" align="center"> CascadeFormer 1.1 (convolution enhanced) </td></tr> |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | 89.70% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 93.35% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | 92.51% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 200 | 92.98% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 300 | 92.79% |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | **94.10%** |
 
 
 ## NTU RGB+D 60
@@ -156,35 +157,9 @@ cross-subject evaluation:
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | Need to run one here... |
 
-
-Attempted to use SkateFormer data loader instead of my own data loader - bad performance!
-
-1. (really) comprehensive regularization
-    1. Shear (deformation)
-    2. rotate
-    3. scale
-    4. spatial flip
-    5. temporal flip
-    6. Gaussian noise
-    7. Gaussian blur
-    8. drop axis
-    9. drop joint
-
-| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
-|--------------------|---------|---------|--------|------------|------------|--------|----------|----------------|----------|----------|
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '123456789ab' | 1e-5, wd=1e-4 | 100, reg: '128' | 64.29% |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '23689' | 1e-5, wd=1e-4 | 100, reg: '23689' | 63.93% |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '23689' | 1e-5, wd=1e-4 | 100, reg: '' | 65.66% |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100, reg: '23689' | 1e-5, wd=1e-4 | 200, reg: '' | 65.89% |
-
 ## Baseline - Experiment (NW-UCLA, cross-view)
 
-
 ![alt text](docs/NTU_comparison.png)
-
-The following bottleneck is ***under discussion***:
-
-1. is (T, 20, 3) -> (T × 20, 3) better than -> (T, 20X3)?
 
 The current best training setup (95%-5% train-val split):
 
@@ -193,35 +168,6 @@ The current best training setup (95%-5% train-val split):
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | **88.79%** |
 
 ## The complete experiment tuning logs:
-
-| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
-|--------------------|---------|---------|--------|------------|------------|--------|----------|----------------|----------|----------|
-| <tr><td colspan="11" align="center"> minimal backbone </td></tr> |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 57.97% (100 epochs pretraining is too weak) |
-| <tr><td colspan="11" align="center"> medium backbone </td></tr> |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 50 | 65.95% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 63.15% |
-| 30% | linear | 256 | 8 | 4 | yes | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 65.73% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 20 | 65.73% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 30 | 69.40% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 50 | **69.40%** |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 67.03% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 61.21% |
-| <tr><td colspan="11" align="center"> strong backbone </td></tr> |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 50 | 65.73% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 100 | 66.59% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 200 | **69.83%** |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | 66.16% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 400 | 64.44% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 500 | 69.18% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 600 | 65.52% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 800 | 66.59% |
-| <tr><td colspan="11" align="center"> hip-centering + Z-normalization </td></tr> |
-| 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 200 | 63.79% |
-| 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 300 | **71.55%** |
-| 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 400 | **70.47%** |
-| 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 500 | 69.18% |
-| 30%, z-norm | linear | 256 | 8 | 4 | no | 1e-4 | 1000 | 3e-5, wd=1e-4, cosine + warmup | 1000 | 60.99% |
 
 Use SkateFormer data loader instead of my own data loader because:
 
@@ -259,6 +205,13 @@ Use SkateFormer data loader instead of my own data loader because:
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 84.27% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 84.70% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 300 | **88.15%** |
+| <tr><td colspan="11" align="center"> CascadeFormer 1.1 (convolution enhanced) </td></tr> |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 3 | 3e-5, wd=1e-4, cosine + warmup | 3 | 82.54% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.99% |
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 83.84% |
+
+
+| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 300 | **87.07%** |
 
 
 ## Baseline - Experiment (Skeletics-152, cross-view)
