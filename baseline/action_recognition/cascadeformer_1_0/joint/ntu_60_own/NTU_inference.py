@@ -96,7 +96,7 @@ def main():
 
     hidden_size = 512 # 256, 512
     n_heads = 8
-    num_layers = 8    # 4, 8
+    num_layers = 12    # 4, 8, 12
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     print("=" * 50)

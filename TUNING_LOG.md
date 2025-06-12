@@ -150,10 +150,18 @@ cross-subject evaluation:
 | <tr><td colspan="11" align="center"> larger model </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 100 | **74.79%** |
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 74.75% |
+
+| 30% | linear | 512 | 8 | **12** | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | **75.12%** |
+| 30% | linear | 512 | 8 | **12** | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | running |
+
+
 | <tr><td colspan="11" align="center"> ablation study: subtraction-based bones </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | **74.23%** |
 | <tr><td colspan="11" align="center"> ablation study: concatenation-based bones </td></tr> |
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | **73.81%** |
+
+
+
 | <tr><td colspan="11" align="center"> cross-view evaluation </td></tr> |
 | no | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 100 | Need to run one here... |
 
@@ -206,12 +214,15 @@ Use SkateFormer data loader instead of my own data loader because:
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 84.70% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 300 | **88.15%** |
 | <tr><td colspan="11" align="center"> CascadeFormer 1.1 (convolution enhanced) </td></tr> |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 3 | 3e-5, wd=1e-4, cosine + warmup | 3 | 82.54% |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.99% |
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 83.84% |
-
-
-| 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 300 | **87.07%** |
+| <tr><td colspan="11" align="center"> p: probability of dropping axis/joint regularization </td></tr> |
+| 30%, p=0.5, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 3 | 3e-5, wd=1e-4, cosine + warmup | 3 | 82.54% |
+| 30%, p=0.5, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.99% |
+| 30%, p=0.5, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 83.84% |
+| 30%, p=0.5, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 100 | 84.70% |
+| 30%, p=0.5, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 300 | **87.07%** |
+| 30%, p=0.5, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 400 | 86.85% |
+| <tr><td colspan="11" align="center"> try **LESS** regularization! </td></tr> |
+| 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | **91.16%** |
 
 
 ## Baseline - Experiment (Skeletics-152, cross-view)

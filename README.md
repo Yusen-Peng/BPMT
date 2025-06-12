@@ -38,7 +38,7 @@ Cascading Finetuning:
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
 | Penn Action, joint | 2,326 | 15 | 2D | 13 | **94.10%** > 93.4% (HDM-BG) |
-| N-UCLA, joint | 1,494 | 12 | 3D | 20 | **87.07%** < 98.3% (SkateFormer) |
+| N-UCLA, joint | 1,494 | 12 | 3D | 20 | **91.16%** < 98.3% (SkateFormer) |
 | NTU, joint | 56,880 | 60 | 3D | 25 | ??? << 92.6% (SkateFormer) - cross subject |
 
 ## Leaderboard - CascadeFormer 2.0

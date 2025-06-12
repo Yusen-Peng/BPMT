@@ -1690,37 +1690,3 @@ def skateformer_collate_fn(batch):
     batch_labels = torch.tensor(labels, dtype=torch.long)
 
     return batch_data, batch_labels
-
-if __name__ == '__main__':
-    train_data_path = 'N-UCLA_processed/'
-    train_label_path = 'N-UCLA_processed/train_label.pkl'
-
-    train_dataset = SF_UCLA_Dataset(
-        data_path=train_data_path,
-        label_path=train_label_path,
-        data_type='j', 
-        window_size=64, 
-        partition=True,
-        repeat=1,
-        p=0.5,
-        debug=False
-    )
-
-    # some DEBUG statements to check the sanity of the dataset
-    print(f"Dataset length: {len(train_dataset)}")
-    print(f"First item shape: {train_dataset[0][0].shape}")
-    print(f"First item label: {train_dataset[0][2]}")
-
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=32,
-        shuffle=True,
-        collate_fn=skateformer_collate_fn,
-    )
-
-    # Sample inspection
-    for xb, yb in train_loader:
-        print(f"Batch X shape: {xb.shape}")  # should be (B, 64, 60)
-        print(f"Batch Y shape: {yb.shape}")  # should be (B,)
-        break
