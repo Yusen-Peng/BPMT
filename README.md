@@ -14,14 +14,14 @@ Cascading Finetuning:
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
-| Penn Action, joint | 2,326 | 15 | 2D | 13 | **94.66%** > 93.4% (HDM-BG) |
+| Penn Action | 2,326 | 15 | 2D | 13 | **94.66%** > 93.4% (HDM-BG) |
 | Penn Action, subtraction-bone | 2,326 | 15 | 2D | 13 | **92.32%** ~ 93.4% (HDM-BG) |
 | Penn Action, concatenation-bone | 2,326 | 15 | 2D | 13 | **93.16%** ~ 93.4% (HDM-BG) |
 | Penn Action, parameterization-bone | 2,326 | 15 | 2D | 13 | **93.91%** > 93.4% (HDM-BG) |
-| N-UCLA, joint | 1,494 | 12 | 3D | 20 | **88.79%** < 98.3% (SkateFormer) |
+| N-UCLA | 1,494 | 12 | 3D | 20 | **88.79%** < 98.3% (SkateFormer) |
 | N-UCLA, subtraction-bone | 1,494 | 12 | 3D | 20 | **85.56%** < 98.3% (SkateFormer) |
 | N-UCLA, concatenation-bone | 1,494 | 12 | 3D | 20 | **88.15%** < 98.3% (SkateFormer) |
-| NTU, joint | 56,880 | 60 | 3D | 25 | **74.79%** << 92.6% (SkateFormer) - cross subject |
+| NTU | 56,880 | 60 | 3D | 25 | **75.12%** << 92.6% (SkateFormer) - cross subject |
 | NTU, subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
 | NTU, concatenation-bone | 56,880 | 60 | 3D | 25 | **73.81%**  << 92.6% (SkateFormer) - cross subject |
 
@@ -37,9 +37,17 @@ Cascading Finetuning:
 
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
-| Penn Action, joint | 2,326 | 15 | 2D | 13 | **94.10%** > 93.4% (HDM-BG) |
-| N-UCLA, joint | 1,494 | 12 | 3D | 20 | **91.16%** < 98.3% (SkateFormer) |
-| NTU, joint | 56,880 | 60 | 3D | 25 | ??? << 92.6% (SkateFormer) - cross subject |
+| Penn Action | 2,326 | 15 | 2D | 13 | **94.10%** > 93.4% (HDM-BG) |
+| N-UCLA | 1,494 | 12 | 3D | 20 | **91.16%** < 98.3% (SkateFormer) |
+| NTU/CS | 56,880 | 60 | 3D | 25 | ??? << 92.6% (SkateFormer) |
+| NTU/CV | 56,880 | 60 | 3D | 25 | ??? << 92.6% (SkateFormer) |
+
+corresponding model checkpoints:
+
+1. Penn Action: [google drive](https://drive.google.com/drive/folders/1qbcT8DlhNyT3HgbM3j2aEQP2rSXoEJRS)
+2. N-UCLA: [google drive](https://drive.google.com/drive/folders/1b0IuO_XY-Gwv4RjS6gF9gPG36uvGwhha)
+3. NTU/CS: TBD 
+4. NTU/CV: TBD
 
 ## Leaderboard - CascadeFormer 2.0
 
@@ -63,6 +71,8 @@ Finetuning:
 
 # Remaining potential datasets 
 
+| dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
+| ------- | ------- | -------- | --------- | ---------- | ------- |
 | <tr><td colspan="6" align="center"> the remaining part of the leaderboard is not done yet... </td></tr> |
 | NTU | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
 | NTU 120 | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
