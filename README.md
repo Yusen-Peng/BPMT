@@ -49,6 +49,12 @@ corresponding model checkpoints:
 3. NTU/CS: TBD 
 4. NTU/CV: TBD
 
+Additional Note: 
+
+1. N-UCLA training is very sensitive (5 epochs difference -> 6% performance difference!)
+
+![alt text](docs/sensitive.png)
+
 ## Leaderboard - CascadeFormer 2.0
 
 Baseline Transformer (T1 and T2):
