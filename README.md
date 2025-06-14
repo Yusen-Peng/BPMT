@@ -21,9 +21,9 @@ Cascading Finetuning:
 | N-UCLA | 1,494 | 12 | 3D | 20 | **88.79%** < 98.3% (SkateFormer) |
 | N-UCLA, subtraction-bone | 1,494 | 12 | 3D | 20 | **85.56%** < 98.3% (SkateFormer) |
 | N-UCLA, concatenation-bone | 1,494 | 12 | 3D | 20 | **88.15%** < 98.3% (SkateFormer) |
-| NTU | 56,880 | 60 | 3D | 25 | **75.12%** << 92.6% (SkateFormer) - cross subject |
-| NTU, subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
-| NTU, concatenation-bone | 56,880 | 60 | 3D | 25 | **73.81%**  << 92.6% (SkateFormer) - cross subject |
+| NTU/CS | 56,880 | 60 | 3D | 25 | **75.22%** << 92.6% (SkateFormer) - cross subject |
+| NTU/CS, subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
+| NTU/CS, concatenation-bone | 56,880 | 60 | 3D | 25 | **73.81%** << 92.6% (SkateFormer) - cross subject |
 
 ## CascadeFormer 1.1 (convolution enhanced)
 
