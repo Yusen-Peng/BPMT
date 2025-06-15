@@ -13,6 +13,16 @@ NUM_JOINTS_NTU = 25
 OFFICIAL_XSUB_TRAIN_SUBJECTS = [1, 2, 4, 5, 8, 9, 13, 14, 15, 16, 17, 18, 19, 25, 27, 28, 31, 34, 35, 38]
 OFFICIAL_XVIEW_TRAIN_CAMERAS = [2, 3]
 
+def normalize_scale(skeleton: np.ndarray) -> np.ndarray:
+    """
+    Normalize the skeleton so that the scale is invariant.
+    E.g., divide by std or max joint distance to origin.
+    """
+    scale = np.linalg.norm(skeleton, axis=-1).max() + 1e-8
+    return skeleton / scale
+
+
+
 def collate_fn_batch_padding(batch):
     """
     a collate function for DataLoader that pads sequences to the maximum length in the batch.
@@ -69,7 +79,10 @@ def read_ntu_skeleton_file(
         xyz = xyz[: min(total_frames, total_frames)]
 
         # reshape from (T, 25, 3) to (T, 75)
-        return xyz.reshape(xyz.shape[0], -1)
+        #return xyz.reshape(xyz.shape[0], -1)
+
+        # FIXME: no reshape!
+        return xyz
     
 
 def build_ntu_skeleton_lists_xsub(
@@ -89,8 +102,8 @@ def build_ntu_skeleton_lists_xsub(
 
         action_idx = int(filename[17:20]) - 1
         skeleton = read_ntu_skeleton_file(filepath, num_joints)
-        hip = skeleton[:, :3]
-        skeleton = skeleton - np.tile(hip, (1, num_joints))
+        hip = skeleton[:, 0:1, :]  # shape: (T, 1, 3)
+        skeleton = skeleton - hip  # shape: (T, 25, 3) - (T, 1, 3) → (T, 25, 3)
         sequences.append(skeleton)
         labels.append(action_idx)
 
@@ -125,9 +138,9 @@ def build_ntu_skeleton_lists_xview(
         # Extract action label (zero-based)
         action_idx = int(filename[17:20]) - 1
 
-        skeleton = read_ntu_skeleton_file(filepath, num_joints)
-        hip = skeleton[:, :3]
-        skeleton = skeleton - np.tile(hip, (1, num_joints))
+        skeleton = read_ntu_skeleton_file(filepath, num_joints) # (T, 25, 3)
+        hip = skeleton[:, 0:1, :]  # shape: (T, 1, 3)
+        skeleton = skeleton - hip  # shape: (T, 25, 3) - (T, 1, 3) → (T, 25, 3)
 
         sequences.append(skeleton)
         labels.append(action_idx)
@@ -164,14 +177,21 @@ if __name__ == "__main__":
     import time
     t_start = time.time()
     
-    # all_seq, all_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=True)
-    all_seq, all_lbl = build_ntu_skeleton_lists_xview('nturgb+d_skeletons', is_train=True)
+    all_seq, all_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=True)
+    #all_seq, all_lbl = build_ntu_skeleton_lists_xview('nturgb+d_skeletons', is_train=True)
 
     t_end = time.time()
     print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")
     print(f"[VERIFY] Number of sequences: {len(all_seq)}")
     print(f"[VERIFY] Number of unique labels: {len(set(all_lbl))}")
     tr_seq, tr_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)
+
+    # check the shape of a sample sequence
+    print(f"[VERIFY] Sample sequence shape: {tr_seq[0].shape}")
+    print(f"[VERIFY] Sample sequence shape: {tr_seq[15].shape}")
+
+
+
     train_set = ActionRecognitionDataset(tr_seq, tr_lbl)
     val_set = ActionRecognitionDataset(val_seq, val_lbl)
     train_loader = DataLoader(

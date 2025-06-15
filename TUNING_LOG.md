@@ -213,6 +213,10 @@ Use SkateFormer data loader instead of my own data loader because:
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 84.27% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 84.70% |
 | 30%, SF data loader | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 3e-5, wd=1e-4, cosine + warmup | 300 | **88.15%** |
+
+
+| masked pretraining | decoder | d_model | n_head | num_layers | freeze T1? | T1-lr | #epochs | T2-lr (ft-lr) | #epochs | accuracy |
+|--------------------|---------|---------|--------|------------|------------|--------|----------|----------------|----------|----------|
 | <tr><td colspan="11" align="center"> CascadeFormer 1.1 (convolution enhanced) </td></tr> |
 | <tr><td colspan="11" align="center"> p: probability of dropping axis/joint regularization </td></tr> |
 | 30%, p=0.5, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 3 | 3e-5, wd=1e-4, cosine + warmup | 3 | 82.54% |
@@ -225,11 +229,22 @@ Use SkateFormer data loader instead of my own data loader because:
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 80 | 84.27% |
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 90 | 87.07% |
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 95 | 86.85% |
-| 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | **91.16%** |
+| **30%**, **p=0.1**, repeat=**10** | linear | 256 | 8 | 4 | no | 1e-4 | **100** | 3e-5, wd=1e-4, cosine + warmup | **100** | **91.16%** |
+| 30%, **p=0.1**, repeat=10, 64 batch size | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 84.70% |
+| 30%, **p=0.0**, repeat=10, 64 batch size | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 86.64 |
+| **30%**, **p=0.1**, repeat=**10** | linear | 256 | 8 | 4 | no | 1e-4 | **100** | 3e-5, wd=1e-4, cosine + warmup, but **p=0.0** during finetuning | **100** | running |
+
+
+
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 110 | 86.64% |
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 50 | 86.21% |
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 100 | 87.50% |
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 3e-5, wd=1e-4, cosine + warmup | 200 | 85.34% |
+| <tr><td colspan="11" align="center"> try **MORE** repeat  </td></tr> |
+| 30%, **p=0.1**, repeat=15 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 50 | 85.13% |
+| 30%, **p=0.1**, repeat=15 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 85.99% |
+| <tr><td colspan="11" align="center"> try **NO** regularization  </td></tr> |
+| 30%, **p=0.0**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | TBD |
 
 
 ## Baseline - Experiment (Skeletics-152, cross-view)

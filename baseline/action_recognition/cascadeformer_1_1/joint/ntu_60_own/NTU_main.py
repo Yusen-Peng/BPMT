@@ -24,7 +24,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
     parser.add_argument("--pretrain", action='store_true', help="Run the stage of pretraining")
     parser.add_argument("--root_dir", type=str, default="Penn_Action/", help="Root directory of the dataset")
-    parser.add_argument("--batch_size", type=int, default=4, help="Batch size for training")
+    parser.add_argument("--batch_size", type=int, default=64, help="Batch size for training")
     parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
     parser.add_argument("--hidden_size", type=int, default=64, help="Hidden size for the model")
     parser.add_argument("--class_specific_split", action='store_true', help="Use class-specific split for training and validation")
@@ -43,7 +43,6 @@ def main():
     hidden_size = args.hidden_size
     device = args.device
     pretrain = args.pretrain
-
 
     mask_strategy = "global_joint"
     mask_ratio = 0.3

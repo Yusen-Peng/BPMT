@@ -69,8 +69,8 @@ def main():
     train_label_path = 'N-UCLA_processed/train_label.pkl'
 
     data_type = 'j'
-    repeat = 10     # 10, 20
-    p = 0.1 # 0.1, 0.5
+    repeat = 10     # 10, 15
+    p = 0.0 # 0.1, 0.5
 
     print(f"[INFO]: proability of dropping regularization: {p}")
     print(f"[INFO]: data being repeated by {repeat} times")

@@ -25,6 +25,13 @@ Cascading Finetuning:
 | NTU/CS, subtraction-bone | 56,880 | 60 | 3D | 25 | **74.23%** << 92.6% (SkateFormer) - cross subject |
 | NTU/CS, concatenation-bone | 56,880 | 60 | 3D | 25 | **73.81%** << 92.6% (SkateFormer) - cross subject |
 
+corresponding model checkpoints:
+
+1. Penn Action: [google drive](https://drive.google.com/drive/folders/1Za50ZE9ZEKdEps_ZE-JIbatTpLuMW83k)
+2. N-UCLA: 88.79% is not good enough
+3. NTU/CS: 75.22% is not good enough
+4. NTU/CV: TBD
+
 ## CascadeFormer 1.1 (convolution enhanced)
 
 Pretraining:
