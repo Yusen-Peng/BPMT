@@ -58,7 +58,7 @@ corresponding model checkpoints:
 
 Additional Note: 
 
-1. N-UCLA training is very sensitive (5 epochs difference -> 6% performance difference!)
+1. N-UCLA training is very sensitive (1 epoch difference -> 5% performance gap!)
 
 ![alt text](docs/sensitive.png)
 
