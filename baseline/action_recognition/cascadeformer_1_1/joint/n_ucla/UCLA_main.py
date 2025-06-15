@@ -70,7 +70,7 @@ def main():
 
     data_type = 'j'
     repeat = 10     # 10, 15
-    p = 0.0 # 0.1, 0.5
+    p = 0.1 # 0.1, 0.5
 
     print(f"[INFO]: proability of dropping regularization: {p}")
     print(f"[INFO]: data being repeated by {repeat} times")

@@ -229,10 +229,13 @@ Use SkateFormer data loader instead of my own data loader because:
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 80 | 84.27% |
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 90 | 87.07% |
 | 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 95 | 86.85% |
+| 30%, **p=0.1**, repeat=10 | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 99 | 86.42% |
 | **30%**, **p=0.1**, repeat=**10** | linear | 256 | 8 | 4 | no | 1e-4 | **100** | 3e-5, wd=1e-4, cosine + warmup | **100** | **91.16%** |
 | 30%, **p=0.1**, repeat=10, 64 batch size | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 84.70% |
-| 30%, **p=0.0**, repeat=10, 64 batch size | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 86.64 |
-| **30%**, **p=0.1**, repeat=**10** | linear | 256 | 8 | 4 | no | 1e-4 | **100** | 3e-5, wd=1e-4, cosine + warmup, but **p=0.0** during finetuning | **100** | running |
+| 30%, **p=0.0**, repeat=10, 64 batch size | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 3e-5, wd=1e-4, cosine + warmup | 100 | 86.64% |
+| **30%**, **p=0.1**, repeat=**10** | linear | 256 | 8 | 4 | no | 1e-4 | **100** | 3e-5, wd=1e-4, cosine + warmup, but **p=0.0** during finetuning | **100** | 85.56% |
+
+| **30%**, **p=0.1**, repeat=**10** | linear | 256 | 8 | 4 | no | 1e-4 | **100** | 3e-5, wd=1e-4, cosine + warmup, but **repeat=15** during finetuning | **100** | 87.07% |
 
 
 

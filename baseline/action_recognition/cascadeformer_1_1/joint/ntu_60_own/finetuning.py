@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from penn_utils import collate_fn_pairs
 from tqdm import tqdm
 from typing import Tuple, Dict
-from pretraining import BaseT1
+from NTU_pretraining import BaseT1
 import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import get_cosine_schedule_with_warmup

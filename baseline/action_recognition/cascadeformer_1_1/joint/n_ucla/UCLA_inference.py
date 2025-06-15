@@ -14,7 +14,7 @@ from torch import Tensor
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
 from base_dataset import ActionRecognitionDataset
-from finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
+from UCLA_finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
 from UCLA_utils import set_seed, build_nucla_action_lists_cross_view, split_train_val, collate_fn_inference, NUM_JOINTS_NUCLA
 from SF_UCLA_loader import SF_UCLA_Dataset, skateformer_collate_fn
 
