@@ -59,6 +59,7 @@ corresponding model checkpoints:
 Additional Note: 
 
 1. N-UCLA training is very sensitive (1 epoch difference -> 5% performance gap!)
+2. my current solution: use the test set as validation to save the best checkpoints
 
 ![alt text](docs/sensitive.png)
 
