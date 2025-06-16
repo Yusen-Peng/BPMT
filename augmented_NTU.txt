@@ -1,0 +1,20 @@
+nohup: ignoring input
+pretrain?: True
+hidden_size: 512
+n_heads: 8
+num_layers: 12
+batch_size: 32
+==================================================
+[INFO] Starting NTU dataset processing on cuda...
+==================================================
+[INFO] Time taken to load NTU skeletons: 4.63 seconds
+[INFO] Number of classes: 60
+====================================================================================================
+
+==========================
+Starting Pretraining...
+==========================
+[INFO] Mask ratio: 30.0%
+[INFO] Mask ratio: 30.0%
+[INFO] train/val split ratio: 5.0%
+  0%|          | 0/100 [00:00<?, ?it/s]

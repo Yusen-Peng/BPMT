@@ -4,12 +4,58 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from penn_utils import collate_fn_pairs
+import copy
 from tqdm import tqdm
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 from pretraining import BaseT1
 import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import get_cosine_schedule_with_warmup
+from sklearn.metrics import accuracy_score
+
+def evaluate(
+    data_loader: DataLoader,
+    t1: nn.Module,
+    t2: nn.Module,
+    cross_attn: nn.Module,
+    gait_head: nn.Module,
+    device: str = 'cuda',
+) -> Tuple[float, float, Optional[torch.Tensor], Optional[torch.Tensor]]:
+    """
+    Unified evaluation function matching training-time validation.
+
+    Returns:
+        - accuracy (float)
+        - average loss (float, 0.0 if no criterion)
+        - all_preds (optional)
+        - all_labels (optional)
+    """
+    t1.eval()
+    t2.eval()
+    cross_attn.eval()
+    gait_head.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for skeletons, labels in data_loader:
+            skeletons, labels = skeletons.to(device), labels.to(device)
+
+            x1 = t1.encode(skeletons)
+            x2 = t2.encode(x1)
+            fused = cross_attn(x1, x2, x2)
+            pooled = fused.mean(dim=1)
+
+            logits = gait_head(pooled)
+
+
+            preds = logits.argmax(dim=1)
+            correct += (preds == labels).sum().item()
+            total += labels.size(0)
+
+    acc = correct / total
+    
+    return acc
+
 
 def load_T1(model_path: str, num_joints: int = 13, three_d: bool = False, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
                 device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT1:
@@ -22,6 +68,7 @@ def load_T1(model_path: str, num_joints: int = 13, three_d: bool = False, d_mode
 
     # optionally freeze the model parameters
     if freeze:
+        model.eval()
         for param in model.parameters():
             param.requires_grad = False
 
@@ -141,12 +188,13 @@ def finetuning(
     )
 
     criterion = nn.CrossEntropyLoss()
-
-    # scheduler = CosineAnnealingLR(
-    #     optimizer,
-    #     T_max=num_epochs,
-    #     eta_min=1e-7
-    # )
+    best_val_acc = 0.0
+    best_state = {
+        't1': None,
+        't2': None,
+        'cross_attn': None,
+        'gait_head': None
+    }
 
     train_losses, val_losses = [], []
     train_accuracies, val_accuracies = [], []
@@ -194,64 +242,30 @@ def finetuning(
         # learning rate scheduler step
         scheduler.step()
 
-        # Validation
-        gait_head.eval()
-        t2.eval()
-        cross_attn.eval()
-        val_total_loss, val_correct, val_total = 0.0, 0, 0
-
-        with torch.no_grad():
-            for skeletons, labels in val_loader:
-                skeletons, labels = skeletons.to(device), labels.to(device)
-                x1 = t1.encode(skeletons)
-                x2 = t2.encode(x1)
-                fused = cross_attn(x1, x2, x2)
-
-                # we need to do pooling
-                pooled = fused.mean(dim=1)
-                logits = gait_head(pooled)
-
-
-                val_loss = criterion(logits, labels)
-                val_total_loss += val_loss.item() * labels.size(0)
-                
-                val_correct += (logits.argmax(dim=1) == labels).sum().item()
-                val_total += labels.size(0)
-
-        val_acc = val_correct / val_total
-        val_avg_loss = val_total_loss / total
-
-        val_losses.append(val_avg_loss)
-        val_accuracies.append(val_acc)
-
+        val_acc = evaluate(
+            val_loader,
+            t1,
+            t2,
+            cross_attn,
+            gait_head,
+            device=device
+        )
         print(f"Epoch {epoch+1}/{num_epochs}: Train Acc = {train_acc:.4f}, Val Acc = {val_acc:.4f}")
 
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            # NOTE: USE DEEP COPY INSTEAD OF SHALLOW COPY!!
+            best_state['t1'] = copy.deepcopy(t1.state_dict())
+            best_state['t2'] = copy.deepcopy(t2.state_dict())
+            best_state['cross_attn'] = copy.deepcopy(cross_attn.state_dict())
+            best_state['gait_head'] = copy.deepcopy(gait_head.state_dict())
+            print(f"✅ Best model updated at epoch {epoch+1} with val acc: {val_acc:.4f}")
 
-    # Plotting the training and validation losses
-    plt.figure(figsize=(12, 5))
-
-    plt.subplot(1, 2, 1)
-    plt.plot(train_losses, label='Train Loss')
-    plt.plot(val_losses, label='Val Loss')
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.title("Training and Validation Loss")
-    plt.legend()
-
-    plt.subplot(1, 2, 2)
-    plt.plot(train_accuracies, label='Train Acc')
-    plt.plot(val_accuracies, label='Val Acc')
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy")
-    plt.title("Training and Validation Accuracy")
-    plt.legend()
-
-    plt.tight_layout()
-    # save the figure
-    plt.savefig("figures/finetuning_loss_accuracy.png")
-
-    # return T2, cross_attn, and gait_head
-    return t2, cross_attn, gait_head
+    t1.load_state_dict(best_state['t1'])
+    t2.load_state_dict(best_state['t2'])
+    cross_attn.load_state_dict(best_state['cross_attn'])
+    gait_head.load_state_dict(best_state['gait_head'])
+    return t1, t2, cross_attn, gait_head
 
 
 def load_T2(model_path: str,d_model: int = 128, nhead: int = 4, num_layers: int = 2,
@@ -261,7 +275,8 @@ def load_T2(model_path: str,d_model: int = 128, nhead: int = 4, num_layers: int 
     """
     model = BaseT2(d_model=d_model, nhead=nhead, num_layers=num_layers)
     model.load_state_dict(torch.load(model_path, map_location='cpu'))
-
+    
+    model.eval()
     for param in model.parameters():
         param.requires_grad = False
         
@@ -277,4 +292,7 @@ def load_cross_attn(path: str,
     """
     layer = CrossAttention(d_model=d_model, nhead=nhead)
     layer.load_state_dict(torch.load(path, map_location="cpu"))
+    layer.eval()
+    for param in layer.parameters():
+        param.requires_grad = False
     return layer.to(device)

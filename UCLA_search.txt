@@ -1,0 +1,27 @@
+nohup: ignoring input
+pretrain?: False
+hidden_size: 256
+n_heads: 8
+num_layers: 4
+batch_size: 4
+==================================================
+[INFO] Starting NW-UCLA dataset processing on cuda...
+==================================================
+[INFO]: proability of dropping regularization: 0.1
+[INFO]: data being repeated by 10 times
+✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️
+training mode: train
+Collected 10200 sequences for train + val.
+Each sequence shape: torch.Size([3, 64, 20, 1])
+✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️✈️
+training mode: val
+====================================================================================================
+====================================================================================================
+====================================================================================================
+pretrained model loaded successfully!
+[INFO] finetuning the entire T1 model...
+is T1 freezed? False
+unfreezing layers: None
+  0%|          | 0/200 [00:00<?, ?it/s]/home/peng.1007/BPMT/baseline/action_recognition/cascadeformer_1_1/joint/n_ucla/base_dataset.py:15: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  seq   = torch.tensor(self.seqs[idx],   dtype=torch.float32)
+  0%|          | 1/200 [00:58<3:13:20, 58.29s/it]  1%|          | 2/200 [01:55<3:09:26, 57.41s/it]  2%|▏         | 3/200 [02:51<3:06:24, 56.77s/it]  2%|▏         | 4/200 [03:47<3:04:58, 56.62s/it]  2%|▎         | 5/200 [04:44<3:03:54, 56.59s/it]  3%|▎         | 6/200 [05:40<3:02:40, 56.50s/it]

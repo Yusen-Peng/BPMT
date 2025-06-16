@@ -1518,6 +1518,10 @@ class SF_UCLA_Dataset(Dataset):
         self.partition = partition
         self.repeat = repeat
         self.p = p
+
+        print("✈️" * 20)
+        print(f"training mode: {self.train_val}")
+
         self.load_data()
 
         if self.partition:
@@ -1612,7 +1616,6 @@ class SF_UCLA_Dataset(Dataset):
                 data = temp
 
         else:
-            random.random()
             agx = 0
             agy = 0
             s = 1.0

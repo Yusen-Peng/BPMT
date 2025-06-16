@@ -20,11 +20,17 @@ from finetuning import load_T1, finetuning, GaitRecognitionHead
 from penn_utils import set_seed
 from NTU_utils import build_ntu_skeleton_lists_xsub, split_train_val, NUM_JOINTS_NTU, collate_fn_finetuning
 
+def load_cached_data(path="ntu_cache_train_sub.npz"):
+    data = np.load(path, allow_pickle=True)
+    sequences = list(data["sequences"])
+    labels = list(data["labels"])
+    return sequences, labels
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
     parser.add_argument("--pretrain", action='store_true', help="Run the stage of pretraining")
     parser.add_argument("--root_dir", type=str, default="Penn_Action/", help="Root directory of the dataset")
-    parser.add_argument("--batch_size", type=int, default=64, help="Batch size for training")
+    parser.add_argument("--batch_size", type=int, default=32, help="Batch size for training")
     parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs for training")
     parser.add_argument("--hidden_size", type=int, default=64, help="Hidden size for the model")
     parser.add_argument("--class_specific_split", action='store_true', help="Use class-specific split for training and validation")
@@ -53,7 +59,7 @@ def main():
     # transformer parameters
     hidden_size = 512   # 256 -> 512
     n_heads = 8
-    num_layers = 8      # 4 -> 8
+    num_layers = 12      # 4 -> 8 -> 12
     print(f"hidden_size: {hidden_size}")
     print(f"n_heads: {n_heads}")
     print(f"num_layers: {num_layers}")
@@ -69,10 +75,10 @@ def main():
     # load the dataset
     import time
     t_start = time.time()
-    all_seq, all_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=True)
+    #all_seq, all_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=True)
+    all_seq, all_lbl = load_cached_data("ntu_cache_train_sub_v1.npz")    
     t_end = time.time()
     print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")    
-    assert len(all_seq) == 40320
     train_seq, train_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)
     train_dataset = ActionRecognitionDataset(train_seq, train_lbl)
     val_dataset = ActionRecognitionDataset(val_seq, val_lbl)

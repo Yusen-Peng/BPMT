@@ -21,6 +21,41 @@ def normalize_scale(skeleton: np.ndarray) -> np.ndarray:
     scale = np.linalg.norm(skeleton, axis=-1).max() + 1e-8
     return skeleton / scale
 
+def add_gaussian_noise(sequence: np.ndarray, std=0.01) -> np.ndarray:
+    noise = np.random.normal(0, std, sequence.shape)
+    return sequence + noise
+
+def random_rotation(sequence: np.ndarray, max_angle=10) -> np.ndarray:
+    angle = np.deg2rad(np.random.uniform(-max_angle, max_angle))
+    cos, sin = np.cos(angle), np.sin(angle)
+    R = np.array([
+        [cos, -sin, 0],
+        [sin,  cos, 0],
+        [0,     0,  1]
+    ])
+    return np.einsum('tjd,dk->tjk', sequence, R)
+
+def random_scaling(sequence: np.ndarray, scale_range=(0.9, 1.1)) -> np.ndarray:
+    scale = np.random.uniform(*scale_range)
+    return sequence * scale
+
+def random_frame_dropout(sequence: np.ndarray, drop_prob=0.1) -> np.ndarray:
+    T = sequence.shape[0]
+    mask = np.random.rand(T) > drop_prob
+    return sequence[mask]
+
+def temporal_crop(sequence: np.ndarray, crop_len=50) -> np.ndarray:
+    T = sequence.shape[0]
+    if T <= crop_len:
+        return sequence
+    start = np.random.randint(0, T - crop_len)
+    return sequence[start:start + crop_len]
+
+def temporal_jitter(sequence: np.ndarray, max_jitter=5) -> np.ndarray:
+    T = sequence.shape[0]
+    jitter = np.random.randint(-max_jitter, max_jitter + 1, size=T)
+    jitter = np.clip(np.arange(T) + jitter, 0, T - 1)
+    return sequence[jitter]
 
 
 def collate_fn_batch_padding(batch):
@@ -83,7 +118,6 @@ def read_ntu_skeleton_file(
 
         # FIXME: no reshape!
         return xyz
-    
 
 def build_ntu_skeleton_lists_xsub(
     skeleton_root: str,
@@ -104,8 +138,31 @@ def build_ntu_skeleton_lists_xsub(
         skeleton = read_ntu_skeleton_file(filepath, num_joints)
         hip = skeleton[:, 0:1, :]  # shape: (T, 1, 3)
         skeleton = skeleton - hip  # shape: (T, 25, 3) - (T, 1, 3) → (T, 25, 3)
+
+        # ADD NORMALIZATION
+        skeleton = normalize_scale(skeleton)
+
+        # HAHA! LET'S DO SOME AUGMENTATIONS
+        if is_train:
+            threshold = 0.2 # FIXME: WE CAN TUNE THIS
+            if np.random.rand() < threshold:
+                skeleton = add_gaussian_noise(skeleton, std=0.01)
+            if np.random.rand() < threshold:
+                skeleton = random_rotation(skeleton, max_angle=10)
+            if np.random.rand() < threshold:
+                skeleton = random_scaling(skeleton, scale_range=(0.9, 1.1))
+            # if np.random.rand() < threshold:
+            #     skeleton = random_frame_dropout(skeleton, drop_prob=0.1)
+            if np.random.rand() < threshold:
+                skeleton = temporal_crop(skeleton, crop_len=50)
+            if np.random.rand() < threshold:
+                skeleton = temporal_jitter(skeleton, max_jitter=5)
+
         sequences.append(skeleton)
         labels.append(action_idx)
+
+    # cache them
+    save_cached_data(sequences, labels, path="ntu_cache_train_sub.npz")
 
     return sequences, labels
 
@@ -172,6 +229,11 @@ def split_train_val(
 
     return tr_seq, tr_lbl, val_seq, val_lbl
 
+def save_cached_data(sequences, labels, path="ntu_cache_train_sub.npz"):
+    sequences_obj = np.array(sequences, dtype=object)
+    labels_arr = np.array(labels)
+    np.savez_compressed(path, sequences=sequences_obj, labels=labels_arr)
+
 
 if __name__ == "__main__":
     import time
@@ -189,8 +251,6 @@ if __name__ == "__main__":
     # check the shape of a sample sequence
     print(f"[VERIFY] Sample sequence shape: {tr_seq[0].shape}")
     print(f"[VERIFY] Sample sequence shape: {tr_seq[15].shape}")
-
-
 
     train_set = ActionRecognitionDataset(tr_seq, tr_lbl)
     val_set = ActionRecognitionDataset(val_seq, val_lbl)

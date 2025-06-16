@@ -27,7 +27,7 @@ Cascading Finetuning:
 
 corresponding model checkpoints:
 
-1. Penn Action: 94.66% [google drive](https://drive.google.com/drive/folders/1Za50ZE9ZEKdEps_ZE-JIbatTpLuMW83k)
+1. Penn Action: **94.66%** [google drive](https://drive.google.com/drive/folders/1Za50ZE9ZEKdEps_ZE-JIbatTpLuMW83k)
 2. N-UCLA: 88.79% is not good enough
 3. NTU/CS: 75.22% is not good enough
 4. NTU/CV: TBD
@@ -51,8 +51,8 @@ Cascading Finetuning:
 
 corresponding model checkpoints:
 
-1. Penn Action: 94.10% [google drive](https://drive.google.com/drive/folders/1qbcT8DlhNyT3HgbM3j2aEQP2rSXoEJRS)
-2. N-UCLA: 91.16% [google drive](https://drive.google.com/drive/folders/1b0IuO_XY-Gwv4RjS6gF9gPG36uvGwhha)
+1. Penn Action: **94.10%** [google drive](https://drive.google.com/drive/folders/1qbcT8DlhNyT3HgbM3j2aEQP2rSXoEJRS)
+2. N-UCLA: **91.16%** [google drive](https://drive.google.com/drive/folders/1b0IuO_XY-Gwv4RjS6gF9gPG36uvGwhha)
 3. NTU/CS: TBD 
 4. NTU/CV: TBD
 
