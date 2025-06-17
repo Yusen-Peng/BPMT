@@ -15,7 +15,7 @@ from UCLA_finetuning import load_T1, finetuning, GaitRecognitionHead, evaluate, 
 #from first_phase_baseline import BaseT1, train_T1
 #from second_phase_baseline import BaseT2, train_T2, load_T1
 #from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
-from UCLA_utils import set_seed, NUM_JOINTS_NUCLA
+from UCLA_utils import set_seed, NUM_JOINTS_NUCLA, split_train_val
 from SF_UCLA_loader import SF_UCLA_Dataset, skateformer_collate_fn
 
 def parse_args():
@@ -72,8 +72,8 @@ def main():
     train_label_path = 'N-UCLA_processed/train_label.pkl'
 
     data_type = 'j'
-    repeat = 10     # 10, 15
-    p = 0.1 # 0.1, 0.5
+    repeat = 35     # 10, 15
+    p = 0.4 # 0.1, 0.5
 
     print(f"[INFO]: proability of dropping regularization: {p}")
     print(f"[INFO]: data being repeated by {repeat} times")
@@ -100,6 +100,8 @@ def main():
 
     print(f"Collected {len(train_seq)} sequences for train + val.")
     print(f"Each sequence shape: {train_seq[0].shape}")  # (64, 60)
+
+    train_seq, train_lbl, _, _ = split_train_val(train_seq, train_lbl, val_ratio=val_ratio)
     test_data_path = 'N-UCLA_processed/'
     test_label_path = 'N-UCLA_processed/val_label.pkl'
 

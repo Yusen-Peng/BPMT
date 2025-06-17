@@ -144,7 +144,8 @@ def build_ntu_skeleton_lists_xsub(
 
         # HAHA! LET'S DO SOME AUGMENTATIONS
         if is_train:
-            threshold = 0.2 # FIXME: WE CAN TUNE THIS
+            # FIXME: WE CAN TUNE THIS
+            threshold = 0.1
             if np.random.rand() < threshold:
                 skeleton = add_gaussian_noise(skeleton, std=0.01)
             if np.random.rand() < threshold:
@@ -153,16 +154,19 @@ def build_ntu_skeleton_lists_xsub(
                 skeleton = random_scaling(skeleton, scale_range=(0.9, 1.1))
             # if np.random.rand() < threshold:
             #     skeleton = random_frame_dropout(skeleton, drop_prob=0.1)
-            if np.random.rand() < threshold:
-                skeleton = temporal_crop(skeleton, crop_len=50)
-            if np.random.rand() < threshold:
-                skeleton = temporal_jitter(skeleton, max_jitter=5)
+            # if np.random.rand() < threshold:
+            #     skeleton = temporal_crop(skeleton, crop_len=50)
+            # if np.random.rand() < threshold:
+            #     skeleton = temporal_jitter(skeleton, max_jitter=5)
 
         sequences.append(skeleton)
         labels.append(action_idx)
 
     # cache them
-    save_cached_data(sequences, labels, path="ntu_cache_train_sub.npz")
+    if is_train:
+        save_cached_data(sequences, labels, path="ntu_cache_train_sub.npz")
+    else:
+        save_cached_data(sequences, labels, path="ntu_cache_test_sub.npz")
 
     return sequences, labels
 

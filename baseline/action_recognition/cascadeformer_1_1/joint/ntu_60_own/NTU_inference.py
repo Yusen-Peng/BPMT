@@ -18,6 +18,12 @@ from penn_utils import set_seed, collate_fn_inference
 from NTU_utils import build_ntu_skeleton_lists_xsub, split_train_val, NUM_JOINTS_NTU
 from finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
 
+def load_cached_data(path="ntu_cache_train_sub.npz"):
+    data = np.load(path, allow_pickle=True)
+    sequences = list(data["sequences"])
+    labels = list(data["labels"])
+    return sequences, labels
+
 def evaluate(
     data_loader: DataLoader,
     t1: nn.Module,
@@ -104,9 +110,7 @@ def main():
     print("=" * 50)
 
     # load the dataset
-    test_seq, test_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=False)
-
-    assert len(test_seq) == 16560
+    test_seq, test_lbl = load_cached_data("ntu_cache_test_sub.npz")
 
     #train_seq, train_lbl, val_seq, val_lbl = split_train_val(train_seq, train_lbl, val_ratio=0.05)
     

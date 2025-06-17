@@ -75,8 +75,7 @@ def main():
     # load the dataset
     import time
     t_start = time.time()
-    #all_seq, all_lbl = build_ntu_skeleton_lists_xsub('nturgb+d_skeletons', is_train=True)
-    all_seq, all_lbl = load_cached_data("ntu_cache_train_sub_v1.npz")    
+    all_seq, all_lbl = load_cached_data("ntu_cache_train_sub_v2.npz")    
     t_end = time.time()
     print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")    
     train_seq, train_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)

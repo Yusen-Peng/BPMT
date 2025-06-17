@@ -9,6 +9,7 @@ from typing import Tuple, Dict
 from NTU_pretraining import BaseT1
 import matplotlib.pyplot as plt
 from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 from transformers import get_cosine_schedule_with_warmup
 
 def load_T1(model_path: str, num_joints: int = 13, three_d: bool = False, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
@@ -131,22 +132,16 @@ def finetuning(
 
     #optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
     optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=1e-4)
-    num_training_steps = num_epochs
-    num_warmup_steps = int(0.05 * num_training_steps)
-
-    scheduler = get_cosine_schedule_with_warmup(
+    
+    # use CosineAnnealingWarmRestarts scheduler instead of CosineAnnealingLR
+    scheduler = CosineAnnealingWarmRestarts(
         optimizer,
-        num_warmup_steps=num_warmup_steps,
-        num_training_steps=num_training_steps,
+        T_0=10,      
+        T_mult=2,
+        eta_min=1e-6
     )
 
     criterion = nn.CrossEntropyLoss()
-
-    # scheduler = CosineAnnealingLR(
-    #     optimizer,
-    #     T_max=num_epochs,
-    #     eta_min=1e-7
-    # )
 
     train_losses, val_losses = [], []
     train_accuracies, val_accuracies = [], []
@@ -159,9 +154,8 @@ def finetuning(
         t1_trainable = any(p.requires_grad for p in t1.parameters())
         t1.train(mode=t1_trainable)
 
-
         total_loss, correct, total = 0.0, 0, 0
-        for skeletons, labels in train_loader:
+        for i, (skeletons, labels) in enumerate(train_loader):
             skeletons, labels = skeletons.to(device), labels.to(device)
             
             if t1_trainable:
@@ -189,12 +183,10 @@ def finetuning(
         train_acc = correct / total
         avg_loss = total_loss / total
         train_losses.append(avg_loss)
-        train_accuracies.append(train_acc)
-        
-        # learning rate scheduler step
-        scheduler.step()
+        train_accuracies.append(train_acc) 
 
         # Validation
+        t1.eval()
         gait_head.eval()
         t2.eval()
         cross_attn.eval()
@@ -224,31 +216,9 @@ def finetuning(
         val_losses.append(val_avg_loss)
         val_accuracies.append(val_acc)
 
-        print(f"Epoch {epoch+1}/{num_epochs}: Train Acc = {train_acc:.4f}, Val Acc = {val_acc:.4f}")
-
-
-    # Plotting the training and validation losses
-    plt.figure(figsize=(12, 5))
-
-    plt.subplot(1, 2, 1)
-    plt.plot(train_losses, label='Train Loss')
-    plt.plot(val_losses, label='Val Loss')
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.title("Training and Validation Loss")
-    plt.legend()
-
-    plt.subplot(1, 2, 2)
-    plt.plot(train_accuracies, label='Train Acc')
-    plt.plot(val_accuracies, label='Val Acc')
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy")
-    plt.title("Training and Validation Accuracy")
-    plt.legend()
-
-    plt.tight_layout()
-    # save the figure
-    plt.savefig("figures/finetuning_loss_accuracy.png")
+        scheduler.step(epoch)
+        current_lr = optimizer.param_groups[0]['lr']
+        print(f"Epoch {epoch+1}/{num_epochs}: LR = {current_lr:.6f}, Train Acc = {train_acc:.4f}, Val Acc = {val_acc:.4f}")
 
     # return T2, cross_attn, and gait_head
     return t2, cross_attn, gait_head

@@ -177,6 +177,7 @@ def finetuning(
          list(gait_head.parameters())
 
     #optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
+    # weight decay = 1e-4, 5e-5
     optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=1e-4)
     num_training_steps = num_epochs
     num_warmup_steps = int(0.05 * num_training_steps)
