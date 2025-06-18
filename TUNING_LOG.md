@@ -101,6 +101,10 @@ The complete experiment tuning logs:
 
 ## NTU RGB+D 60
 
+batch-level padding OR fixed-length sequence
+
+![alt text](docs/ntu_seq_length_distribution.png)
+
 Many folks have done data augmentation (still using only skeleton data):
 
 1. E1: joint modality only
@@ -156,9 +160,9 @@ cross-subject evaluation:
 | 30% | linear | 512 | 8 | 8 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | **73.81%** |
 | <tr><td colspan="11" align="center"> CascadeFormer 1.1 with data augmentation </td></tr> |
 | 30% | linear | 512 | 8 | **12** | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | 70.68% |
-| 30% | linear | 512 | 8 | **12** | no | 1e-4 | 100 | 1e-5, wd=1e-4, CosineAnnealingWarmRestarts | 10 | running |
-| 30% | linear | 512 | 8 | **12** | no | 1e-4 | 100 | 1e-5, wd=1e-4, CosineAnnealingWarmRestarts | 10 | running |
-
+| <tr><td colspan="11" align="center"> CascadeFormer 1.1 with trimmed-uniform random sampling  </td></tr> |
+| 30%, 64+1.0 | linear | 512 | 8 | **12** | no | 1e-4 | 10 | 1e-5, wd=1e-4, CosineAnnealingWarmRestarts | 10 | 66.91% |
+| 30%, 64+1.0 | linear | 512 | 8 | **12** | no | 1e-4 | 10 | 3e-5, wd=1e-2, CosineAnnealingWarmRestarts | 20 | running |
 
 
 

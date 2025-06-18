@@ -1,12 +1,9 @@
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from typing import Tuple
-from torch.optim.lr_scheduler import CosineAnnealingLR
-from NTU_utils import collate_fn_batch_padding
 
 POSITIONAL_UPPER_BOUND = 1000
 
@@ -129,8 +126,8 @@ def mask_random_global_joints(inputs: torch.Tensor, mask_ratio: float = 0.3) -> 
 def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
 
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn_batch_padding)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn_batch_padding)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     criterion = nn.MSELoss(reduction='none')
     optimizer = optim.Adam(model.parameters(), lr=lr)

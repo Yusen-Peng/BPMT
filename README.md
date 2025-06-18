@@ -4,6 +4,8 @@
 
 ### architecture
 
+Positional embeddings in T1 are **temporal** positions (encode the **frame numbers**)
+
 Pretraining:
 ![alt text](docs/baseline_pretraining_classification.png)
 
@@ -53,17 +55,9 @@ Cascading Finetuning:
 corresponding model checkpoints:
 
 1. Penn Action: **94.10%** [google drive](https://drive.google.com/drive/folders/1qbcT8DlhNyT3HgbM3j2aEQP2rSXoEJRS)
-2. N-UCLA: **91.16%** [google drive](https://drive.google.com/drive/folders/1b0IuO_XY-Gwv4RjS6gF9gPG36uvGwhha)
-3. NTU/CS: 70.68% not good enough 
+2. N-UCLA: **91.16%** [google drive](https://drive.google.com/drive/folders/1b0IuO_XY-Gwv4RjS6gF9gPG36uvGwhha); **90.52%** [google drive](https://drive.google.com/drive/folders/10v1zGGhziiRZdXO2mDU-db_keVmmeUNY) 
+3. NTU/CS: 70.68% not good enough
 4. NTU/CV: TBD
-
-Additional Note: 
-
-1. N-UCLA training is very sensitive (1 epoch difference -> 5% performance gap!)
-2. my current solution: use the test set as validation to save the best checkpoints
-
-![alt text](docs/sensitive.png)
-![alt test](docs/save_best.png)
 
 ## Leaderboard - CascadeFormer 2.0
 
@@ -93,10 +87,4 @@ Finetuning:
 | NTU | 56,880 | 60 | 3D | 25 | N/A < 92.6% (SkateFormer) - cross view |
 | NTU 120 | 114,480 | 120 | 3D | 25 | N/A < 87.7%  (SkateFormer) - cross subject |
 | NTU 120 | 114,480 | 120 | 3D | 25 | N/A < 89.3%  (SkateFormer) - cross view |
-| Skeletics-152 | 125,657 | 152 | 3D | 25 | N/A < 56.39% (MS-G3D) |
- 
-## Under Discussion
-
-1. for NTU, batch-level padding (current setup) OR fixed-length sequence?
-
-![alt text](docs/ntu_seq_length_distribution.png)
+| Skeletics-152 | 125,657 | 152 | 3D | 25 | N/A < 56.39% (MS-G3D) | 

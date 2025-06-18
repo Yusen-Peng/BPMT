@@ -1,16 +1,11 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
-import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-from penn_utils import collate_fn_pairs
 from tqdm import tqdm
-from typing import Tuple, Dict
+from typing import Tuple
+from typing import List
 from NTU_pretraining import BaseT1
-import matplotlib.pyplot as plt
-from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
-from transformers import get_cosine_schedule_with_warmup
 
 def load_T1(model_path: str, num_joints: int = 13, three_d: bool = False, d_model: int = 128, nhead: int = 4, num_layers: int = 2, freeze: bool = True,
                 device: str = 'cuda' if torch.cuda.is_available() else 'cpu') -> BaseT1:
@@ -84,7 +79,6 @@ class GaitRecognitionHead(nn.Module):
     def forward(self, x):
         return self.fc(x)
 
-from typing import List
 def finetuning(
     train_loader: DataLoader,
     val_loader: DataLoader,
@@ -95,6 +89,7 @@ def finetuning(
     num_layers: int = 2,
     num_epochs: int = 200,
     lr: float = 1e-5,
+    wd: float = 1e-2,
     freezeT1: bool = True,
     unfreeze_layers: List[int] = None,
     device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -130,8 +125,7 @@ def finetuning(
          list(cross_attn.parameters()) + \
          list(gait_head.parameters())
 
-    #optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
-    optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=1e-4)
+    optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=wd)
     
     # use CosineAnnealingWarmRestarts scheduler instead of CosineAnnealingLR
     scheduler = CosineAnnealingWarmRestarts(

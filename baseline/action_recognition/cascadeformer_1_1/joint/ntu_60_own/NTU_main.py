@@ -1,24 +1,12 @@
-import os
-import glob
 import numpy as np
 import torch
 import argparse
-from typing import List, Tuple
-from itertools import combinations
 from base_dataset import ActionRecognitionDataset
-from torch import nn
-from torch import optim
-from torch import Tensor
-from torch.nn import functional as F
-from torch.utils.data import DataLoader
 from NTU_pretraining import train_T1, BaseT1
 from finetuning import load_T1, finetuning, GaitRecognitionHead
-#from first_phase_baseline import BaseT1, train_T1
-#from second_phase_baseline import BaseT2, train_T2, load_T1
-#from finetuning import GaitRecognitionHead, finetuning, load_T2, load_cross_attn
 
 from penn_utils import set_seed
-from NTU_utils import build_ntu_skeleton_lists_xsub, split_train_val, NUM_JOINTS_NTU, collate_fn_finetuning
+from NTU_utils import split_train_val, NUM_JOINTS_NTU
 
 def load_cached_data(path="ntu_cache_train_sub.npz"):
     data = np.load(path, allow_pickle=True)
@@ -42,7 +30,6 @@ def main():
     set_seed(42)
 
     args = parse_args()
-    root_dir = args.root_dir
     # get the number of classes from the root_dir by taking the trailing number
     batch_size = args.batch_size
     num_epochs = args.num_epochs
@@ -75,7 +62,7 @@ def main():
     # load the dataset
     import time
     t_start = time.time()
-    all_seq, all_lbl = load_cached_data("ntu_cache_train_sub_v2.npz")    
+    all_seq, all_lbl = load_cached_data("ntu_cache_train_sub_64_10.npz")    
     t_end = time.time()
     print(f"[INFO] Time taken to load NTU skeletons: {t_end - t_start:.2f} seconds")    
     train_seq, train_lbl, val_seq, val_lbl = split_train_val(all_seq, all_lbl, val_ratio=0.15)
@@ -88,14 +75,14 @@ def main():
     print(f"[INFO] Number of classes: {num_classes}")
     print("=" * 100)
 
-    if pretrain == True: 
+    if pretrain: 
         """
             pretraining on the whole dataset
         """
 
-        print(f"\n==========================")
-        print(f"Starting Pretraining...")
-        print(f"==========================")
+        print("\n==========================")
+        print("Starting Pretraining...")
+        print("==========================")
         
         # instantiate the model
         three_d = True
@@ -113,7 +100,7 @@ def main():
         if mask_ratio is not None:
             print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
         else:
-            print(f"[INFO] no masked pretraining, only regular pretraining")
+            print("[INFO] no masked pretraining, only regular pretraining")
 
         lr = 1e-4
         print(f"[INFO] Mask ratio: {mask_ratio * 100}%")
@@ -131,7 +118,7 @@ def main():
         )
 
         # save pretrained model
-        torch.save(model.state_dict(), f"action_checkpoints/NTU_pretrained.pt")
+        torch.save(model.state_dict(), "action_checkpoints/fixed_ntu/NTU_pretrained.pt")
 
         print("Aha! pretraining is done!")
         print("=" * 100)
@@ -145,7 +132,7 @@ def main():
     # load T1 models
     three_d = True
     t1 = load_T1(
-        model_path="action_checkpoints/NTU_pretrained.pt",
+        model_path="action_checkpoints/fixed_ntu/NTU_pretrained.pt",
         num_joints=NUM_JOINTS_NTU,
         three_d=three_d,
         d_model=hidden_size,
@@ -164,14 +151,12 @@ def main():
         train_finetuning_dataset,
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=collate_fn_finetuning
     )
 
     val_finetuning_dataloader = torch.utils.data.DataLoader(
         val_finetuning_dataset,
         batch_size=batch_size,
         shuffle=False,
-        collate_fn=collate_fn_finetuning
     )
 
     gait_head_template = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes).to(device)
@@ -182,11 +167,13 @@ def main():
     if freezeT1 and (unfreeze_layers is None):
         print("[INFO] freezing the entire T1 model...")
     elif freezeT1 and (unfreeze_layers is not None):
-        print(f"[INFO] layerwise finetuning...")
+        print("[INFO] layerwise finetuning...")
         print(f"[INFO] unfreezing layers: {unfreeze_layers}...")
     elif not freezeT1:
         print("[INFO] finetuning the entire T1 model...")
 
+    ft_lr = 3e-5
+    wd = 1e-2
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
         val_loader=val_finetuning_dataloader,
@@ -196,7 +183,8 @@ def main():
         nhead=n_heads,
         num_layers=num_layers,
         num_epochs=num_epochs,
-        lr=1e-5,
+        lr=ft_lr,
+        wd=wd,
         freezeT1=freezeT1,
         unfreeze_layers=unfreeze_layers,
         device=device
@@ -207,12 +195,12 @@ def main():
         print(f"[INFO] Unfreezing layers: {unfreeze_layers}...")
 
     # save the finetuned models
-    torch.save(trained_T2.state_dict(), f"action_checkpoints/NTU_finetuned_T2.pt")
-    torch.save(train_cross_attn.state_dict(), f"action_checkpoints/NTU_finetuned_cross_attn.pt")
-    torch.save(train_head.state_dict(), f"action_checkpoints/NTU_finetuned_head.pt")
+    torch.save(trained_T2.state_dict(), "action_checkpoints/fixed_ntu/NTU_finetuned_T2.pt")
+    torch.save(train_cross_attn.state_dict(), "action_checkpoints/fixed_ntu/NTU_finetuned_cross_attn.pt")
+    torch.save(train_head.state_dict(), "action_checkpoints/fixed_ntu/NTU_finetuned_head.pt")
 
     if any(param.requires_grad for param in t1.parameters()):
-        torch.save(t1.state_dict(), f"action_checkpoints/NTU_finetuned_T1.pt")
+        torch.save(t1.state_dict(), "action_checkpoints/fixed_ntu/NTU_finetuned_T1.pt")
 
     print("Aha! finetuned models saved successfully!")
 

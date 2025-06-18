@@ -33,7 +33,7 @@ def parse_args():
 def main():
     set_seed(42)
 
-    # are we training or evaluating?
+    # are we actually training or just evaluating?
     TRAIN = True
 
     # masking_strategy = "frame", "global_joint"
@@ -72,8 +72,8 @@ def main():
     train_label_path = 'N-UCLA_processed/train_label.pkl'
 
     data_type = 'j'
-    repeat = 35     # 10, 15
-    p = 0.4 # 0.1, 0.5
+    repeat = 30     # 10, 15
+    p = 0.1 # 0.1, 0.5
 
     print(f"[INFO]: proability of dropping regularization: {p}")
     print(f"[INFO]: data being repeated by {repeat} times")
@@ -146,14 +146,14 @@ def main():
 
     if TRAIN: 
 
-        if pretrain == True:
+        if pretrain:
             """
                 pretraining on the whole dataset
             """
 
-            print(f"\n==========================")
-            print(f"Starting Pretraining...")
-            print(f"==========================")
+            print("\n==========================")
+            print("Starting Pretraining...")
+            print("==========================")
             
             # instantiate the model
             three_d = True
@@ -184,7 +184,7 @@ def main():
 
             print("[TEST] testing global joint masking" + "=" * 40)
             # save pretrained model
-            torch.save(model.state_dict(), f"action_checkpoints/NUCLA_pretrained.pt")
+            torch.save(model.state_dict(), "action_checkpoints/NUCLA_pretrained.pt")
 
             print("Aha! pretraining is done!")
             print("=" * 100)
@@ -223,9 +223,9 @@ def main():
         elif not freezeT1:
             print("[INFO] finetuning the entire T1 model...")
 
-
         # finetuning learning rate
-        fn_lr = 3e-5 # 3e-5
+        fn_lr = 4e-5 # 3e-5
+        wd = 1e-2 # 1e-2
         trained_T1, trained_T2, train_cross_attn, train_head = finetuning(
             train_loader=train_finetuning_dataloader,
             val_loader=val_finetuning_dataloader,
@@ -236,6 +236,7 @@ def main():
             num_layers=num_layers,
             num_epochs=num_epochs,
             lr=fn_lr,
+            wd=wd,
             freezeT1=freezeT1,
             unfreeze_layers=unfreeze_layers,
             device=device
@@ -284,10 +285,11 @@ def main():
                     d_model=hidden_size, 
                     nhead=n_heads, 
                     num_layers=num_layers, 
-                    device=device,
-                    freeze=True
+                    device=device, 
                 )
         print(f"************Unfreezing layers: {unfreeze_layers}")
+    
+
     
     t2 = load_T2("action_checkpoints/NUCLA_finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     # load the cross attention module
@@ -295,7 +297,7 @@ def main():
 
     # load the gait recognition head
     gait_head = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes)
-    gait_head.load_state_dict(torch.load("action_checkpoints/NUCLA_finetuned_head.pt", map_location="cpu"))
+    gait_head.load_state_dict(torch.load("action_checkpoints/NUCLA_finetuned_head.pt", map_location=device))
     gait_head = gait_head.to(device)
 
     # evaluate the model

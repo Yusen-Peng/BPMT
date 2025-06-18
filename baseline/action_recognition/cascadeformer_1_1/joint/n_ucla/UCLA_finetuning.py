@@ -141,6 +141,7 @@ def finetuning(
     num_layers: int = 2,
     num_epochs: int = 200,
     lr: float = 1e-5,
+    wd: float = 1e-2,
     freezeT1: bool = True,
     unfreeze_layers: List[int] = None,
     device: str = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -178,7 +179,7 @@ def finetuning(
 
     #optimizer = optim.Adam(params, lr=lr, weight_decay=1e-4)
     # weight decay = 1e-4, 5e-5
-    optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=1e-4)
+    optimizer = torch.optim.AdamW(params, lr=lr, weight_decay=wd)
     num_training_steps = num_epochs
     num_warmup_steps = int(0.05 * num_training_steps)
 
