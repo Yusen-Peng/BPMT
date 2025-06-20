@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from typing import Tuple
-import copy
-from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
+from torch.optim.lr_scheduler import CosineAnnealingLR
+from SF_UCLA_loader import skateformer_collate_fn
 
-POSITIONAL_UPPER_BOUND = 64
+POSITIONAL_UPPER_BOUND = 2048
 
 class BaseT1(nn.Module):
     """
@@ -128,18 +129,11 @@ def mask_random_global_joints(inputs: torch.Tensor, mask_ratio: float = 0.3) -> 
 def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_epochs=50, batch_size=16, lr=1e-4, mask_ratio=0.15, device='cuda'):
 
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=skateformer_collate_fn)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=skateformer_collate_fn)
 
     criterion = nn.MSELoss(reduction='none')
     optimizer = optim.Adam(model.parameters(), lr=lr)
-    scheduler = CosineAnnealingWarmRestarts(
-        optimizer, T_0=10, T_mult=2, eta_min=1e-6
-    )
-
-    best_model_state_dict = None
-    best_val_loss = float('inf')
-    save_every = 100  # save every N epochs
 
     train_losses = []
     val_losses = []
@@ -149,7 +143,7 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_ep
     for epoch in tqdm(range(num_epochs)):
         model.train()
         train_loss = 0.0
-        for i, (sequences, _) in enumerate(train_loader):
+        for sequences, _ in train_loader:
             sequences = sequences.float().to(device)  # (B, T, J, D)
             B, T, J, D = sequences.shape
 
@@ -171,7 +165,6 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_ep
             loss.backward()
             optimizer.step()
             train_loss += loss.item() * sequences.size(0)
-            scheduler.step(epoch + i / len(train_loader))
 
         train_loss /= len(train_dataset)
 
@@ -198,20 +191,6 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_ep
         train_losses.append(train_loss)
         val_losses.append(val_loss)
 
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_model_state_dict = copy.deepcopy(model.state_dict())
-            tqdm.write(f"[Epoch {epoch+1}] New best validation loss: {val_loss:.4f}")
-
-        # Save checkpoint every N epochs
-        if (epoch + 1) % save_every == 0:
-            torch.save(model.state_dict(), f"action_checkpoints/fixed_ntu/T1_epoch_{epoch+1}.pt")
-
-
         tqdm.write(f"[Epoch {epoch+1}/{num_epochs}] Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
-
-
-    if best_model_state_dict is not None:
-        model.load_state_dict(best_model_state_dict)
 
     return model

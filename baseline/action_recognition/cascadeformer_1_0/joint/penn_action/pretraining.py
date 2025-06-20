@@ -1,12 +1,10 @@
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from penn_utils import collate_fn_batch_padding
 from tqdm import tqdm
 from typing import Tuple
-from torch.optim.lr_scheduler import CosineAnnealingLR
 
 POSITIONAL_UPPER_BOUND = 1000
 
@@ -179,7 +177,7 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_ep
                 if masking_strategy == "frame":
                     masked_inputs, mask = mask_random_frames(sequences, mask_ratio=mask_ratio)
                 elif masking_strategy == "global_joint":
-                    joint_dim = 3 if model.three_d == True else 2
+                    joint_dim = 3 if model.three_d else 2
                     masked_inputs, mask = mask_random_global_joints(sequences, num_joints=model.num_joints, joint_dim=joint_dim, mask_ratio=mask_ratio)                
                 else:
                     raise ValueError(f"Unknown masking strategy: {masking_strategy}")
@@ -223,7 +221,7 @@ def train_T1(masking_strategy, train_dataset, val_dataset, model: BaseT1, num_ep
                     if masking_strategy == "frame":
                         masked_inputs, mask = mask_random_frames(sequences, mask_ratio=mask_ratio)
                     elif masking_strategy == "global_joint":
-                        joint_dim = 3 if model.three_d == True else 2
+                        joint_dim = 3 if model.three_d else 2
                         masked_inputs, mask = mask_random_global_joints(sequences, num_joints=model.num_joints, joint_dim=joint_dim, mask_ratio=mask_ratio)
                     else:
                         raise ValueError(f"Unknown masking strategy: {masking_strategy}")

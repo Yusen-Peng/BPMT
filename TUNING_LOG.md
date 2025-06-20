@@ -97,7 +97,10 @@ The complete experiment tuning logs:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 200 | 92.98% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 300 | 92.79% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | **94.10%** |
-
+| <tr><td colspan="11" align="center"> CascadeFormer 1.1 (spatial transformer) </td></tr> |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 100 | **94.10%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 120 | **running**|
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | **94.01%** |
 
 ## NTU RGB+D 60
 
@@ -137,11 +140,9 @@ cross-subject evaluation:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 300 | 71.67% |
 | <tr><td colspan="11" align="center"> 30% masked pretraining - random global joints </td></tr> |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | 71.27% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 200 | 70.24% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 300 | 72.65% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 300 | 1e-5, wd=1e-4 | 500 | 72.31% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 100 | 72.32% |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | 71.99% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 100 | 72.33% |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 300 | **73.21%** |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 3e-5, wd=1e-4, cosine + warmup | 500 | 72.94% |
@@ -161,8 +162,8 @@ cross-subject evaluation:
 | <tr><td colspan="11" align="center"> CascadeFormer 1.1 with data augmentation </td></tr> |
 | 30% | linear | 512 | 8 | **12** | no | 1e-4 | 100 | 1e-5, wd=1e-4 | 100 | 70.68% |
 | <tr><td colspan="11" align="center"> CascadeFormer 1.1 with trimmed-uniform random sampling  </td></tr> |
-| 30%, 64+1.0 | linear | 512 | 8 | **12** | no | 1e-4 | 10 | 1e-5, wd=1e-4, CosineAnnealingWarmRestarts | 10 | 66.91% |
-| 30%, 64+1.0 | linear | 512 | 8 | **12** | no | 1e-4 | 10 | 3e-5, wd=1e-2, CosineAnnealingWarmRestarts | 20 | running |
+| 30%, 64+1.0 | linear | 512 | 8 | **12** | no | 1e-4 | 50 | 3e-5, wd=1e-2, CosineAnnealingWarmRestarts, epoch-level | 50 | **72.22%** |
+| 30%, 64+1.0 | linear | 512 | 8 | **12** | no | 1e-4 | 50 | 3e-5, wd=1e-2, CosineAnnealingWarmRestarts, batch-level | 10 | 71.84% |
 
 
 

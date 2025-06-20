@@ -1,5 +1,9 @@
 # CascadeFormer: Two-stage Cascading Transformer for Human Action Recognition
 
+The base transformer:
+
+![alt text](docs/base_transformer.png)
+
 ## CascadeFormer 1.0
 
 ### architecture
@@ -56,7 +60,31 @@ corresponding model checkpoints:
 
 1. Penn Action: **94.10%** [google drive](https://drive.google.com/drive/folders/1qbcT8DlhNyT3HgbM3j2aEQP2rSXoEJRS)
 2. N-UCLA: **91.16%** [google drive](https://drive.google.com/drive/folders/1b0IuO_XY-Gwv4RjS6gF9gPG36uvGwhha); **90.52%** [google drive](https://drive.google.com/drive/folders/10v1zGGhziiRZdXO2mDU-db_keVmmeUNY) 
-3. NTU/CS: 70.68% not good enough
+3. NTU/CS: **72.22%** is not good enough; running: CUDA_VISIBLE_DEVICES=0 taskset -c 26-35 python3 baseline/action_recognition/cascadeformer_1_1/joint/ntu_60_own/NTU_main.py --pretrain --num_epochs 500 > NTU_1_1_pretrain.txt 2>&1 &
+4. NTU/CV: TBD
+
+## CascadeFormer 1.2 (spatial-transformer enhanced)
+
+Pretraining:
+![alt text](docs/cascadeformer_1_2_pretrain.png)
+
+Cascading Finetuning:
+![alt text](docs/cascadeformer_1_2_finetune.png)
+
+### result leaderboard - CascadeFormer 1.2
+
+| dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
+| ------- | ------- | -------- | --------- | ---------- | ------- |
+| Penn Action | 2,326 | 15 | 2D | 13 | **94.10%** > 93.4% (HDM-BG) |
+| N-UCLA | 1,494 | 12 | 3D | 20 | 98.3% (SkateFormer) |
+| NTU/CS | 56,880 | 60 | 3D | 25 | 92.6% (SkateFormer) |
+| NTU/CV | 56,880 | 60 | 3D | 25 | 92.6% (SkateFormer) |
+
+corresponding model checkpoints:
+
+1. Penn Action: **94.01%** [google drive](https://drive.google.com/drive/folders/1jAlH7pf-zaHy7CVIF3MAmiZ5mMtDw2j-), **94.10%** [google drive](https://drive.google.com/drive/folders/1Jl7lIVcbqw6W2xzvf09nVRERXHIFrjXn)
+2. N-UCLA:
+3. NTU/CS:
 4. NTU/CV: TBD
 
 ## Leaderboard - CascadeFormer 2.0
