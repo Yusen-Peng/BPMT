@@ -45,8 +45,8 @@ Cascading Finetuning:
 corresponding model checkpoints:
 
 1. Penn Action: **94.66%** [google drive](https://drive.google.com/drive/folders/1Za50ZE9ZEKdEps_ZE-JIbatTpLuMW83k)
-2. N-UCLA: 88.79% is not good enough
-3. NTU/CS: 75.22% is not good enough
+2. N-UCLA: **88.79%** is not good enough
+3. NTU/CS: **75.22%** is not good enough
 4. NTU/CV: TBD
 
 ## CascadeFormer 1.1 (convolution enhanced)
@@ -95,7 +95,7 @@ Cascading Finetuning:
 corresponding model checkpoints:
 
 1. Penn Action: **94.01%** [google drive](https://drive.google.com/drive/folders/1jAlH7pf-zaHy7CVIF3MAmiZ5mMtDw2j-), **94.10%** [google drive](https://drive.google.com/drive/folders/1Jl7lIVcbqw6W2xzvf09nVRERXHIFrjXn)
-2. N-UCLA:
+2. N-UCLA: **90.73%** [google drive](https://drive.google.com/drive/folders/1IPSW5pz_Sn0dfywP2RatlnlrfVzPJNvB)
 3. NTU/CS: TBD
 4. NTU/CV: TBD
 

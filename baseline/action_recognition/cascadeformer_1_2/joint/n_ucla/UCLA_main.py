@@ -44,7 +44,7 @@ def main():
     set_seed(42)
 
     # are we actually training or just evaluating?
-    TRAIN = True
+    TRAIN = False
 
     # masking_strategy = "frame", "global_joint"
     masking_strategy = "global_joint"
@@ -81,7 +81,7 @@ def main():
 
     data_type = 'j'
     repeat = 25     # 10, 15
-    p = 0.1 # 0.1, 0.5
+    p = 0.3 # 0.1, 0.5
 
     print(f"[INFO]: proability of dropping regularization: {p}")
     print(f"[INFO]: data being repeated by {repeat} times")
