@@ -99,8 +99,8 @@ The complete experiment tuning logs:
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 500 | 1e-5, wd=1e-4 | 500 | **94.10%** |
 | <tr><td colspan="11" align="center"> CascadeFormer 1.1 (spatial transformer) </td></tr> |
 | 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 100 | **94.10%** |
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 120 | **running**|
-| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | **94.01%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 120 | **94.10%** |
+| 30% | linear | 256 | 8 | 4 | no | 1e-4 | 200 | 1e-5, wd=1e-4 | 200 | 94.01% |
 
 ## NTU RGB+D 60
 

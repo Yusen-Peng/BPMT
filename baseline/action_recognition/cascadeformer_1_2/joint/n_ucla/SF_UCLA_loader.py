@@ -5,7 +5,6 @@ import math
 import torch
 
 from torch.utils.data import Dataset
-from torch.utils.data import DataLoader
 
 
 
@@ -1662,10 +1661,6 @@ class SF_UCLA_Dataset(Dataset):
 
         return data, index_t, label, index
 
-    def top_k(self, score, top_k):
-        rank = score.argsort()
-        hit_top_k = [l in rank[i, -top_k:] for i, l in enumerate(self.label)]
-        return sum(hit_top_k) * 1.0 / len(hit_top_k)
 
 
 def import_class(name):

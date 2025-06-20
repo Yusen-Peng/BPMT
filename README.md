@@ -2,13 +2,11 @@
 
 The base transformer:
 
-![alt text](docs/base_transformer.png)
+<img src="docs/base_transformer.png" width="200" height="200">
+
+Positional embeddings in T1 are **temporal** positions (encode the **frame numbers**) - indispensable!
 
 ## CascadeFormer 1.0
-
-### architecture
-
-Positional embeddings in T1 are **temporal** positions (encode the **frame numbers**)
 
 Pretraining:
 ![alt text](docs/baseline_pretraining_classification.png)
@@ -84,7 +82,7 @@ corresponding model checkpoints:
 
 1. Penn Action: **94.01%** [google drive](https://drive.google.com/drive/folders/1jAlH7pf-zaHy7CVIF3MAmiZ5mMtDw2j-), **94.10%** [google drive](https://drive.google.com/drive/folders/1Jl7lIVcbqw6W2xzvf09nVRERXHIFrjXn)
 2. N-UCLA:
-3. NTU/CS:
+3. NTU/CS: TBD
 4. NTU/CV: TBD
 
 ## Leaderboard - CascadeFormer 2.0
