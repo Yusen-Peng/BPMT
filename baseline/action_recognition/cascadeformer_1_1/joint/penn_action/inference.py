@@ -1,21 +1,36 @@
-import os
-import glob
-import numpy as np
 import torch
 from sklearn.metrics import accuracy_score
-import seaborn as sns
-import matplotlib.pyplot as plt
 import argparse
-from typing import List, Tuple
-from itertools import combinations
+from typing import Tuple
 from torch import nn
-from torch import optim
-from torch import Tensor
 from torch.utils.data import DataLoader
-from torch.nn import functional as F
 from base_dataset import ActionRecognitionDataset
-from penn_utils import set_seed, build_penn_action_lists, split_train_val, NUM_JOINTS_PENN, collate_fn_inference
+from penn_utils import set_seed, build_penn_action_lists, split_train_val, collate_fn_inference
 from finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
+
+def count_all_parameters(
+        T1: nn.Module, 
+        T2: nn.Module, 
+        cross_attn: nn.Module, 
+        gait_head: nn.Module
+    ) -> int:
+    """
+    Counts the total number of parameters in the T1, T2, cross-attention, and gait head models.
+    
+    Args:
+        T1: T1 transformer model
+        T2: T2 transformer model
+        cross_attn: CrossAttention module
+        gait_head: GaitRecognitionHead module
+
+    Returns:
+        total_params: Total number of parameters across all models
+    """
+    total_params = sum(p.numel() for p in T1.parameters())
+    total_params += sum(p.numel() for p in T2.parameters())
+    total_params += sum(p.numel() for p in cross_attn.parameters())
+    total_params += sum(p.numel() for p in gait_head.parameters())
+    return total_params
 
 def evaluate(
     data_loader: DataLoader,
@@ -122,21 +137,25 @@ def main():
     unfreeze_layers = "entire"
     if unfreeze_layers is None:
         print("************Freezing all layers")
-        t1 = load_T1("action_checkpoints/Penn_pretrained.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
+        t1 = load_T1("action_checkpoints/BEST_PENN_ACTION_1_1/Penn_pretrained.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     else:
-        t1 = load_T1("action_checkpoints/Penn_finetuned_T1.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
+        t1 = load_T1("action_checkpoints/BEST_PENN_ACTION_1_1/Penn_finetuned_T1.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
         print(f"************Unfreezing layers: {unfreeze_layers}")
     
-    t2 = load_T2("action_checkpoints/Penn_finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
+    t2 = load_T2("action_checkpoints/BEST_PENN_ACTION_1_1/Penn_finetuned_T2.pt", d_model=hidden_size, nhead=n_heads, num_layers=num_layers, device=device)
     # load the cross attention module
-    cross_attn = load_cross_attn("action_checkpoints/Penn_finetuned_cross_attn.pt", d_model=hidden_size, device=device)
+    cross_attn = load_cross_attn("action_checkpoints/BEST_PENN_ACTION_1_1/Penn_finetuned_cross_attn.pt", d_model=hidden_size, device=device)
 
     # load the gait recognition head
     gait_head = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes)
-    gait_head.load_state_dict(torch.load("action_checkpoints/Penn_finetuned_head.pt", map_location="cpu"))
+    gait_head.load_state_dict(torch.load("action_checkpoints/BEST_PENN_ACTION_1_1/Penn_finetuned_head.pt", map_location="cpu"))
     gait_head = gait_head.to(device)
 
     print("Aha! All models loaded successfully!")
+    print("=" * 100)
+    print("the total number of parameters in the model is: ")
+    total_params = count_all_parameters(t1, t2, cross_attn, gait_head)
+    print(f"Total parameters: {total_params:,}")
     print("=" * 100)
 
     # evaluate the model

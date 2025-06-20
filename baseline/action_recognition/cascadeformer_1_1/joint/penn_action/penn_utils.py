@@ -3,15 +3,10 @@ import numpy as np
 import torch
 from scipy.io import loadmat
 from torch.nn.utils.rnn import pad_sequence
-from torch.utils.data import random_split
-from torch.utils.data import Subset
 from sklearn.model_selection import train_test_split
-from collections import defaultdict
 import os
 import glob
-from tqdm import tqdm
 from typing import List, Tuple, Dict
-from base_dataset import ActionRecognitionDataset
 
 NUM_JOINTS_PENN = 13
 

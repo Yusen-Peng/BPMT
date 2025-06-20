@@ -1,17 +1,12 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
-import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-from penn_utils import collate_fn_pairs
 import copy
 from tqdm import tqdm
-from typing import Tuple, Dict, Optional
+from typing import Tuple, Optional
+from typing import List
 from pretraining import BaseT1
-import matplotlib.pyplot as plt
-from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import get_cosine_schedule_with_warmup
-from sklearn.metrics import accuracy_score
 
 def evaluate(
     data_loader: DataLoader,
@@ -130,7 +125,6 @@ class GaitRecognitionHead(nn.Module):
     def forward(self, x):
         return self.fc(x)
 
-from typing import List
 def finetuning(
     train_loader: DataLoader,
     val_loader: DataLoader,
@@ -198,8 +192,8 @@ def finetuning(
         'gait_head': None
     }
 
-    train_losses, val_losses = [], []
-    train_accuracies, val_accuracies = [], []
+    train_losses = []
+    train_accuracies = []
 
     for epoch in tqdm(range(num_epochs)):
         gait_head.train()

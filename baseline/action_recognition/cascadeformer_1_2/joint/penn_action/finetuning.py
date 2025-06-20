@@ -1,14 +1,11 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-from penn_utils import collate_fn_pairs
 from tqdm import tqdm
-from typing import Tuple, Dict
+from typing import Tuple
+from typing import List
 from pretraining import BaseT1
-import matplotlib.pyplot as plt
-from torch.optim.lr_scheduler import CosineAnnealingLR
 from transformers import get_cosine_schedule_with_warmup
 
 def load_T1(
@@ -96,7 +93,6 @@ class GaitRecognitionHead(nn.Module):
     def forward(self, x):
         return self.fc(x)
 
-from typing import List
 def finetuning(
     train_loader: DataLoader,
     val_loader: DataLoader,

@@ -1,21 +1,37 @@
-import os
-import glob
-import numpy as np
 import torch
 from sklearn.metrics import accuracy_score
-import seaborn as sns
-import matplotlib.pyplot as plt
 import argparse
-from typing import List, Tuple
-from itertools import combinations
+from typing import Tuple
 from torch import nn
-from torch import optim
-from torch import Tensor
 from torch.utils.data import DataLoader
-from torch.nn import functional as F
 from base_dataset import ActionRecognitionDataset
-from penn_utils import set_seed, build_penn_action_lists, split_train_val, NUM_JOINTS_PENN, collate_fn_inference
+from penn_utils import set_seed, build_penn_action_lists, split_train_val, collate_fn_inference
 from finetuning import load_T1, load_T2, load_cross_attn, GaitRecognitionHead
+
+def count_all_parameters(
+        T1: nn.Module, 
+        T2: nn.Module, 
+        cross_attn: nn.Module, 
+        gait_head: nn.Module
+    ) -> int:
+    """
+    Counts the total number of parameters in the T1, T2, cross-attention, and gait head models.
+    
+    Args:
+        T1: T1 transformer model
+        T2: T2 transformer model
+        cross_attn: CrossAttention module
+        gait_head: GaitRecognitionHead module
+
+    Returns:
+        total_params: Total number of parameters across all models
+    """
+    total_params = sum(p.numel() for p in T1.parameters() if p.requires_grad)
+    total_params += sum(p.numel() for p in T2.parameters() if p.requires_grad)
+    total_params += sum(p.numel() for p in cross_attn.parameters() if p.requires_grad)
+    total_params += sum(p.numel() for p in gait_head.parameters() if p.requires_grad)
+    
+    return total_params
 
 def evaluate(
     data_loader: DataLoader,
@@ -137,6 +153,10 @@ def main():
     gait_head = gait_head.to(device)
 
     print("Aha! All models loaded successfully!")
+    print("=" * 100)
+    print("the total number of parameters in the model is: ")
+    total_params = count_all_parameters(t1, t2, cross_attn, gait_head)
+    print(f"Total parameters: {total_params:,}")
     print("=" * 100)
 
     # evaluate the model

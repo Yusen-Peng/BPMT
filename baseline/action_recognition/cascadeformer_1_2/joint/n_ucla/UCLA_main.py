@@ -9,6 +9,26 @@ from UCLA_finetuning import load_T1, finetuning, GaitRecognitionHead, evaluate, 
 from UCLA_utils import set_seed, NUM_JOINTS_NUCLA, split_train_val
 from SF_UCLA_loader import SF_UCLA_Dataset, skateformer_collate_fn
 
+def count_all_parameters(T1, T2, cross_attn, gait_head) -> int:
+    """
+    Counts the total number of parameters in the T1, T2, cross-attention, and gait head models.
+    
+    Args:
+        T1: T1 transformer model
+        T2: T2 transformer model
+        cross_attn: CrossAttention module
+        gait_head: GaitRecognitionHead module
+
+    Returns:
+        total_params: Total number of parameters across all models
+    """
+    total_params = sum(p.numel() for p in T1.parameters())
+    total_params += sum(p.numel() for p in T2.parameters())
+    total_params += sum(p.numel() for p in cross_attn.parameters())
+    total_params += sum(p.numel() for p in gait_head.parameters())
+    return total_params
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Gait Recognition Training")
     parser.add_argument("--pretrain", action='store_true', help="Run the stage of pretraining")
@@ -19,7 +39,6 @@ def parse_args():
     parser.add_argument("--class_specific_split", action='store_true', help="Use class-specific split for training and validation")
     parser.add_argument("--device", type=str, default='cuda', help="Device to use for training (cuda or cpu)")
     return parser.parse_args()
-
 
 def main():
     set_seed(42)
@@ -61,7 +80,7 @@ def main():
     train_label_path = 'N-UCLA_processed/train_label.pkl'
 
     data_type = 'j'
-    repeat = 15     # 10, 15
+    repeat = 25     # 10, 15
     p = 0.1 # 0.1, 0.5
 
     print(f"[INFO]: proability of dropping regularization: {p}")
@@ -213,7 +232,7 @@ def main():
             print("[INFO] finetuning the entire T1 model...")
 
         # finetuning learning rate
-        fn_lr = 4e-5 # 3e-5
+        fn_lr = 3e-5 # 3e-5
         wd = 1e-2 # 1e-2
         trained_T1, trained_T2, train_cross_attn, train_head = finetuning(
             train_loader=train_finetuning_dataloader,
@@ -288,6 +307,13 @@ def main():
     gait_head = GaitRecognitionHead(input_dim=hidden_size, num_classes=num_classes)
     gait_head.load_state_dict(torch.load("action_checkpoints/NUCLA_finetuned_head.pt", map_location=device))
     gait_head = gait_head.to(device)
+
+
+    print("Aha! All models loaded successfully!")
+    print("=" * 100)
+    print("the total number of parameters in the model is: ")
+    total_params = count_all_parameters(t1, t2, cross_attn, gait_head)
+    print(f"Total parameters: {total_params:,}")
 
     # evaluate the model
     accuracy = evaluate(

@@ -1,10 +1,22 @@
-# CascadeFormer: Two-stage Cascading Transformer for Human Action Recognition
+# 🌊 CascadeFormer: Two-stage Cascading Transformer for Human Action Recognition
 
-The base transformer:
+The base (temporal) transformer:
 
 <img src="docs/base_transformer.png" width="200" height="200">
 
-Positional embeddings in T1 are **temporal** positions (encode the **frame numbers**) - indispensable!
+Positional embeddings in T1 are **temporal** positions (encode the **frame numbers**) - **indispensable**!
+
+## Model scale summary
+
+| version | hidden size, layers, heads | total # parameters |
+| ------- | ------------------ | ---------------- |
+| CascadeFormer 1.1 | 256, 4, 8 | 11.0M |
+| CascadeFormer 1.1 | 256, 4, 8 | 11.3M |
+| CascadeFormer 1.2 | 256, 4, 8 | 12.6M |
+
+SoTA:
+
+![alt text](docs/reference_scale.png)
 
 ## CascadeFormer 1.0
 
@@ -62,6 +74,8 @@ corresponding model checkpoints:
 4. NTU/CV: TBD
 
 ## CascadeFormer 1.2 (spatial-transformer enhanced)
+
+Spatial transformer: reshape input into (BxT, J, D) instead of (B, T, JxD)
 
 Pretraining:
 ![alt text](docs/cascadeformer_1_2_pretrain.png)
