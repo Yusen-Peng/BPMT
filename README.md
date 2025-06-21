@@ -1,15 +1,5 @@
 # 🌊 CascadeFormer: Two-stage Cascading Transformer for Human Action Recognition
 
-## Existing SoTA for inspiration
-
-ST-TR dual stream architecture:
-
-![alt text](docs/ST_TR.png)
-
-![alt text](docs/ST_TR_results.png)
-
-## 🌊 CascadeFormer
-
 The base (temporal) transformer:
 
 <img src="docs/base_transformer.png" width="200" height="200">
@@ -111,7 +101,13 @@ corresponding model checkpoints:
 
 ## CascadeFormer 1.3
 
-The spatio-temporal repeating module in T1 is somewhat inspired by [ST-TR](https://arxiv.org/abs/2012.06399)
+The spatio-temporal repeating module in T1 is somewhat inspired by [ST-TR](https://arxiv.org/abs/2012.06399) below:
+
+ST-TR dual stream architecture:
+
+![alt text](docs/ST_TR.png)
+
+![alt text](docs/ST_TR_results.png)
 
 Pretraining:
 ![alt text](docs/cascadeformer_1_3_pretrain.png)
