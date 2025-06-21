@@ -1,12 +1,9 @@
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from penn_utils import collate_fn_batch_padding
 from tqdm import tqdm
 from typing import Tuple
-from torch.optim.lr_scheduler import CosineAnnealingLR
 
 POSITIONAL_UPPER_BOUND = 2048
 

@@ -1,15 +1,6 @@
-import os
-import glob
-import numpy as np
 import torch
 import argparse
-from typing import List, Tuple
-from itertools import combinations
 from base_dataset import ActionRecognitionDataset
-from torch import nn
-from torch import optim
-from torch import Tensor
-from torch.nn import functional as F
 from pretraining import train_T1, BaseT1
 
 from finetuning import load_T1, finetuning, GaitRecognitionHead
@@ -74,14 +65,14 @@ def main():
     print(f"[INFO] Number of classes: {num_classes}")
     print("=" * 100)
 
-    if pretrain == True: 
+    if pretrain: 
         """
             pretraining on the whole dataset
         """
 
-        print(f"\n==========================")
-        print(f"Starting Pretraining...")
-        print(f"==========================")
+        print("\n==========================")
+        print("Starting Pretraining...")
+        print("==========================")
         
         # instantiate the model
         three_d = False
@@ -112,7 +103,7 @@ def main():
 
         print("[TEST] testing global joint masking" + "=" * 40)
         # save pretrained model
-        torch.save(model.state_dict(), f"action_checkpoints/Penn_pretrained.pt")
+        torch.save(model.state_dict(), "action_checkpoints/Penn_pretrained.pt")
 
         print("Aha! pretraining is done!")
         print("=" * 100)
@@ -163,7 +154,7 @@ def main():
     if freezeT1 and (unfreeze_layers is None):
         print("[INFO] freezing the entire T1 model...")
     elif freezeT1 and (unfreeze_layers is not None):
-        print(f"[INFO] layerwise finetuning...")
+        print("[INFO] layerwise finetuning...")
         print(f"[INFO] unfreezing layers: {unfreeze_layers}...")
     elif not freezeT1:
         print("[INFO] finetuning the entire T1 model...")
@@ -171,8 +162,6 @@ def main():
 
     # finetuning learning rate
     fn_lr = 3e-5
-
-
     trained_T2, train_cross_attn, train_head = finetuning(
         train_loader=train_finetuning_dataloader,
         val_loader=val_finetuning_dataloader,
@@ -193,12 +182,12 @@ def main():
         print(f"[INFO] Unfreezing layers: {unfreeze_layers}...")
 
     # save the finetuned models
-    torch.save(trained_T2.state_dict(), f"action_checkpoints/Penn_finetuned_T2.pt")
-    torch.save(train_cross_attn.state_dict(), f"action_checkpoints/Penn_finetuned_cross_attn.pt")
-    torch.save(train_head.state_dict(), f"action_checkpoints/Penn_finetuned_head.pt")
+    torch.save(trained_T2.state_dict(), "action_checkpoints/Penn_finetuned_T2.pt")
+    torch.save(train_cross_attn.state_dict(), "action_checkpoints/Penn_finetuned_cross_attn.pt")
+    torch.save(train_head.state_dict(), "action_checkpoints/Penn_finetuned_head.pt")
 
     if any(param.requires_grad for param in t1.parameters()):
-        torch.save(t1.state_dict(), f"action_checkpoints/Penn_finetuned_T1.pt")
+        torch.save(t1.state_dict(), "action_checkpoints/Penn_finetuned_T1.pt")
 
     print("Aha! finetuned models saved successfully!")
 

@@ -1,15 +1,6 @@
-import os
-import glob
-import numpy as np
 import torch
 import argparse
-from typing import List, Tuple
-from itertools import combinations
 from base_dataset import ActionRecognitionDataset
-from torch import nn
-from torch import optim
-from torch import Tensor
-from torch.nn import functional as F
 from pretraining import train_T1, BaseT1
 from UCLA_finetuning import load_T1, finetuning, GaitRecognitionHead, evaluate, load_T2, load_cross_attn
 #from first_phase_baseline import BaseT1, train_T1
@@ -34,7 +25,7 @@ def main():
     set_seed(42)
 
     # are we actually training or just evaluating?
-    TRAIN = True
+    TRAIN = False
 
     # masking_strategy = "frame", "global_joint"
     masking_strategy = "global_joint"
@@ -42,7 +33,6 @@ def main():
     val_ratio = 0.05
 
     args = parse_args()
-    root_dir = args.root_dir
     # get the number of classes from the root_dir by taking the trailing number
     batch_size = args.batch_size
     num_epochs = args.num_epochs
@@ -218,13 +208,13 @@ def main():
         if freezeT1 and (unfreeze_layers is None):
             print("[INFO] freezing the entire T1 model...")
         elif freezeT1 and (unfreeze_layers is not None):
-            print(f"[INFO] layerwise finetuning...")
+            print("[INFO] layerwise finetuning...")
             print(f"[INFO] unfreezing layers: {unfreeze_layers}...")
         elif not freezeT1:
             print("[INFO] finetuning the entire T1 model...")
 
         # finetuning learning rate
-        fn_lr = 4e-5 # 3e-5
+        fn_lr = 3e-5 # 3e-5
         wd = 1e-2 # 1e-2
         trained_T1, trained_T2, train_cross_attn, train_head = finetuning(
             train_loader=train_finetuning_dataloader,
@@ -258,10 +248,10 @@ def main():
         print(f"[INFO] Final accuracy after finetuning: {final_acc:.4f}")
 
         # save the finetuned models
-        torch.save(trained_T2.state_dict(), f"action_checkpoints/NUCLA_finetuned_T2.pt")
-        torch.save(train_cross_attn.state_dict(), f"action_checkpoints/NUCLA_finetuned_cross_attn.pt")
-        torch.save(train_head.state_dict(), f"action_checkpoints/NUCLA_finetuned_head.pt")
-        torch.save(trained_T1.state_dict(), f"action_checkpoints/NUCLA_finetuned_T1.pt")
+        torch.save(trained_T2.state_dict(), "action_checkpoints/NUCLA_finetuned_T2.pt")
+        torch.save(train_cross_attn.state_dict(), "action_checkpoints/NUCLA_finetuned_cross_attn.pt")
+        torch.save(train_head.state_dict(), "action_checkpoints/NUCLA_finetuned_head.pt")
+        torch.save(trained_T1.state_dict(), "action_checkpoints/NUCLA_finetuned_T1.pt")
 
         print("Aha! finetuned models saved successfully!")
 

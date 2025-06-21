@@ -1,5 +1,15 @@
 # 🌊 CascadeFormer: Two-stage Cascading Transformer for Human Action Recognition
 
+## Existing SoTA for inspiration
+
+ST-TR dual stream architecture:
+
+![alt text](docs/ST_TR.png)
+
+![alt text](docs/ST_TR_results.png)
+
+## 🌊 CascadeFormer
+
 The base (temporal) transformer:
 
 <img src="docs/base_transformer.png" width="200" height="200">
@@ -63,7 +73,7 @@ Cascading Finetuning:
 | ------- | ------- | -------- | --------- | ---------- | ------- |
 | Penn Action | 2,326 | 15 | 2D | 13 | **94.10%** > 93.4% (HDM-BG) |
 | N-UCLA | 1,494 | 12 | 3D | 20 | **91.16%** < 98.3% (SkateFormer) |
-| NTU/CS | 56,880 | 60 | 3D | 25 | **70.68%** << 92.6% (SkateFormer) |
+| NTU/CS | 56,880 | 60 | 3D | 25 | **72.22%** << 92.6% (SkateFormer) |
 | NTU/CV | 56,880 | 60 | 3D | 25 | ??? << 92.6% (SkateFormer) |
 
 corresponding model checkpoints:
@@ -88,7 +98,7 @@ Cascading Finetuning:
 | dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
 | ------- | ------- | -------- | --------- | ---------- | ------- |
 | Penn Action | 2,326 | 15 | 2D | 13 | **94.10%** > 93.4% (HDM-BG) |
-| N-UCLA | 1,494 | 12 | 3D | 20 | 98.3% (SkateFormer) |
+| N-UCLA | 1,494 | 12 | 3D | 20 | **90.73%** < 98.3% (SkateFormer) |
 | NTU/CS | 56,880 | 60 | 3D | 25 | 92.6% (SkateFormer) |
 | NTU/CV | 56,880 | 60 | 3D | 25 | 92.6% (SkateFormer) |
 
@@ -98,6 +108,29 @@ corresponding model checkpoints:
 2. N-UCLA: **90.73%** [google drive](https://drive.google.com/drive/folders/1IPSW5pz_Sn0dfywP2RatlnlrfVzPJNvB)
 3. NTU/CS: TBD
 4. NTU/CV: TBD
+
+## CascadeFormer 1.3
+
+The spatio-temporal repeating module in T1 is somewhat inspired by [ST-TR](https://arxiv.org/abs/2012.06399)
+
+Pretraining:
+![alt text](docs/cascadeformer_1_3_pretrain.png)
+
+Cascading Finetuning:
+![alt text](docs/cascadeformer_1_3_finetune.png)
+
+### result leaderboard - CascadeFormer 1.3
+
+| dataset | #videos | #actions | dimension | #joints | outperform SoTA? |
+| ------- | ------- | -------- | --------- | ---------- | ------- |
+| Penn Action | 2,326 | 15 | 2D | 13 |  93.4% (HDM-BG) |
+| N-UCLA | 1,494 | 12 | 3D | 20 | 98.3% (SkateFormer) |
+| NTU/CS | 56,880 | 60 | 3D | 25 | 92.6% (SkateFormer) |
+| NTU/CV | 56,880 | 60 | 3D | 25 | 92.6% (SkateFormer) |
+
+corresponding model checkpoints:
+
+
 
 ## Leaderboard - CascadeFormer 2.0
 
